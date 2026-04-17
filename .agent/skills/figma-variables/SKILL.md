@@ -1,6 +1,6 @@
 ---
-name: figma-variables
-description: Create and manage Hoai Minh ERP design token variables in Figma. Establishes the complete color system, spacing, typography, and shape tokens as Figma Variables with Light/Dark mode support. Used by the UI Designer agent.
+name: hm-design-tokens
+description: Knowledge base for Hoai Minh ERP design tokens — colors, spacing, typography, and radius values. Reference for the /figma-variables workflow when creating Figma Variables.
 ---
 
 # Figma Variables Skill — Hoai Minh Design System
@@ -22,65 +22,43 @@ figma_docs(section: 'tokens')
 
 ## Hoai Minh Design Token Reference
 
-### Color Palette (Source of truth)
+> **Source of truth:** `src/assets/scss/_colors.scss`
+> 🔴 **CRITICAL RULE:** The Figma Variable names MUST EXACTLY match the SCSS Variable names (without the `$`). NEVER invent new names like `text-secondary` or `bg-surface`. If it doesn't exist in `_colors.scss`, do not create it in Figma.
 
-| Token Name | Light Mode | Dark Mode | Usage |
-|------------|-----------|-----------|-------|
-| `color/primary` | `#126433` | `#1a8a47` | Primary actions, links |
-| `color/primary-light` | `#e8f5ee` | `#0d3d20` | Primary backgrounds, hover |
-| `color/primary-dark` | `#0d4a26` | `#0a2f18` | Primary pressed states |
-| `color/error` | `#dc2626` | `#ef4444` | Error, danger, debt amounts |
-| `color/error-light` | `#fef2f2` | `#3d0a0a` | Error backgrounds |
-| `color/warning` | `#cd9000` | `#e0a010` | Pending, caution |
-| `color/warning-light` | `#fffbeb` | `#3d2a00` | Warning backgrounds |
-| `color/info` | `#0074ff` | `#3b94ff` | Processing, informational |
-| `color/info-light` | `#eff6ff` | `#001d3d` | Info backgrounds |
-| `color/success` | `#16a34a` | `#22c55e` | Success, completed |
-| `color/success-light` | `#f0fdf4` | `#052e16` | Success backgrounds |
-| `color/bg-base` | `#ffffff` | `#0f1117` | Page background |
-| `color/bg-surface` | `#f9fafb` | `#1a1d27` | Card, panel background |
-| `color/bg-elevated` | `#f3f4f6` | `#242736` | Elevated surfaces |
-| `color/text-primary` | `#111827` | `#f9fafb` | Main text |
-| `color/text-secondary` | `#6b7280` | `#9ca3af` | Secondary, caption text |
-| `color/text-disabled` | `#9ca3af` | `#4b5563` | Disabled text |
-| `color/border` | `#e5e7eb` | `#2d3139` | Default borders |
-| `color/border-strong` | `#d1d5db` | `#4b5563` | Strong borders, dividers |
+### Color Palette (Exact mapping to `_colors.scss`)
 
-### Spacing Scale
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `spacing/xs` | 4 | Icon gaps, tiny padding |
-| `spacing/sm` | 8 | Small padding, close items |
-| `spacing/md` | 12 | Default field padding |
-| `spacing/lg` | 16 | Card padding, section gaps |
-| `spacing/xl` | 24 | Section margins |
-| `spacing/2xl` | 32 | Large section gaps |
-| `spacing/3xl` | 48 | Page margins |
-
-### Border Radius
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `radius/xs` | 4 | Small tags, badges |
-| `radius/sm` | 6 | Buttons, inputs |
-| `radius/md` | 8 | Cards, dropdowns |
-| `radius/lg` | 10 | Modals, panels |
-| `radius/xl` | 16 | Large cards |
-| `radius/full` | 9999 | Pills, avatars |
-
-### Typography
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `font/family-primary` | `Mulish` | All ERP text |
-| `font/size-xs` | 11 | Captions, badges |
-| `font/size-sm` | 12 | Secondary labels |
-| `font/size-body` | 13 | Default body |
-| `font/size-md` | 14 | Standard text |
-| `font/size-lg` | 16 | Section headings |
-| `font/size-xl` | 18 | Page sub-titles |
-| `font/size-2xl` | 24 | Page titles |
+| Figma Variable Name | SCSS Variable ($) | Hex Value |
+|---------------------|-------------------|-----------|
+| `primary` | `$primary` | `#126433` |
+| `secondary` | `$secondary` | `#3c4858` |
+| `success` | `$success` | `#126433` |
+| `error` | `$error` | `#e5322b` |
+| `warning` | `$warning` | `#CD9000` |
+| `info` | `$info` | `#0074FF` |
+| `light` | `$light` | `#f8f9fa` |
+| `dark` | `$dark` | `#343a40` |
+| `white` | `$white` | `#ffffff` |
+| `black` | `$black` | `#000000` |
+| `border` | `$border` | `#979B9B` |
+| `hover` | `$hover` | `#f0f0f0` |
+| `placeholder` | `$placeholder` | `#979B9B` |
+| `disable-input` | `$disable-input` | `#F2F2F2` |
+| `background-primary` | `$background-primary`| `#EEEEEE` |
+| `gray-100` | `$gray-100` | `#f0f3f5` |
+| `gray-200` | `$gray-200` | `#e4e7ea` |
+| `gray-300` | `$gray-300` | `#c8ced3` |
+| `gray-400` | `$gray-400` | `#acb4bc` |
+| `gray-500` | `$gray-500` | `#8f9ba6` |
+| `gray-600` | `$gray-600` | `#73818f` |
+| `gray-700` | `$gray-700` | `#5c6873` |
+| `gray-800` | `$gray-800` | `#2f353a` |
+| `gray-850` | `$gray-850` | `#26282e` |
+| `gray-900` | `$gray-900` | `#23282c` |
+| `gray-color` | `$gray-color` | `#999999` |
+| `black-color` | `$black-color` | `#3C4858` |
+| `hoaiminh-primary` | `$hoaiminh-primary` | `#e5322b` |
+| `hoaiminh-secondary` | `$hoaiminh-secondary` | `#fff00d` |
+| `logo-primary` | `$logo-primary` | `#891728` |
 
 ---
 
@@ -92,31 +70,48 @@ figma_docs(section: 'tokens')
 figma_status → must be pluginConnected: true
 ```
 
-### Step 2: Create Color Variables (Light + Dark)
+### Step 2: Create Color Variables (Light Only for Free Plan)
 ```js
 await figma.setupDesignTokens({
   collectionName: "HM Colors",
-  modes: ["Light", "Dark"],
   colors: {
-    "color/primary":        { Light: "#126433", Dark: "#1a8a47" },
-    "color/primary-light":  { Light: "#e8f5ee", Dark: "#0d3d20" },
-    "color/primary-dark":   { Light: "#0d4a26", Dark: "#0a2f18" },
-    "color/error":          { Light: "#dc2626", Dark: "#ef4444" },
-    "color/error-light":    { Light: "#fef2f2", Dark: "#3d0a0a" },
-    "color/warning":        { Light: "#cd9000", Dark: "#e0a010" },
-    "color/warning-light":  { Light: "#fffbeb", Dark: "#3d2a00" },
-    "color/info":           { Light: "#0074ff", Dark: "#3b94ff" },
-    "color/info-light":     { Light: "#eff6ff", Dark: "#001d3d" },
-    "color/success":        { Light: "#16a34a", Dark: "#22c55e" },
-    "color/success-light":  { Light: "#f0fdf4", Dark: "#052e16" },
-    "color/bg-base":        { Light: "#ffffff", Dark: "#0f1117" },
-    "color/bg-surface":     { Light: "#f9fafb", Dark: "#1a1d27" },
-    "color/bg-elevated":    { Light: "#f3f4f6", Dark: "#242736" },
-    "color/text-primary":   { Light: "#111827", Dark: "#f9fafb" },
-    "color/text-secondary": { Light: "#6b7280", Dark: "#9ca3af" },
-    "color/text-disabled":  { Light: "#9ca3af", Dark: "#4b5563" },
-    "color/border":         { Light: "#e5e7eb", Dark: "#2d3139" },
-    "color/border-strong":  { Light: "#d1d5db", Dark: "#4b5563" },
+    // Brand & Status
+    "primary":   "#126433",
+    "secondary": "#3c4858",
+    "success":   "#126433",
+    "error":     "#e5322b",
+    "warning":   "#CD9000",
+    "info":      "#0074FF",
+    "light":     "#f8f9fa",
+    "dark":      "#343a40",
+    "white":     "#ffffff",
+    "black":     "#000000",
+    
+    // UI Elements
+    "border":             "#979B9B",
+    "hover":              "#f0f0f0",
+    "placeholder":        "#979B9B",
+    "disable-input":      "#F2F2F2",
+    "background-primary": "#EEEEEE",
+    
+    // Grays
+    "gray-100": "#f0f3f5",
+    "gray-200": "#e4e7ea",
+    "gray-300": "#c8ced3",
+    "gray-400": "#acb4bc",
+    "gray-500": "#8f9ba6",
+    "gray-600": "#73818f",
+    "gray-700": "#5c6873",
+    "gray-800": "#2f353a",
+    "gray-850": "#26282e",
+    "gray-900": "#23282c",
+    "gray-color": "#999999",
+    "black-color": "#3C4858",
+    
+    // Brand Specific
+    "hoaiminh-primary": "#e5322b",
+    "hoaiminh-secondary": "#fff00d",
+    "logo-primary": "#891728"
   }
 });
 ```

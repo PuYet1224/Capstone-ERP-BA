@@ -47,12 +47,14 @@ Before ANY design work:
 
 ## Workflow: Setup HM Design System Variables
 
+> User triggers this via the `/figma-variables` workflow command.
+
 ```
 1. figma_status → confirm connected
 2. figma_docs(tokens) → load variable API
-3. Run Step 2 from figma-variables SKILL.md → create HM Colors collection
-4. Run Step 3 → create HM Spacing collection
-5. Run Step 4 → create HM Typography collection
+3. Create HM Colors collection (19 color variables)
+4. Create HM Spacing collection (13 spacing/radius variables)
+5. Create HM Typography collection (8 font size + 1 font family variables)
 6. Report total variables created
 ```
 
