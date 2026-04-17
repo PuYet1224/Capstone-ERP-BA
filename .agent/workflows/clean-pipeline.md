@@ -1,6 +1,6 @@
 ---
 trigger: /clean-pipeline
-description: Dọn dẹp C:\ai-pipeline sau khi implementation xong. Xóa SRS, guide, ảnh design của features đã hoàn thành. Usage /clean-pipeline [feature-name] or /clean-pipeline --dry-run
+description: Clean up C:\ai-pipeline after implementation is complete. Removes SRS, guides, and design images for finished features. Usage /clean-pipeline [feature-name] or /clean-pipeline --dry-run
 skills:
   - clean-pipeline
 ---

@@ -7,7 +7,7 @@ skills:
 
 # BA Pipeline Skill — Principal Business Analyst
 
-> **Role:** You are the Principal BA for Hoài Minh Honda ERP system.  
+> **Role:** You are the Principal BA for Hoai Minh Honda ERP system.  
 > **Mission:** Read requirement files → deep-analyze business logic → create implementation guides for BE and FE teams.  
 > **Quality bar:** Guides must be complete enough for developers to implement without asking questions.
 
@@ -49,7 +49,7 @@ Scan `C:\ai-pipeline\requirements\` for `REQ_*.md` files.
 **Check memory first:** Read `.agent\skills\hoaiminh-domain\memory\` — if a `{FeatureName}.md` memory file already exists for this requirement → use it as additional context for improved analysis. **Do NOT ask user if they want to re-analyze** — they ran `/ba-analyst` which means PROCEED. Always overwrite guides and update memory.
 
 If only 1 new file → auto-select.
-If 0 files → inform: "Không tìm thấy requirement mới."
+If 0 files → inform: "No new requirement files found."
 
 ### Step 2: Read & Cross-Reference with Domain Knowledge
 
@@ -137,7 +137,7 @@ After presenting analysis:
 
 Save to: `.agent\skills\hoaiminh-domain\memory\{FeatureName}.md`
 
-Memory phải **chi tiết tường tận**, ghi lại toàn bộ quá trình phân tích. Nghiệp vụ phức tạp (như Phiếu Thu) có thể mất nhiều ngày mới hoàn chỉnh — memory phải phản ánh được mức độ đó.
+**Memory must be detailed and complete.** Complex features (like Receipt) may take multiple days to fully understand — the memory file must reflect that depth.
 
 ```markdown
 # Context Memory: {FeatureName}
@@ -145,51 +145,51 @@ Memory phải **chi tiết tường tận**, ghi lại toàn bộ quá trình ph
 > Module: {SAL|CS|WH|HR|SYS}
 
 ## 1. Business Context Summary
-{Tóm tắt tính năng này làm gì, tại sao tồn tại, quan hệ với module nào}
+{What this feature does, why it exists, which modules it relates to}
 
 ## 2. Key Decisions & Rationale
-{Quyết định quan trọng và LÝ DO tại sao chọn như vậy}
+{Important decisions and WHY they were made}
 - Decision 1: {what} — because {why}
 - Decision 2: {what} — because {why}
 
 ## 3. State Machine
-{Tất cả trạng thái + transition table — copy nguyên từ phân tích}
+{All statuses + full transition table — copy from analysis}
 
 ## 4. Database Tables & Relationships
 - Primary: {table} — {description}
 - Related: {table} — {FK relationship}
 
 ## 5. Business Rules Applied
-{Liệt kê tất cả BR-xx rules đã áp dụng, kèm giải thích ngắn}
+{List all BR-xx rules applied, with brief explanation}
 
 ## 6. Cross-Module Dependencies
-{Feature này phụ thuộc module nào, module nào phụ thuộc feature này}
+{What this feature depends on, what depends on this feature}
 
 ## 7. Edge Cases & Gotchas
-{Các trường hợp đặc biệt, dễ sai, cần lưu ý}
+{Special cases, common mistakes, things to watch out for}
 
 ## 8. User Flow Summary
-{Tóm tắt các flow chính — tạo mới, chuyển trạng thái, hủy/ngừng}
+{Key flows — create new, change status, cancel/suspend}
 
 ## 9. Interface Contracts
-{Status values, payment methods — các giá trị bất biến}
+{Status values, payment methods — immutable values}
 
 ## 10. Revision History
 - {date}: Initial analysis from REQ_{SEQ}
 - {date}: Updated after feedback (added Processing + Suspended status)
 ```
 
-**Memory giữ lại toàn bộ kinh nghiệm BA.** 3-5 năm sau, đọc lại file này phải hiểu NGAY bối cảnh, quyết định, edge cases mà không cần hỏi ai.
+**Memory preserves all BA experience.** Reading this file 3-5 years later must give full context, decisions, and edge cases — without needing to ask anyone.
 
 ### Step 7: Report
 
 ```
-✅ Phân tích hoàn tất:
-   📄 BE Guide: C:\ai-pipeline\guides\BE_{SEQ}_{Name}.md ({N} dòng)
-   📄 FE Guide: C:\ai-pipeline\guides\FE_{SEQ}_{Name}.md ({N} dòng)
-   📝 Memory: .agent\skills\hoaiminh-domain\memory\{Name}.md
+✅ Analysis complete:
+   📄 BE Guide: C:\ai-pipeline\guides\BE_{SEQ}_{Name}.md ({N} lines)
+   📄 FE Guide: C:\ai-pipeline\guides\FE_{SEQ}_{Name}.md ({N} lines)
+   📝 Memory:   .agent\skills\hoaiminh-domain\memory\{Name}.md
 
-Bước tiếp: Mở BE workspace → /be-implement | Mở FE workspace → /fe-implement
+Next steps: Open BE workspace → /be-implement | Open FE workspace → /fe-implement
 ```
 
 ---
@@ -198,7 +198,7 @@ Bước tiếp: Mở BE workspace → /be-implement | Mở FE workspace → /fe-
 
 - BE Guide ≥ 100 lines with transition table + typed records + validation rules
 - FE Guide ≥ 100 lines with component tree + grid specs + badge rendering
-- Memory file phải chi tiết (10 sections), KHÔNG giới hạn dòng
+- Memory file must be detailed (10 sections), NO line limit
 - NEVER copy-paste requirement. ANALYZE and TRANSLATE.
 - ALWAYS cross-reference domain knowledge before writing guides.
 - ALWAYS save memory after completing analysis.

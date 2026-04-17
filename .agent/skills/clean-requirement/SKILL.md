@@ -14,8 +14,8 @@ description: Transform messy meeting notes into structured Business Requirement 
 ## 1. Trigger
 
 When user provides raw notes with phrases like:
-- "clean requirement", "làm requirement", "dọn note"
-- "vừa họp xong", "note cuộc họp"
+- "clean requirement", "requirements cleanup", "clean up notes"
+- "just finished a meeting", "meeting notes"
 - Or pastes unstructured text about a feature
 
 ## 2. Input Processing
@@ -43,30 +43,30 @@ Generate a SRS file built around **3 pillars**: Business Rules, User Flow, Inter
 ```markdown
 # Software Requirement Specification (SRS) — {Feature Name}
 
-> **Dự án:** Hoài Minh Honda ERP  
+> **Project:** Hoai Minh Honda ERP  
 > **Module:** {Module Name}  
 > **Version:** 1.0  
-> **Ngày tạo:** {date}  
-> **Đối tượng đọc:** Business Analyst (BA)  
+> **Date:** {date}  
+> **Audience:** Business Analyst (BA)  
 
 ---
 
-## Bối cảnh
+## Background
 {What this feature is, why it exists, relationship to other modules}
 
 **Actors:**
-| Vai trò | Quyền hạn |
-|---------|----------|
+| Role | Permissions |
+|------|-------------|
 | {Role} | {Permissions} |
 
 ---
 
-## Trụ cột 1: Business Rules (Quy tắc bất biến)
+## Pillar 1: Business Rules (Invariant Rules)
 
-Những "luật chơi" của hệ thống. Dù code hay UI thay đổi, rules này KHÔNG BAO GIỜ được vi phạm.
+The "laws" of the system. Regardless of code or UI changes, these rules MUST NEVER be violated.
 
-| ID | Quy tắc | Giải thích |
-|----|---------|-----------|
+| ID | Rule | Explanation |
+|----|------|-------------|
 | BR-01 | {rule} | {why} |
 | BR-02 | {rule} | {why} |
 
@@ -74,9 +74,9 @@ Group rules by category if needed (creation rules, status rules, calculation rul
 
 ---
 
-## Trụ cột 2: User Flow (Luồng dữ liệu)
+## Pillar 2: User Flow (Data Flow)
 
-Dữ liệu đi từ đâu, qua module nào, kết thúc ở đâu.
+Where data comes from, which modules it passes through, where it ends up.
 
 ### Flow 1: {Main flow name}
 {Step-by-step flow with arrows showing data journey}
@@ -89,29 +89,29 @@ Dữ liệu đi từ đâu, qua module nào, kết thúc ở đâu.
 
 ---
 
-## Trụ cột 3: Interface Definition (Đầu vào / Đầu ra)
+## Pillar 3: Interface Definition (Inputs / Outputs)
 
-Đầu vào và đầu ra của mỗi module phải rõ ràng. Logic bên trong có thể thay đổi, nhưng interface là BẤT BIẾN.
+Inputs and outputs of each module must be clearly defined. Internal logic may change, but the interface is IMMUTABLE.
 
-### Interface 1: Dữ liệu đọc từ module khác (READ ONLY)
-| Dữ liệu | Nguồn | Ghi chú |
-|----------|-------|---------|
+### Interface 1: Data read from other modules (READ ONLY)
+| Data | Source | Notes |
+|------|--------|-------|
 
-### Interface 2: Dữ liệu riêng (READ/WRITE)
-| Dữ liệu | Bảng/Entity | Editable khi |
-|----------|-------------|-------------|
+### Interface 2: Own data (READ/WRITE)
+| Data | Table/Entity | Editable when |
+|------|-------------|---------------|
 
-### Interface 3: Output cho module khác
-| Dữ liệu | Nghĩa | Module nhận |
-|----------|-------|------------|
+### Interface 3: Output for other modules
+| Data | Meaning | Receiving module |
+|------|---------|------------------|
 
 ### Interface 4+: Contract Values (Status codes, Payment types, etc.)
-| Value | Nghĩa | Ghi chú |
-|-------|--------|---------|
+| Value | Meaning | Notes |
+|-------|---------|-------|
 
 ---
 
-## Tiêu chí Nghiệm thu
+## Acceptance Criteria
 {Numbered list of testable acceptance criteria}
 ```
 
@@ -130,7 +130,7 @@ Dữ liệu đi từ đâu, qua module nào, kết thúc ở đâu.
 ✅ Requirement file created:
    📄 C:\ai-pipeline\requirements\REQ_{SEQ}_{Name}.md
    
-Next step: Open BA workspace → BA sẽ tự tìm và phân tích file này
+Next step: Open BA workspace → BA will automatically find and analyze this file
 ```
 
 ## 5. Rules

@@ -1,19 +1,19 @@
 ---
 trigger: /clean-requirement
-description: Biến note bừa bãi sau cuộc họp thành SRS chuẩn 3 trụ cột. Output lưu vào C:\ai-pipeline\requirements\.
+description: Transform messy post-meeting notes into a structured SRS (3-pillar format). Output saved to C:\ai-pipeline\requirements\.
 ---
 
-# /clean-requirement — Dọn dẹp yêu cầu
+# /clean-requirement — Clean Up Requirements
 
-## Khi user gõ `/clean-requirement`:
+## When user runs `/clean-requirement`:
 
 1. Load skill `clean-requirement`
-2. User paste raw notes vào chat
-3. BA đọc domain knowledge → biến note thành SRS 3 trụ cột
-4. Lưu vào `C:\ai-pipeline\requirements\REQ_{SEQ}_{Name}.md`
+2. User pastes raw notes into chat
+3. BA reads domain knowledge → transforms notes into structured SRS (3 pillars)
+4. Save to `C:\ai-pipeline\requirements\REQ_{SEQ}_{Name}.md`
 
 ## Quick Reference
 
-- **Đọc domain từ:** `.agent\skills\hoaiminh-domain\sections\`
-- **Ghi SRS vào:** `C:\ai-pipeline\requirements\`
-- **Template:** 3 trụ cột (Business Rules + User Flow + Interface Definition)
+- **Read domain from:** `.agent\skills\hoaiminh-domain\sections\`
+- **Write SRS to:** `C:\ai-pipeline\requirements\`
+- **Template:** 3 pillars (Business Rules + User Flow + Interface Definition)
