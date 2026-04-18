@@ -2,7 +2,8 @@
 name: figma-reader
 description: |
   Figma MCP live reader for BA design analysis.
-  Reads live Figma Desktop data via MCP bridge → analyzes BODY content only (no sidebar/header).
+  Reads live Figma Desktop data via MCP bridge → analyzes BODY content only.
+  CRITICAL: ALWAYS skips sidebar and header nodes — only analyzes the main content area.
   Maps colors to SCSS variables, components to Hoài Minh wrappers.
   NEVER reads from local images or archives.
 triggers:
@@ -13,10 +14,10 @@ triggers:
   - "UI"
 ---
 
-# Figma Reader Skill — BA Analysis (Figma MCP Only)
+# Figma Reader Skill — BA Analysis (BODY CONTENT ONLY)
 
 > 🔴 **Figma MCP is the ONLY design source.** No local images, no archives, no fallbacks.
-> If Figma is not connected → STOP. Do NOT read local images.
+> 🔴 **BODY ONLY:** NEVER analyze or include sidebar, header, or footer in specs.
 
 ---
 
@@ -32,53 +33,83 @@ triggers:
 
 ---
 
-## PHASE 1 — FIGMA LIVE READ (When connected)
+## PHASE 1 — FIGMA LIVE READ
 
 ### Step 1.1: Read the currently selected frame
 ```
 figma_read → operation: "get_selection" → depth: 6, detail: "compact"
 ```
-→ Gets: frame name, dimensions, main child node structure
+→ Gets the full frame tree including sidebar, header, body sections
 
-### Step 1.2: Scan the full design
-```
-figma_read → operation: "scan_design"
-```
-→ Gets: all text, colors (hex), fonts, icons, sections — structured summary
+### 🔴 Step 1.2: FILTER — Find BODY content node ONLY
 
-### Step 1.3: Get CSS for each body section
-```
-figma_read → operation: "get_css" → nodeId: <section_node_id>
-```
-→ Gets: padding, gap, width, border-radius, font-size values in exact px
+> **THIS IS THE MOST CRITICAL STEP.** The frame contains sidebar, header, and body.
+> You MUST identify and isolate the BODY content node before analyzing.
 
-### Step 1.4: Check color variable names
+**How to identify the BODY content node:**
+1. Look at the top-level children of the selected frame
+2. **SKIP** any node that matches these patterns:
+   - Name contains: "Sidebar", "Nav", "Navigation", "Menu", "Side"
+   - Name contains: "Header", "Top bar", "Navbar", "App bar"
+   - Name contains: "Footer", "Bottom bar"
+   - Node is positioned at x=0 with narrow width (sidebar)
+   - Node is positioned at y=0 with small height (header)
+3. **SELECT** the node that represents the main content area:
+   - Usually the LARGEST node by area
+   - Usually positioned to the RIGHT of the sidebar
+   - Usually positioned BELOW the header
+   - Name often contains: "Content", "Body", "Main", "Page", or the feature name
+
+**After identifying the body node:** Use its `nodeId` for ALL subsequent calls.
+
+### Step 1.3: Get CSS for BODY section only
+```
+figma_read → operation: "get_css" → nodeId: <BODY_NODE_ID>
+```
+→ Gets padding, gap, width, border-radius, font-size for body ONLY
+
+### Step 1.4: Get detailed design for body sections
+```
+figma_read → operation: "get_design" → nodeId: <BODY_NODE_ID> → depth: 6
+```
+→ Gets all text, colors, components WITHIN the body section only
+
+### Step 1.5: Check color variable names
 ```
 figma_read → operation: "get_node_detail" → nodeId: <node_id>
 ```
-→ Gets: fillStyle.name, boundVariables for design token identification
+→ Gets fillStyle.name, boundVariables for design token identification
 
 ---
 
-## PHASE 2 — BODY CONTENT ONLY
+## 🔴🔴🔴 CRITICAL: WHAT TO SKIP vs WHAT TO ANALYZE
 
 ```
-🚫 IGNORE (layout system handles these):
-   - Sidebar navigation
-   - Top header / navbar
-   - Page footer / copyright
+❌ ABSOLUTELY NEVER INCLUDE IN SPECS:
+   ├── Sidebar navigation (left panel with menu items)
+   ├── Top header / navbar (logo, user avatar, notifications)
+   ├── Page footer / copyright
+   └── ANY navigation component
 
-✅ FOCUS ON (body content only):
-   - Breadcrumb structure
-   - Toolbar (ps-toolbar-top) — action buttons
-   - Filter bar — search, status dropdowns, date range, toggles
-   - Grid — columns, widths, cell templates, master-detail
-   - Form sections — field groups, labels, input types
-   - Status badges — text, colors, conditions
-   - Special components — QR codes, signatures, progress bars
-   - Financial summaries — amounts, totals, remaining
-   - Dialogs / modals
+   If you see these in the Figma data → IGNORE THEM COMPLETELY.
+   Do NOT include them in FE Guide specs.
+   Do NOT list them in component inventory.
+   They ALREADY EXIST in the layout system.
+
+✅ ONLY ANALYZE THE BODY CONTENT:
+   ├── ps-toolbar-top (action buttons at top of content area)
+   ├── ps-filter-bar (search/filter controls)
+   ├── ps-kendo-grid (data tables/lists)
+   ├── Form sections (input fields, dropdowns)
+   ├── Status badges
+   ├── Financial summaries
+   ├── Signature / QR code areas
+   └── Dialogs / modals
 ```
+
+> 🔴 **SELF-CHECK:** Before writing any spec output, ask yourself:
+> "Am I describing sidebar or header?" → If YES → DELETE that section.
+> "Am I describing only the body content?" → If YES → Continue.
 
 ---
 
@@ -129,21 +160,23 @@ If a color is NOT in this table → flag it: "⚠️ Unknown color #XXXXXX — n
 
 ## STRUCTURED OUTPUT FORMAT
 
-For EVERY screen analyzed, produce:
+For EVERY screen analyzed, produce this (BODY content only):
 
 ```markdown
 ## 📊 BA Design Analysis: {frame_name}
 > Source: **Figma Desktop (live)** — {timestamp}
+> ⚠️ Analysis covers BODY content ONLY — sidebar/header excluded
 
 ### A. SCREEN OVERVIEW
 - Frame: {name} ({width}x{height})
+- Body node: {body_node_name} ({body_width}x{body_height})
 - Screen type: List / Detail / Dashboard / Form
 
-### B. LAYOUT STRUCTURE
+### B. LAYOUT STRUCTURE (body only)
 - Sections (top to bottom)
 - Spacing: {gap between sections}
 
-### C. COMPONENT INVENTORY
+### C. COMPONENT INVENTORY (body only)
 | # | Figma Element | HM Component | Label | Data Source |
 |---|---|---|---|---|
 
