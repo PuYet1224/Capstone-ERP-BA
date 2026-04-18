@@ -1,8 +1,9 @@
 ---
 name: ba-pipeline
-description: Principal BA auto-discovers requirement files from shared pipeline, analyzes using internal domain knowledge, creates comprehensive BE and FE implementation guides. Includes context memory for long-term domain awareness.
+description: Principal BA auto-discovers requirement files from shared pipeline, reads designs via Figma MCP bridge, analyzes using internal domain knowledge, creates comprehensive BE and FE implementation guides.
 skills:
   - hoaiminh-domain
+  - figma-reader
 ---
 
 # BA Pipeline Skill — Principal Business Analyst
@@ -18,9 +19,11 @@ skills:
 ### External (Shared Folder — IO only)
 ```
 READ:   C:\ai-pipeline\requirements\     (REQ_*.md — input from user)
-READ:   C:\ai-pipeline\designs\          (desktop/ & mobile/ .png files — visual designs)
+READ:   Figma MCP (figma_read)           (live designs — ONLY source of visual truth)
 WRITE:  C:\ai-pipeline\guides\           (BE_*.md + FE_*.md — output for dev)
 ```
+
+> 🔴 **NEVER read from `C:\ai-pipeline\designs\` or local PNG files.** Use Figma MCP exclusively.
 
 ### Internal (Your Own Workspace)
 ```
@@ -43,11 +46,15 @@ FeatureName: PascalCase (Receipt, Invoice, WarehouseIO)
 
 ## 3. Execution Protocol
 
-### Step 1: Auto-Scan Requirements & Designs
+### Step 1: Auto-Scan Requirements & Read Figma Design
 
 1. Scan `C:\ai-pipeline\requirements\` for `REQ_*.md` files.
-2. Scan `C:\ai-pipeline\designs\` for design images (e.g., `desktop\` or `mobile\` folders).
-   - If `.png` design files are found related to the requirement, use `view_file` to read and deeply analyze them. UI analysis helps uncover missing fields, validation rules, and implicit state transitions.
+2. **Read design from Figma MCP** (NOT from local images):
+   - Call `figma_status` → verify connected
+   - If connected: call `figma_read scan_design` + `get_selection` → analyze BODY content only
+   - If NOT connected: STOP and ask user to connect Figma Desktop + MCP plugin
+   - Map all colors → SCSS variables (see figma-reader skill)
+   - Map all components → Hoài Minh wrappers (see figma-reader skill)
 
 **Check memory first:** Read `.agent\skills\hoaiminh-domain\memory\` — if a `{FeatureName}.md` memory file already exists for this requirement → use it as additional context for improved analysis. **Do NOT ask user if they want to re-analyze** — they ran `/ba-analyst` which means PROCEED. Always overwrite guides and update memory.
 
@@ -60,7 +67,7 @@ Read the requirement, then load your domain knowledge:
 
 **Always read & analyze:**
 - Requirement text (`REQ_*.md`)
-- Design images (`.png`) from `C:\ai-pipeline\designs\` (if available)
+- Figma MCP live design (via `figma_read` — see figma-reader skill)
 - `.agent\skills\hoaiminh-domain\sections\01-glossary.md`
 - `.agent\skills\hoaiminh-domain\sections\07-business-rules.md`
 - `.agent\skills\hoaiminh-domain\sections\06-database-schema.md`
