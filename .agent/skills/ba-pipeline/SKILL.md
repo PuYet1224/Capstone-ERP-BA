@@ -18,6 +18,7 @@ skills:
 ### External (Shared Folder — IO only)
 ```
 READ:   C:\ai-pipeline\requirements\     (REQ_*.md — input from user)
+READ:   C:\ai-pipeline\designs\          (desktop/ & mobile/ .png files — visual designs)
 WRITE:  C:\ai-pipeline\guides\           (BE_*.md + FE_*.md — output for dev)
 ```
 
@@ -42,9 +43,11 @@ FeatureName: PascalCase (Receipt, Invoice, WarehouseIO)
 
 ## 3. Execution Protocol
 
-### Step 1: Auto-Scan Requirements
+### Step 1: Auto-Scan Requirements & Designs
 
-Scan `C:\ai-pipeline\requirements\` for `REQ_*.md` files.
+1. Scan `C:\ai-pipeline\requirements\` for `REQ_*.md` files.
+2. Scan `C:\ai-pipeline\designs\` for design images (e.g., `desktop\` or `mobile\` folders).
+   - If `.png` design files are found related to the requirement, use `view_file` to read and deeply analyze them. UI analysis helps uncover missing fields, validation rules, and implicit state transitions.
 
 **Check memory first:** Read `.agent\skills\hoaiminh-domain\memory\` — if a `{FeatureName}.md` memory file already exists for this requirement → use it as additional context for improved analysis. **Do NOT ask user if they want to re-analyze** — they ran `/ba-analyst` which means PROCEED. Always overwrite guides and update memory.
 
@@ -55,7 +58,9 @@ If 0 files → inform: "No new requirement files found."
 
 Read the requirement, then load your domain knowledge:
 
-**Always read:**
+**Always read & analyze:**
+- Requirement text (`REQ_*.md`)
+- Design images (`.png`) from `C:\ai-pipeline\designs\` (if available)
 - `.agent\skills\hoaiminh-domain\sections\01-glossary.md`
 - `.agent\skills\hoaiminh-domain\sections\07-business-rules.md`
 - `.agent\skills\hoaiminh-domain\sections\06-database-schema.md`
