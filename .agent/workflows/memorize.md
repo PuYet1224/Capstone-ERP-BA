@@ -15,11 +15,24 @@ skills:
 1. Read skill: `.agent/skills/memorize/SKILL.md`
 2. Execute all steps: read SRS → read guides → read actual code → distill → write memory
 
+## Memory Output Path
+
+**Hoài Minh ERP projects:**
+```
+.agent/projects/hoaiminh/memory/{Feature}.md
+```
+
+**Other projects:**
+```
+.agent/projects/{project-name}/memory/{Feature}.md
+(create folder if doesn't exist)
+```
+
 ## Final Output
 
 ```
 ✅ Memorized: {Feature}
-   📝 Memory: .agent/skills/hoaiminh-domain/memory/{Feature}.md
+   📝 Memory: .agent/projects/hoaiminh/memory/{Feature}.md
    ⚡ Deviations from plan: {N}
    🧠 Covers: {N} states, {N} rules, {N} APIs, {N} gotchas
 

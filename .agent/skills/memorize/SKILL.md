@@ -1,12 +1,12 @@
----
+﻿---
 name: memorize
-description: Đọc toàn bộ SRS, code đã implement (BE + FE), và guides → chưng cất thành 1 file memory English vĩnh viễn trong BA workspace. Chạy TRƯỚC /clean-pipeline để đảm bảo AI nhớ mọi thứ mãi mãi.
+description: Äá»c toÃ n bá»™ SRS, code Ä‘Ã£ implement (BE + FE), vÃ  guides â†’ chÆ°ng cáº¥t thÃ nh 1 file memory English vÄ©nh viá»…n trong BA workspace. Cháº¡y TRÆ¯á»šC /clean-pipeline Ä‘á»ƒ Ä‘áº£m báº£o AI nhá»› má»i thá»© mÃ£i mÃ£i.
 ---
 
-# Memorize Skill — Knowledge Distillation
+# Memorize Skill â€” Knowledge Distillation
 
 > **Role:** You are a Knowledge Distiller.  
-> **Mission:** Read everything that was built → distill into a permanent, curated English memory file.  
+> **Mission:** Read everything that was built â†’ distill into a permanent, curated English memory file.  
 > **Why:** Pipeline files are temporary. Code changes. Memory is the permanent truth.
 
 ---
@@ -27,22 +27,22 @@ Read from multiple sources to build a complete picture:
 ```
 C:\ai-pipeline\requirements\REQ_{SEQ}_{Feature}.md
 ```
-→ Extract: business context, actors, original business rules, open questions resolved
+â†’ Extract: business context, actors, original business rules, open questions resolved
 
 ### Source 2: Implementation Guides (planned state)
 ```
 C:\ai-pipeline\guides\BE_{SEQ}_{Feature}.md
-C:\ai-pipeline\guides\FE_{SEQ}_{Feature}.md
+C:\ai-pipeline\guides\FE_WEB_{SEQ}_{Feature}.md
 ```
-→ Extract: planned API contracts, DTOs, state machine
+â†’ Extract: planned API contracts, DTOs, state machine
 
-### Source 3: Actual BE Code (final state — truth)
+### Source 3: Actual BE Code (final state â€” truth)
 ```
 modules/MTB/Features/M.{Module}/F.{Feature}/*.cs
 modules/MTB/Features/M.{Module}/F.{Feature}/Constants/*.cs
 ```
 > Read from: C:\Users\lala0\Capstone-ERP-API-VSA\  
-→ Extract: actual handlers, real status values, real field names, real validation logic
+â†’ Extract: actual handlers, real status values, real field names, real validation logic
 
 ### Source 4: Actual FE Code (final state)
 ```
@@ -50,41 +50,41 @@ src/app/modules/{feature}/*.ts
 src/app/modules/{feature}/*.html
 ```
 > Read from: C:\Users\lala0\Capstone-ERP-WEB\  
-→ Extract: actual component structure, actual API calls used, actual UI states
+â†’ Extract: actual component structure, actual API calls used, actual UI states
 
 ---
 
 ## 3. Distillation Rules
 
-> Read sources → synthesize → DO NOT just copy-paste.
+> Read sources â†’ synthesize â†’ DO NOT just copy-paste.
 
 **Priority order when plan vs code differ:**
 ```
 Actual Code > Implementation Guide > SRS
 ```
 
-The code is what's running in production. If guide said X but code does Y → memory records Y, notes the deviation.
+The code is what's running in production. If guide said X but code does Y â†’ memory records Y, notes the deviation.
 
 **What to include:**
-- ✅ Final business rules (as implemented)
-- ✅ Final API contracts (actual routes, actual payloads)
-- ✅ Final state machine (from code, not guide)
-- ✅ Final DB tables and relationships used
-- ✅ Decisions made during implementation (why, not just what)
-- ✅ Bugs found during review/enhance cycles → how they were fixed
-- ✅ Edge cases discovered during testing
-- ✅ Cross-module dependencies confirmed
+- âœ… Final business rules (as implemented)
+- âœ… Final API contracts (actual routes, actual payloads)
+- âœ… Final state machine (from code, not guide)
+- âœ… Final DB tables and relationships used
+- âœ… Decisions made during implementation (why, not just what)
+- âœ… Bugs found during review/enhance cycles â†’ how they were fixed
+- âœ… Edge cases discovered during testing
+- âœ… Cross-module dependencies confirmed
 
 **What to exclude:**
-- ❌ Open questions that were resolved (merge the answer in)
-- ❌ Drafts and abandoned approaches
-- ❌ Raw file contents (synthesize, don't dump)
+- âŒ Open questions that were resolved (merge the answer in)
+- âŒ Drafts and abandoned approaches
+- âŒ Raw file contents (synthesize, don't dump)
 
 ---
 
 ## 4. Memory File Template
 
-**Output path:** `C:\Users\lala0\Capstone-ERP-BA\BA-Workspace\.agent\skills\hoaiminh-domain\memory\{Feature}.md`
+**Output path:** `C:\Users\lala0\Capstone-ERP-BA\.agent\projects\hoaiminh\memory\{Feature}.md`
 
 > Overwrite if exists. This is the final, authoritative version.
 
@@ -94,7 +94,7 @@ The code is what's running in production. If guide said X but code does Y → me
 > **Module:** {SAL | CS | WH | HR | SYS}  
 > **Memorized:** {YYYY-MM-DD}  
 > **Source files:** REQ_{SEQ} + BE_{SEQ} + FE_{SEQ} + actual code  
-> **Status:** Production ✅
+> **Status:** Production âœ…
 
 ---
 
@@ -111,7 +111,7 @@ The code is what's running in production. If guide said X but code does Y → me
 
 ## 2. Database
 
-**Primary table:** `{tbl_name}` — {what it stores}
+**Primary table:** `{tbl_name}` â€” {what it stores}
 
 **Schema (key columns only):**
 | Column | Type | Description |
@@ -119,7 +119,7 @@ The code is what's running in production. If guide said X but code does Y → me
 | {col} | {type} | {meaning} |
 
 **Related tables:**
-- `{tbl_name}` — {relationship + why it's used}
+- `{tbl_name}` â€” {relationship + why it's used}
 
 ---
 
@@ -133,7 +133,7 @@ The code is what's running in production. If guide said X but code does Y → me
 | From | To | Condition |
 |------|----|-----------|
 | {status} | {status} | {when allowed} |
-| {status} | {status} | ❌ Final state — no outgoing |
+| {status} | {status} | âŒ Final state â€” no outgoing |
 
 ---
 
@@ -141,11 +141,11 @@ The code is what's running in production. If guide said X but code does Y → me
 
 ### GET {route}
 - **Auth:** RequireAuthorization
-- **HEAD filter:** Yes — `x.Head == currentUser.HeadCode`
+- **HEAD filter:** Yes â€” `x.Head == currentUser.HeadCode`
 - **Returns:** `{FeatureDto}[]` with pagination
 - **Key fields:** {list key fields returned}
 
-### POST {route} — Create/Edit
+### POST {route} â€” Create/Edit
 - **Payload:** `{command fields}`
 - **Validation:** {key rules}
 - **Side effects:** {what else changes}
@@ -153,7 +153,7 @@ The code is what's running in production. If guide said X but code does Y → me
 ### POST {route}/update-status
 - **Payload:** `{ code: int, status: int }`
 - **Transitions:** {valid ones only}
-- **Transaction:** Yes — ExecutionStrategy
+- **Transaction:** Yes â€” ExecutionStrategy
 
 ---
 
@@ -170,9 +170,9 @@ The code is what's running in production. If guide said X but code does Y → me
 
 ```
 {feature}/
-├── {feature}-list.component.ts   ← Grid view, route: /{module}/{feature}
-├── {feature}-detail.component.ts ← Form view, route: /{module}/{feature}/:code
-└── {feature}.service.ts          ← API calls
+â”œâ”€â”€ {feature}-list.component.ts   â† Grid view, route: /{module}/{feature}
+â”œâ”€â”€ {feature}-detail.component.ts â† Form view, route: /{module}/{feature}/:code
+â””â”€â”€ {feature}.service.ts          â† API calls
 ```
 
 **Key UI behaviors:**
@@ -184,8 +184,8 @@ The code is what's running in production. If guide said X but code does Y → me
 
 > WHY things were done this way. Successor devs need this.
 
-- **Decision:** {what} → **Because:** {why, especially non-obvious reasons}
-- **Decision:** {what} → **Because:** {why}
+- **Decision:** {what} â†’ **Because:** {why, especially non-obvious reasons}
+- **Decision:** {what} â†’ **Because:** {why}
 
 ---
 
@@ -200,10 +200,10 @@ The code is what's running in production. If guide said X but code does Y → me
 ## 9. Cross-Module Dependencies
 
 **This feature reads from:**
-- `{Module}` → `{what data, which table}`
+- `{Module}` â†’ `{what data, which table}`
 
 **This feature's output is used by:**
-- `{Module}` → `{how/when}`
+- `{Module}` â†’ `{how/when}`
 
 ---
 
@@ -211,8 +211,8 @@ The code is what's running in production. If guide said X but code does Y → me
 
 > Things that will bite the next dev if they don't know.
 
-- ⚠️ **{gotcha}:** {explanation + how to handle}
-- ⚠️ **{gotcha}:** {explanation}
+- âš ï¸ **{gotcha}:** {explanation + how to handle}
+- âš ï¸ **{gotcha}:** {explanation}
 
 ---
 
@@ -221,7 +221,7 @@ The code is what's running in production. If guide said X but code does Y → me
 | Date | Change | Reason |
 |------|--------|--------|
 | {date} | Initial implementation | REQ_{SEQ} |
-| {date} | {what changed} | {why — bug fix, requirement change, etc.} |
+| {date} | {what changed} | {why â€” bug fix, requirement change, etc.} |
 ```
 
 ---
@@ -231,33 +231,34 @@ The code is what's running in production. If guide said X but code does Y → me
 After saving memory file:
 
 ```
-✅ Memorized: {Feature}
+âœ… Memorized: {Feature}
 
-📝 Memory saved: .../memory/{Feature}.md
+ðŸ“ Memory saved: .agent\projects\hoaiminh\memory\{Feature}.md
 
-📊 Distilled from:
-   📄 REQ_{SEQ}_{Feature}.md
-   📄 BE_{SEQ}_{Feature}.md  
-   📄 FE_{SEQ}_{Feature}.md
-   💻 {N} .cs handler files
-   🎨 {N} Angular component files
+ðŸ“Š Distilled from:
+   ðŸ“„ REQ_{SEQ}_{Feature}.md
+   ðŸ“„ BE_{SEQ}_{Feature}.md  
+   ðŸ“„ FE_WEB_{SEQ}_{Feature}.md
+   ðŸ’» {N} .cs handler files
+   ðŸŽ¨ {N} Angular component files
 
-⚡ Deviations from plan (code differs from guide):
-   - {e.g., "Status 'Suspended' removed — not implemented in code"}
+âš¡ Deviations from plan (code differs from guide):
+   - {e.g., "Status 'Suspended' removed â€” not implemented in code"}
    - {e.g., "Added optimistic lock check not in original guide"}
 
-🧠 Memory covers:
+ðŸ§  Memory covers:
    States: {N} | Rules: {N} | APIs: {N} | Gotchas: {N}
 
-✅ Safe to run: /clean-pipeline {feature-name}
+âœ… Safe to run: /clean-pipeline {feature-name}
 ```
 
 ---
 
 ## 6. Quality Rules
 
-- **English only** — memory is for future AI agents, keep consistent
-- **Concise but complete** — every section must have real content, not "N/A"
-- **Reality-first** — if code contradicts guide, memory follows code
-- **Gotchas section is mandatory** — at least 1 entry (if truly none: "No known edge cases — clean implementation")
-- **Decisions section is mandatory** — successor devs need to know WHY, not just WHAT
+- **English only** â€” memory is for future AI agents, keep consistent
+- **Concise but complete** â€” every section must have real content, not "N/A"
+- **Reality-first** â€” if code contradicts guide, memory follows code
+- **Gotchas section is mandatory** â€” at least 1 entry (if truly none: "No known edge cases â€” clean implementation")
+- **Decisions section is mandatory** â€” successor devs need to know WHY, not just WHAT
+
