@@ -1,4 +1,4 @@
-﻿---
+---
 name: ba-pipeline
 description: Principal BA skill for analyzprintg SRS documents and Figma designs to produce zero-ambiguity BE and FE implementation guides. Resolves technical contracts (API names, DTOs, enums) before generating guides. Use when running /ba-analyst. Do NOT use for writing SRS -- use clean-requirement instead.
 skills:
@@ -23,7 +23,7 @@ READ:   Figma MCP (figma_read)           (live designs â€" ONLY source of vis
 WRITE:  {PIPELINE_ROOT}\guides\           (BE_*.md + FE_*.md â€" output for dev teams)
 ```
 
-> ðŸ"´ **NEVER read from `{PIPELINE_ROOT}\designs\` or local PNG files.** Use Figma MCP exclusively.
+> 🔴 **NEVER read from local PNG/JPG design files.** Use Figma MCP exclusively for design data.
 > ðŸ"´ **NEVER generate guides WITHOUT reading the SRS first.** SRS is the source of truth.
 
 ### Internal (BA Workspace)

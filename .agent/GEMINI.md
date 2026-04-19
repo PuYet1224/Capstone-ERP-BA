@@ -1,4 +1,4 @@
-﻿---
+---
 trigger: always_on
 ---
 
@@ -22,13 +22,13 @@ trigger: always_on
 - `/ba-analyst` -- trigger analysis pipeline: auto-scan requirements -> analyze -> create guides
 - `/clean-requirement` -- transform raw notes into SRS -> save to shared folder
 
-## WORKSPACE_MAP -- ONLY place with absolute paths (change here when deployprintg to new machine)
+## WORKSPACE_MAP -- ONLY place with absolute paths (change here when deploying to new machine)
 
 ```
-PIPELINE_ROOT:  C:\ai-pipeline
+PIPELINE_ROOT:  C:\ai.pipeline\Hoai-Minh-Project
 ```
 
-> When deployprintg to a new server or machine, update PIPELINE_ROOT above. Everything else uses relative paths.
+> When deploying to a new server or machine, update PIPELINE_ROOT above. Everything else uses relative paths.
 
 ## External Paths (SECURITY BOUNDARY)
 
@@ -84,30 +84,27 @@ Your guides must be **complete enough that BE/FE developers can implement withou
 
 ## 🚨 DATA SOURCE TRANSPARENCY -- P0 ABSOLUTE RULE (NEVER VIOLATE)
 
-> **Why this rule exists:** AI previously read PNG files from `.design-archive` locally but presented findings as if reading directly from live Figma. This is misleading and strictly prohibited.
+> **Figma MCP is the ONLY design source.** No local images, no archives, no fallbacks.
 
 ### Before EVERY design/data analysis, MUST declare the data source:
 
 | Reading from | Must state |
 |---|---|
 | `figma_read` Figma Desktop live | ✅ "Reading from **Figma Desktop (live)**" |
-| `.design-archive/*.png` | ✅ "Reading from **archived images** at `.design-archive/`" |
-| `C:\ai.pipeline\designs\*.png` | ✅ "Reading from **pipeline images**" |
 | Current code files | ✅ "Reading from **current code**" |
-| Requirements / documents | ✅ "Reading from **requirements input** at `C:\ai-pipeline\requirements\`" |
+| Requirements / documents | ✅ "Reading from **requirements input** at `{PIPELINE_ROOT}\requirements\`" |
 
 ### ABSOLUTELY FORBIDDEN:
-- ❌ `figma_read` fails -> silently reading local files without printforming the user
-- ❌ Analyzprintg archive images but sayprintg "per Figma" or "from Figma"
+- ❌ Reading from local PNG/JPG images and presenting as "from Figma"
 - ❌ Skipping the source declaration step before analysis
 - ❌ Returning analysis results without stating where data came from
 
-### When figma_read fails -- required procedure:
+### When figma_read is not connected -- required procedure:
 ```
-1. State clearly: "figma_read failed -- Figma Desktop not connected."
-2. Ask user: "Use images from .design-archive as fallback?"
-3. ONLY use local images AFTER user confirms.
-4. Always label: "[Analysis from archive image -- not live Figma]"
+1. State clearly: "❌ Figma Desktop not connected."
+2. Ask user to connect Figma Desktop + MCP plugin.
+3. DO NOT fall back to local images. DO NOT proceed without Figma.
+4. STOP and wait for user to connect.
 ```
 
 > 🔴 This rule is **P0** -- higher priority than all other instructions.
