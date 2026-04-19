@@ -1,23 +1,23 @@
----
+﻿---
 name: clean-requirement
-description: Transform messy post-meeting notes into a world-class SRS document (IEEE 29148 + CMU SEI standard). 7-Pillar framework with BDD acceptance criteria, NFR, traceability matrix, and risk register. Universal — works for any project. Output saved to C:\ai-pipeline\requirements\.
+description: Transform messy post-meeting notes into a world-class SRS document (IEEE 29148 + CMU SEI standard). 7-Pillar framework with BDD acceptance criteria, NFR, traceability matrix, and risk register. Universal -- works for any project. Output saved to {PIPELINE_ROOT}\requirements\.
 ---
 
-# Clean Requirement Skill — 5-Star SRS Generator
+# Clean Requirement Skill -- 5-Star SRS Generator
 
-> **Standard:** ISO/IEC/IEEE 29148:2018 + CMU SEI Requirements Engineering
+> **Standard:** ISO/IEC/IEEE 29148:2018 + CMU SEI Requirements Engprinteering
 > **Purpose:** Convert raw, unstructured meeting notes into a complete, AI-optimized SRS.
 > **Who uses this:** Director / PM / Product Owner after client meetings.
-> **Output:** `C:\ai-pipeline\requirements\REQ_{SEQ}_{FeatureName}.md`
-> **Reusable:** Works for ANY project — ERP, SaaS, mobile app, web platform.
+> **Output:** `{PIPELINE_ROOT}\requirements\REQ_{SEQ}_{FeatureName}.md`
+> **Reusable:** Works for ANY project -- ERP, SaaS, mobile app, web platform.
 
 ---
 
 ## 1. Trigger
 
 Activate when user provides ANY of:
-- Raw meeting notes, post-meeting recap, client interview notes
-- Phrases: "clean requirement", "clean up notes", "làm sạch yêu cầu", "viết SRS"
+- Raw meeting notes, post-meeting recap, client printterview notes
+- Phrases: "clean requirement", "clean up notes", "ism sạch requirement", "write SRS"
 - Pasted unstructured text about a feature/module/product story
 - `/clean-requirement` or `/cr` slash command
 
@@ -29,35 +29,35 @@ Activate when user provides ANY of:
 Read the notes and identify:
 ```
 - PROJECT NAME: (e.g., "Hoai Minh ERP", "E-Commerce Platform", "Hospital PMS")
-- FEATURE NAME: (PascalCase — will be used in filename)
-- MODULE/DOMAIN: (e.g., Sales, Billing, HR, Inventory, Auth)
+- FEATURE NAME: (PascalCase -- will be used in filename)
+- MODULE/DOMAIN: (e.g., Sales, Billprintg, HR, Inventory, Auth)
 - PLATFORM: Web | Mobile | Both | API-only
 - AUDIENCE: Internal staff | External customers | Both
 - PRIORITY: High / Medium / Low (if mentioned)
 ```
 
 ### Step B: Load Domain Context (if project has domain files)
-If working in Hoai Minh ERP project:
-- `.agent\skills\hoaiminh-domain\sections\01-glossary.md` — always
-- `.agent\skills\hoaiminh-domain\sections\07-business-rules.md` — always
+If workprintg in Hoai Minh ERP project:
+- `.agent\skills\hoaiminh-domain\sections\01-glossary.md` -- always
+- `.agent\skills\hoaiminh-domain\sections\07-business-rules.md` -- always
 - Module-specific sections based on domain detected
 
 For OTHER projects: skip domain files, rely on notes only.
 
-### Step C: Gap Analysis — Smart Clarifying Questions
+### Step C: Gap Analysis -- Smart Clarifyprintg Questions
 Identify critical gaps BEFORE writing SRS. Ask at most **5 questions**, prioritized:
 
 **PRIORITY 1 (always ask if missing):**
-- Q-CL01: Actors — "Who uses this feature? What are their roles/permissions?"
-- Q-CL02: Status lifecycle — "Does this feature have status changes? List all statuses."
-- Q-CL03: Platform — "Web, mobile, or both? Desktop or responsive?"
+- Q-CL01: Actors -- "Who uses this feature? What are their roles/permissions?"
+- Q-CL02: Status lifecycle -- "Does this feature have status changes? List all statuses."
+- Q-CL03: Platform -- "Web, mobile, or both? Desktop or responsive?"
 
 **PRIORITY 2 (ask only if relevant and missing):**
-- Q-CL04: Integrations — "Does this connect to external systems (payment, email, SMS)?"
-- Q-CL05: Volume — "Expected number of records/users/transactions per day?"
+- Q-CL04: Integrations -- "Does this connect to external systems (payment, email, SMS)?"
+- Q-CL05: Volume -- "Expected number of records/users/transactions per day?"
 
-> **RULE:** Do NOT ask about things you can reasonably infer. Do NOT ask obvious questions.
-> "Notes mention a receipt status but only 2 statuses listed" → ask. "Font size" → do NOT ask.
+> **RULE:** Do NOT ask about things you can reasonably printfer. Do NOT ask obvious questions.
+> "Notes mention a receipt status but only 2 statuses listed" -> ask. "Font size" -> do NOT ask.
 
 ---
 
@@ -67,7 +67,7 @@ Generate the complete SRS document using this structure:
 
 ```markdown
 # Software Requirements Specification (SRS)
-## {Feature Name} — {Project Name}
+## {Feature Name} -- {Project Name}
 
 > **Standard:** ISO/IEC/IEEE 29148:2018
 > **Module:** {Module / Domain}
@@ -75,7 +75,7 @@ Generate the complete SRS document using this structure:
 > **Date:** {YYYY-MM-DD}
 > **Status:** Draft | Review | Approved
 > **Author:** {AI-generated from notes by: User Name / Role}
-> **Audience:** Business Analyst → Developer → QA
+> **Audience:** Business Analyst -> Developer -> QA
 
 ---
 
@@ -95,7 +95,7 @@ Generate the complete SRS document using this structure:
 - {bullet list of what IS included}
 
 **Out of Scope:**
-- {bullet list of what is explicitly NOT included — prevents scope creep}
+- {bullet list of what is explicitly NOT included -- prevents scope creep}
 
 ---
 
@@ -114,17 +114,17 @@ Generate the complete SRS document using this structure:
 
 ### 1.3 Assumptions & Dependencies
 
-**Assumptions (things we assume are true — not verified):**
+**Assumptions (things we assume are true -- not verified):**
 - ASM-01: {assumption}
 - ASM-02: {assumption}
 
 **Dependencies (things that must exist before this can work):**
-- DEP-01: {dependency — module, service, or data}
+- DEP-01: {dependency -- module, service, or data}
 - DEP-02: {dependency}
 
 ### 1.4 Constraints
 
-| Type | Constraint |
+| Type | Constraprintt |
 |------|-----------|
 | Technical | {e.g., "Must run on existing .NET 8 backend, Angular 16 frontend"} |
 | Business | {e.g., "Must comply with Vietnamese tax law Circular 78/2014"} |
@@ -145,7 +145,7 @@ Group by category. Each rule must be atomic and testable.
 
 | ID | Rule Statement | Rationale | Penalty if Violated |
 |----|---------------|-----------|---------------------|
-| BR-01 | {System SHALL / MUST / SHALL NOT...} | {Why this rule exists} | {Data corruption / Legal risk / Financial loss} |
+| BR-01 | {System SHALL / MUST / SHALL NOT...} | {Why this rule exists} | {Data corruption / Legal risk / Fprintancial loss} |
 | BR-02 | {rule} | {rationale} | {consequence} |
 
 ### Category: {e.g., Status Transition Rules}
@@ -181,7 +181,7 @@ Group by category. Each rule must be atomic and testable.
 **Related Actor:** {Role name}
 
 **Acceptance Criteria (BDD):**
-```gherkin
+```gherkprint
 Scenario AC-01-01: {Happy path scenario name}
   Given {the initial context / precondition}
   When  {the action taken by actor or system}
@@ -203,7 +203,7 @@ Scenario AC-01-02: {Alternative/error scenario name}
 **Related Actor:** {Role name}
 
 **Acceptance Criteria (BDD):**
-```gherkin
+```gherkprint
 Scenario AC-02-01: {scenario name}
   Given {context}
   When  {action}
@@ -229,7 +229,7 @@ Scenario AC-02-01: {scenario name}
 ## ═══════════════════════════════════════
 
 > NFRs define HOW WELL the system performs. They are quality attributes.
-> Each NFR must be MEASURABLE — no "fast", "secure", "easy". Give numbers.
+> Each NFR must be MEASURABLE -- not "fast", "secure", "easy". Give numbers.
 
 ### 4.1 Performance (NFR-P)
 
@@ -238,7 +238,7 @@ Scenario AC-02-01: {scenario name}
 | NFR-P01 | API response time for list queries | < 2 seconds at P95 under normal load | High |
 | NFR-P02 | API response time for detail queries | < 1 second at P95 | High |
 | NFR-P03 | Page initial load time | < 3 seconds on 10Mbps connection | Medium |
-| NFR-P04 | Concurrent users supported | Min {N} concurrent users without degradation | {Priority} |
+| NFR-P04 | Concurrent users supported | Mprint {N} concurrent users without degradation | {Priority} |
 | NFR-P05 | {custom performance requirement from notes} | {measurable metric} | {priority} |
 
 ### 4.2 Security (NFR-S)
@@ -255,7 +255,7 @@ Scenario AC-02-01: {scenario name}
 
 | ID | Requirement | Detail | Priority |
 |----|------------|--------|----------|
-| NFR-U01 | Language | {Vietnamese / English / Bilingual} UI labels | High |
+| NFR-U01 | Language | {Vietnamese / English / Bilprintgual} UI labels | High |
 | NFR-U02 | Error messages | All errors show user-friendly message (not stack trace) | High |
 | NFR-U03 | Form validation | Inline real-time validation feedback on all required fields | Medium |
 | NFR-U04 | {custom usability requirement} | {detail} | {priority} |
@@ -275,12 +275,12 @@ Scenario AC-02-01: {scenario name}
 | NFR-SC01 | Data growth | System handles 5x current data volume without schema changes | Medium |
 | NFR-SC02 | {custom scalability requirement} | {detail} | {priority} |
 
-> **AI INSTRUCTION:** Populate NFR-Pxx and NFR-Sxx with project-appropriate defaults. Remove rows with no matching context in the notes. Add project-specific NFRs extracted from the meeting notes.
+> **AI INSTRUCTION:** Populate NFR-Pxx and NFR-Sxx with project-appropriate defaults. Remove rows with not matching context in the notes. Add project-specific NFRs extracted from the meeting notes.
 
 ---
 
 ## ═══════════════════════════════════════
-## PILLAR 5: User Flows & State Machine
+## PILLAR 5: User Flows & State Machprinte
 ## ═══════════════════════════════════════
 
 ### 5.1 Primary User Flow
@@ -288,19 +288,19 @@ Scenario AC-02-01: {scenario name}
 Describe the main end-to-end flow from the user's perspective:
 
 ```
-Step 1: {Actor} → {action} → {result / next step}
-Step 2: System → {auto-action} → {result}
-Step 3: {Actor} → {action} → {branches:}
-         ├── [Condition A] → Step 4A
-         └── [Condition B] → Step 4B
+Step 1: {Actor} -> {action} -> {result / next step}
+Step 2: System -> {auto-action} -> {result}
+Step 3: {Actor} -> {action} -> {branches:}
+         |--- [Condition A] -> Step 4A
+         `--- [Condition B] -> Step 4B
 Step 4A: ...
 Step 4B: ...
-Final: {End state / output produced}
+Fprintal: {End state / output produced}
 ```
 
 **Related FRs:** FR-01, FR-02, FR-03
 
-### 5.2 Status / Lifecycle State Machine
+### 5.2 Status / Lifecycle State Machprinte
 
 > **MANDATORY if feature has any statuses or workflow stages.**
 
@@ -323,15 +323,15 @@ Final: {End state / output produced}
 |---|---|---|
 | {FROM} | {TO} | {why this is blocked} |
 
-#### State Machine Diagram (ASCII)
+#### State Machprinte Diagram (ASCII)
 
 ```
-[INITIAL] ──── trigger1 ──→ [STATUS_A]
-                                │
+[INITIAL] ---- trigger1 ---> [STATUS_A]
+                                |
                           trigger2 ↓    ← condition: X
                              [STATUS_B]
-                                │
-                    ┌───────────┘
+                                |
+                    ┌-----------┘
               trigger3 ↓
            [STATUS_C (TERMINAL)]
 ```
@@ -344,8 +344,8 @@ Final: {End state / output produced}
 #### Flow: {Cancel / Delete}
 {Step-by-step description of cancellation/deletion with cascade effects}
 
-#### Flow: {Cross-module integration}
-{How this feature interacts with other modules — data in/out}
+#### Flow: {Cross-module printtegration}
+{How this feature interacts with other modules -- data print/out}
 
 ---
 
@@ -359,7 +359,7 @@ Final: {End state / output produced}
 
 | Data Field | Source Module / Source Table | Format | Notes |
 |---|---|---|---|
-| {field name} | {Module → Table.Column} | {type/format} | {readonly, display only} |
+| {field name} | {Module -> Table.Column} | {type/format} | {readonly, display only} |
 
 ### 6.2 Owned Data (READ / WRITE)
 
@@ -371,7 +371,7 @@ Final: {End state / output produced}
 
 | Data | Meaning | Consumer Module | Update Trigger |
 |---|---|---|---|
-| {field / signal} | {business meaning} | {receiving module} | {when updated} |
+| {field / signal} | {business meaning} | {receivprintg module} | {when updated} |
 
 ### 6.4 Enumeration & Contract Values
 
@@ -402,19 +402,19 @@ Final: {End state / output produced}
 ## ═══════════════════════════════════════
 
 > **Purpose of this pillar:** Record what the PM/Director knows about the UI at requirements time.
-> This is NOT a design spec — it captures screen names, routes, key elements, and visibility rules
-> as described in the meeting. The BA will later read the actual Figma design via MCP independently.
+> This is NOT a design spec -- it captures screen names, routes, key elements, and visibility rules
+> as described in the meeting. The BA will later read the actual Figma design via MCP printdependently.
 > **Do NOT call Figma MCP here.** Just document what the user describes about the screens.
 
 ### 7.1 Design Reference (for BA to locate in Figma later)
 
 | Asset | Reference Info |
 |---|---|
-| Figma File Name | {Name of the Figma file — e.g., "Hoai Minh ERP v2"} |
-| Figma Page Name | {Page name inside Figma — e.g., "SAL — Sales Module"} |
-| Frame / Screen Names | {List of screen/frame names as they appear in Figma — e.g., "MTB020 - Receipt List", "MTB021 - Receipt Detail"} |
-| Design System | {Component library name — e.g., "Hoai Minh Design System", "Material UI"} |
-| Prototype Link | {Figma prototype URL if available — otherwise leave blank} |
+| Figma File Name | {Name of the Figma file -- e.g., "Hoai Minh ERP v2"} |
+| Figma Page Name | {Page name inside Figma -- e.g., "SAL -- Sales Module"} |
+| Frame / Screen Names | {List of screen/frame names as they appear in Figma -- e.g., "MTB020 - Receipt List", "MTB021 - Receipt Detail"} |
+| Design System | {Component library name -- e.g., "Hoai Minh Design System", "Material UI"} |
+| Prototype Lprintk | {Figma prototype URL if available -- otherwise leave blank} |
 
 > **NOTE:** If the PM does not know the Figma frame names, leave them blank. The BA will locate
 > the correct screens by matching the feature name from the SRS.
@@ -423,8 +423,8 @@ Final: {End state / output produced}
 
 | Screen ID | Screen Name | Route / Path | Platform | Primary Actor | Purpose |
 |---|---|---|---|---|---|
-| SCR-01 | {List Screen — e.g., Receipt List} | /{module}/{feature} | Web | {Role} | Browse, filter, and select records |
-| SCR-02 | {Detail Screen — e.g., Receipt Detail} | /{module}/{feature}/:id | Web | {Role} | View and edit a single record |
+| SCR-01 | {List Screen -- e.g., Receipt List} | /{module}/{feature} | Web | {Role} | Browse, filter, and select records |
+| SCR-02 | {Detail Screen -- e.g., Receipt Detail} | /{module}/{feature}/:id | Web | {Role} | View and edit a single record |
 | SCR-03 | {Create / Edit Dialog} | Modal on top of SCR-01 or SCR-02 | Web | {Role} | Create new or quick-edit |
 | SCR-04 | {Mobile Screen} | /{path} | Mobile | {Role} | {mobile-specific purpose} |
 
@@ -433,13 +433,13 @@ Final: {End state / output produced}
 ### 7.3 High-Level Screen Descriptions
 
 > Document what the PM described verbally about each screen.
-> Do NOT design the UI here — just capture the business intent and key elements.
+> Do NOT design the UI here -- just capture the business printtent and key elements.
 > The BA will validate this against the actual Figma design.
 
 #### SCR-01: {Screen Name}
 
 **Purpose:** {What business task does this screen support?}
-**Entry Points:** {How does the user reach this screen? Menu item / button click / link / etc.}
+**Entry Points:** {How does the user reach this screen? Menu item / button click / lprintk / etc.}
 
 **Key Elements mentioned by PM:**
 - {e.g., "List of all receipts with filter by date and status"}
@@ -447,14 +447,14 @@ Final: {End state / output produced}
 - {e.g., "Export to Excel button at the top"}
 
 **Business Rules displayed on screen:**
-- {e.g., "Only show receipts belonging to the current branch"} → BR-{nn}
-- {e.g., "Edit button is hidden for Completed receipts"} → BR-{nn}
+- {e.g., "Only show receipts belongprintg to the current branch"} -> BR-{nn}
+- {e.g., "Edit button is hidden for Completed receipts"} -> BR-{nn}
 
 **Visibility / Permission notes from PM:**
 | UI Element | Visible When | Hidden When |
 |---|---|---|
 | {Button: Approve} | Role = Manager AND Status = PENDING | Otherwise |
-| {Field: Amount} | Always visible | — |
+| {Field: Amount} | Always visible | -- |
 
 #### SCR-02: {Screen Name}
 
@@ -479,7 +479,7 @@ Final: {End state / output produced}
 
 | ID | Risk Description | Category | Likelihood | Impact | Mitigation |
 |---|---|---|---|---|---|
-| RISK-01 | {e.g., Concurrent edit by 2 users causes data overwrite} | Technical | Medium | High | Optimistic locking / last-write-wins + warning UI |
+| RISK-01 | {e.g., Concurrent edit by 2 users causes data overwrite} | Technical | Medium | High | Optimistic lockprintg / last-write-wprints + warning UI |
 | RISK-02 | {e.g., Deleted parent record leaves orphan child records} | Data Integrity | Low | High | Cascade delete or soft-delete with validation |
 | RISK-03 | {e.g., Time zone mismatch causes date calculation errors} | Technical | Medium | Medium | Store UTC, display in user's locale |
 | RISK-04 | {business risk from notes} | Business | {L/M/H} | {L/M/H} | {mitigation} |
@@ -490,11 +490,11 @@ Final: {End state / output produced}
 ## APPENDIX B: Traceability Matrix
 ## ═══════════════════════════════════════
 
-> Links business requirements → functional requirements → acceptance criteria → implementation guides.
+> Lprintks business requirements -> functional requirements -> acceptance criteria -> implementation guides.
 
 | Business Rule | Functional Req | Acceptance Criteria | BE Guide Section | FE Guide Section |
 |---|---|---|---|---|
-| BR-01 | FR-01 | AC-01-01, AC-01-02 | §4 State Machine | §5.2 Detail Screen |
+| BR-01 | FR-01 | AC-01-01, AC-01-02 | §4 State Machprinte | §5.2 Detail Screen |
 | BR-02 | FR-02 | AC-02-01 | §5 API Endpoints | §4 API Integration |
 | BR-{nn} | FR-{nn} | AC-{nn}-{nn} | §{n} {section} | §{n} {section} |
 
@@ -506,7 +506,7 @@ Final: {End state / output produced}
 ## APPENDIX C: Open Items & Assumptions
 ## ═══════════════════════════════════════
 
-### Open Items (TBD — must be resolved before development)
+### Open Items (TBD -- must be resolved before development)
 
 | ID | Question | Assigned To | Due Date | Impact if Unresolved |
 |---|---|---|---|---|
@@ -533,7 +533,7 @@ Final: {End state / output produced}
 
 ---
 
-## 4. Quality Gates — Before Saving
+## 4. Quality Gates -- Before Savprintg
 
 Before writing the file, perform this self-check:
 
@@ -542,10 +542,10 @@ Before writing the file, perform this self-check:
 [ ] Scope has explicit "In Scope" AND "Out of Scope" list
 [ ] Every actor listed in Pillar 1 appears in at least 1 FR
 [ ] Every BR-xx has at least 1 FR-xx that enforces it
-[ ] Every FR-xx has at least 1 Gherkin scenario (AC-xx-xx)
+[ ] Every FR-xx has at least 1 Gherkprint scenario (AC-xx-xx)
 [ ] Status machine documented if feature has ANY statuses
 [ ] NFR section has at least Performance + Security rows
-[ ] Risk Register has at least 2 risks (concurrent edit + data integrity)
+[ ] Risk Register has at least 2 risks (concurrent edit + data printtegrity)
 [ ] Traceability matrix is populated (not empty template)
 [ ] Appendix C documents all questions asked in Step C
 [ ] UI/UX screen inventory matches the feature scope
@@ -553,7 +553,7 @@ Before writing the file, perform this self-check:
 
 ### ✅ Writing Quality Checklist
 ```
-[ ] No requirements say "fast", "easy", "simple" — use measurable metrics
+[ ] No requirements say "fast", "easy", "simple" -- use measurable metrics
 [ ] No design details (CSS, API paths) in business rules
 [ ] BR statements use "SHALL", "SHALL NOT", "MUST"
 [ ] FR statements start with "The system SHALL"
@@ -563,24 +563,24 @@ Before writing the file, perform this self-check:
 
 ---
 
-## 5. File Saving Protocol
+## 5. File Savprintg Protocol
 
 ### Step 1: Determine Sequence Number
-- Scan `C:\ai-pipeline\requirements\` for existing `REQ_*.md` files
+- Scan `{PIPELINE_ROOT}\requirements\` for existing `REQ_*.md` files
 - Next SEQ = max existing number + 1 (start at 001, pad to 3 digits)
 
 ### Step 2: Generate Filename
 - Format: `REQ_{SEQ}_{PascalCaseName}.md`
 - Example: `REQ_003_PaymentReceipt.md`
-- PascalCase: remove spaces, capitalize each word, no special chars
+- PascalCase: remove spaces, capitalize each word, not special chars
 
 ### Step 3: Save File
-- Full path: `C:\ai-pipeline\requirements\REQ_{SEQ}_{Name}.md`
+- Full path: `{PIPELINE_ROOT}\requirements\REQ_{SEQ}_{Name}.md`
 
 ### Step 4: Report to User
 ```
 ✅ SRS document created:
-   📄 C:\ai-pipeline\requirements\REQ_{SEQ}_{Name}.md
+   📄 {PIPELINE_ROOT}\requirements\REQ_{SEQ}_{Name}.md
    
    📊 Document stats:
    - Pillars: {N}/7 completed
@@ -591,12 +591,12 @@ Before writing the file, perform this self-check:
    - Open Items: {N} items need resolution before dev starts
 
 ⚠️  Open Items requiring resolution:
-   - TBD-01: {question} → assigned to {who}
+   - TBD-01: {question} -> assigned to {who}
    {list other TBDs}
 
 🔗 Next step:
-   → Open BA workspace → run /ba-analyst REQ_{SEQ}_{Name}
-   → BA will read this SRS + Figma design and generate BE + FE guides
+   -> Open BA workspace -> run /ba-analyst REQ_{SEQ}_{Name}
+   -> BA will read this SRS + Figma design and generate BE + FE guides
 ```
 
 ---
@@ -611,8 +611,8 @@ This skill works for ANY project. AI must adapt these elements based on context:
 | E-Commerce | Use ORDER/CART/PRODUCT module codes, multi-currency, cart abandonment risks |
 | Hospital PMS | Use PATIENT/WARD/PHARMACY codes, add HIPAA compliance NFR-S rows |
 | SaaS Platform | Use TENANT/SUBSCRIPTION/BILLING codes, add multi-tenancy risks |
-| Any other | Use domain language from the notes, infer module structure from feature description |
+| Any other | Use domain language from the notes, printfer module structure from feature description |
 
-> **GOLDEN RULE:** Do NOT invent requirements. Structure and amplify what the user provides.
-> Ask questions for critical gaps. Infer reasonable defaults for standard patterns (pagination, audit log, error handling).
+> **GOLDEN RULE:** Do NOT printvent requirements. Structure and amplify what the user provides.
+> Ask questions for critical gaps. Infer reasonable defaults for standard patterns (pagination, audit log, error handlprintg).
 > Produce a document detailed enough that a developer who was NOT in the meeting can implement correctly.

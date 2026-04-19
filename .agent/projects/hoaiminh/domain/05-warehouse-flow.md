@@ -1,4 +1,4 @@
-# Warehouse Flow - Stock Management at Honda HEAD Hoài Minh
+﻿# Warehouse Flow - Stock Management at Honda HEAD Hoài Minh
 
 ## Overview
 
@@ -8,9 +8,9 @@ Warehouse management handles two distinct inventory types: **Vehicles (xe máy)*
 
 ```
 tbl_LSHead (HEAD/Branch)
-└── tbl_LSWarehouse (Warehouse per HEAD)
-    └── tbl_WHZone (Zones within warehouse)
-        └── tbl_WHLocation (Locations within zone)
+`--- tbl_LSWarehouse (Warehouse per HEAD)
+    `--- tbl_WHZone (Zones within warehouse)
+        `--- tbl_WHLocation (Locations within zone)
 ```
 
 - Each HEAD can have multiple warehouses
@@ -120,10 +120,10 @@ When KTV uses parts during repair:
 
 ```
 tbl_WHInventoryMaster (Audit campaign)
-└── tbl_WHInventoryPoint (Audit points - per warehouse)
-    └── tbl_WHInventorySession (Count sessions)
-        └── tbl_WHInventory (Individual count records)
-            └── tbl_WHInventoryScan (Scan records)
+`--- tbl_WHInventoryPoint (Audit points - per warehouse)
+    `--- tbl_WHInventorySession (Count sessions)
+        `--- tbl_WHInventory (Individual count records)
+            `--- tbl_WHInventoryScan (Scan records)
 ```
 
 ### Audit Flow
@@ -147,9 +147,9 @@ tbl_WHInventoryMaster (Audit campaign)
 
 ## Stock Lock Mechanism
 
-`tbl_LSVehicleColorStock.Lock` — Number of vehicles "locked" (reserved but not yet delivered):
-- When a sales order selects a vehicle → `Lock` increments
-- When sale is cancelled → `Lock` decrements
+`tbl_LSVehicleColorStock.Lock` -- Number of vehicles "locked" (reserved but not yet delivered):
+- When a sales order selects a vehicle -> `Lock` increments
+- When sale is cancelled -> `Lock` decrements
 - Available stock = `Quantity - Lock`
 
 > **Business Rule:** System must prevent selling more vehicles than available (`Quantity - Lock > 0`).

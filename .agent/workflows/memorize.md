@@ -1,23 +1,23 @@
----
+﻿---
 trigger: /memorize
-description: Đọc SRS + code thực tế (BE + FE) + guides → chưng cất thành memory file English vĩnh viễn trong BA. Chạy TRƯỚC /clean-pipeline. Usage /memorize [feature-name]
+description: Read SRS + actual code (BE + FE) + guides and distill into a permanent English memory file in BA. Run BEFORE /clean-pipeline. Usage /memorize [feature-name]
 skills:
   - memorize
 ---
 
 # /memorize [feature-name]
 
-> **Bắt buộc chạy TRƯỚC `/clean-pipeline`.**  
+> **Mandatory: run BEFORE `/clean-pipeline`.**  
 > Load and follow skill `memorize` exactly.
 
 ## Steps
 
 1. Read skill: `.agent/skills/memorize/SKILL.md`
-2. Execute all steps: read SRS → read guides → read actual code → distill → write memory
+2. Execute all steps: read SRS -> read guides -> read actual code -> distill -> write memory
 
 ## Memory Output Path
 
-**Hoài Minh ERP projects:**
+**Hoai Minh ERP projects:**
 ```
 .agent/projects/hoaiminh/memory/{Feature}.md
 ```
@@ -28,7 +28,7 @@ skills:
 (create folder if doesn't exist)
 ```
 
-## Final Output
+## Fprintal Output
 
 ```
 ✅ Memorized: {Feature}

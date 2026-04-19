@@ -1,4 +1,4 @@
-# Hoài Minh ERP — Kiến Trúc Dự Án Mới
+﻿# Hoài Minh ERP -- Kiến Trúc Dự Án Mới
 
 > Tài liệu giới thiệu cấu trúc kỹ thuật dự án Hoài Minh Honda ERP (phiên bản mới).
 > Phục vụ thuyết trình nội bộ cho team dev.
@@ -11,8 +11,8 @@
 |-----------|---------|
 | **Framework** | .NET 10 (LTS) |
 | **Kiến trúc** | Modular Monolith + Vertical Slice |
-| **Database** | SQL Server — Code-First (reverse-engineered từ DB hiện tại) |
-| **Authentication** | JWT Bearer — External Identity Server (`identity.hoaiminh.vn`) |
+| **Database** | SQL Server -- Code-First (reverse-engineered từ DB hiện tại) |
+| **Authentication** | JWT Bearer -- External Identity Server (`identity.hoaiminh.vn`) |
 | **API Style** | Minimal API (không dùng Controller cũ) |
 | **ORM** | Entity Framework Core 10 |
 | **API Docs** | Swagger / OpenAPI (tự động từ code) |
@@ -23,28 +23,28 @@
 
 ```
 HoaiMinh.ERP/
-│
-├── 📁 .agent/                          ← Bộ não AI (không deploy)
-│   ├── agents/hoaiminh-analyst.md      ← AI Business Analyst
-│   ├── skills/hoaiminh-domain/         ← Domain knowledge (8 sections)
-│   └── workflows/hm-feature.md        ← Auto feature pipeline
-│
-├── 📁 docs/                            ← Tài liệu dự án
-│   └── requirements/                   ← Yêu cầu nghiệp vụ
-│
-├── 📁 src/                             ← Host Application
-│   └── HoaiMinh.ERP.API/
-│       ├── Program.cs                  ← Entry point (chỉ config + routing)
-│       ├── appsettings.json            ← Connection string, Auth config
-│       └── Properties/
-│           └── launchSettings.json     ← IIS Express + Kestrel profiles
-│
-├── 📁 modules/                         ← Business Logic (TẤT CẢ code ở đây)
-│   ├── HoaiMinh.ERP.Modules.Core/     ← Shared: DbContext, Entities, DTOs
-│   ├── HoaiMinh.ERP.Modules.Identity/ ← Auth: User Profiles, JWT mapping
-│   └── HoaiMinh.ERP.Modules.Sale/     ← Bán hàng: Orders, Invoices, Receipts
-│
-└── HoaiMinh.ERP.slnx                  ← Solution file
+|
+|--- 📁 .agent/                          ← Bộ não AI (không deploy)
+|   |--- agents/hoaiminh-analyst.md      ← AI Business Analyst
+|   |--- skills/hoaiminh-domain/         ← Domain knowledge (8 sections)
+|   `--- workflows/hm-feature.md        ← Auto feature pipeline
+|
+|--- 📁 docs/                            ← Tài liệu dự án
+|   `--- requirements/                   ← Yêu cầu nghiệp vụ
+|
+|--- 📁 src/                             ← Host Application
+|   `--- HoaiMinh.ERP.API/
+|       |--- Program.cs                  ← Entry point (chỉ config + routing)
+|       |--- appsettings.json            ← Connection string, Auth config
+|       `--- Properties/
+|           `--- launchSettings.json     ← IIS Express + Kestrel profiles
+|
+|--- 📁 modules/                         ← Business Logic (TẤT CẢ code ở đây)
+|   |--- HoaiMinh.ERP.Modules.Core/     ← Shared: DbContext, Entities, DTOs
+|   |--- HoaiMinh.ERP.Modules.Identity/ ← Auth: User Profiles, JWT mapping
+|   `--- HoaiMinh.ERP.Modules.Sale/     ← Bán hàng: Orders, Invoices, Receipts
+|
+`--- HoaiMinh.ERP.slnx                  ← Solution file
 ```
 
 ---
@@ -78,43 +78,43 @@ flowchart LR
 
 ### 3 Nguyên Tắc Vàng:
 
-1. **`src/HoaiMinh.ERP.API/` không chứa logic nghiệp vụ** — chỉ cấu hình server và đăng ký modules
-2. **Mỗi module tự chứa mọi thứ** — Entity, DTO, Endpoint, Service
-3. **Vertical Slice** — 1 feature = 1 folder gọn gàng, dễ tìm
+1. **`src/HoaiMinh.ERP.API/` không chứa logic nghiệp vụ** -- chỉ cấu hình server và đăng ký modules
+2. **Mỗi module tự chứa mọi thứ** -- Entity, DTO, Endpoint, Service
+3. **Vertical Slice** -- 1 feature = 1 folder gọn gàng, dễ tìm
 
 ---
 
 ## 4. Chi Tiết Từng Module
 
-### 📦 `Modules.Core` — Nền Tảng Dùng Chung
+### 📦 `Modules.Core` -- Nền Tảng Dùng Chung
 
 ```
 Modules.Core/
-├── Data/
-│   ├── HoaiMinhDbContext.cs          ← 91 DbSets (tất cả bảng DB)
-│   └── Entities/                     ← 91 entity classes
-│       ├── tbl_SALOrderMaster.cs
-│       ├── tbl_CSWorkOrderMaster.cs
-│       ├── tbl_LSHead.cs
-│       └── ... (91 files)
-├── Common/
-│   ├── ApiResponse.cs                ← Chuẩn response wrapper
-│   └── PaginatedRequest.cs           ← Phân trang
-└── CoreModuleExtensions.cs           ← DI registration
+|--- Data/
+|   |--- HoaiMinhDbContext.cs          ← 91 DbSets (tất cả bảng DB)
+|   `--- Entities/                     ← 91 entity classes
+|       |--- tbl_SALOrderMaster.cs
+|       |--- tbl_CSWorkOrderMaster.cs
+|       |--- tbl_LSHead.cs
+|       `--- ... (91 files)
+|--- Common/
+|   |--- ApiResponse.cs                ← Chuẩn response wrapper
+|   `--- PaginatedRequest.cs           ← Phân trang
+`--- CoreModuleExtensions.cs           ← DI registration
 ```
 
 **Vai trò:** Cung cấp entity classes + DbContext cho tất cả modules khác sử dụng.
 
-### 🛒 `Modules.Sale` — Phân hệ Bán Hàng
+### 🛒 `Modules.Sale` -- Phân hệ Bán Hàng
 
 ```
 Modules.Sale/
-├── Features/
-│   ├── Orders/
-│   │   └── OrderEndpoints.cs         ← CRUD đơn hàng + API DTOs
-│   └── OrderDetails/
-│       └── OrderDetailEndpoints.cs   ← Chi tiết đơn + parts/services/promotions
-└── SaleModuleExtensions.cs           ← Đăng ký tất cả endpoints
+|--- Features/
+|   |--- Orders/
+|   |   `--- OrderEndpoints.cs         ← CRUD đơn hàng + API DTOs
+|   `--- OrderDetails/
+|       `--- OrderDetailEndpoints.cs   ← Chi tiết đơn + parts/services/promotions
+`--- SaleModuleExtensions.cs           ← Đăng ký tất cả endpoints
 ```
 
 **API Endpoints:**
@@ -132,14 +132,14 @@ Modules.Sale/
 | GET | `/api/v1/order-details/{code}/services` | Dịch vụ trong chi tiết |
 | GET | `/api/v1/order-details/{code}/promotions` | Khuyến mãi trong chi tiết |
 
-### 🔐 `Modules.Identity` — Xác Thực & User Profiles
+### 🔐 `Modules.Identity` -- Xác Thực & User Profiles
 
 ```
 Modules.Identity/
-├── Features/
-│   └── UserProfile/
-│       └── UserProfileEndpoints.cs   ← /me + profiles CRUD
-└── IdentityModuleExtensions.cs
+|--- Features/
+|   `--- UserProfile/
+|       `--- UserProfileEndpoints.cs   ← /me + profiles CRUD
+`--- IdentityModuleExtensions.cs
 ```
 
 **API Endpoints:**
@@ -160,12 +160,12 @@ Modules.Identity/
 | **API Pattern** | `ApiController` + `IHttpActionResult` | Minimal API |
 | **Data Access** | EDMX Database-First | EF Core Code-First |
 | **Auth** | `ScopeAuthorize` (Lib3P) | JWT Bearer (built-in) |
-| **Request/Response** | `dynamic param` → JSON manual deserialize | Strongly-typed DTOs |
+| **Request/Response** | `dynamic param` -> JSON manual deserialize | Strongly-typed DTOs |
 | **Error Handling** | `ReturnSuccess/ReturnError` | `Results.Ok/BadRequest` + `ApiResponse<T>` |
 | **Dependencies** | Lib3P (custom library) | NuGet packages only |
 | **API Docs** | Không có | Swagger tự động |
 | **Code Organization** | 51 partial controller files | Vertical Slice (1 folder = 1 feature) |
-| **Commented Code** | ~90% commented out | 0% — clean codebase |
+| **Commented Code** | ~90% commented out | 0% -- clean codebase |
 
 ---
 
@@ -193,7 +193,7 @@ app.MapCustomerServiceModuleEndpoints();
 # Chạy dev server
 dotnet run --project src/HoaiMinh.ERP.API
 
-# Hoặc F5 trong Visual Studio → IIS Express
+# Hoặc F5 trong Visual Studio -> IIS Express
 # Swagger UI mở tại: http://localhost:5200/swagger
 ```
 

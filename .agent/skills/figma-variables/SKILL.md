@@ -1,13 +1,13 @@
----
+﻿---
 name: hm-design-tokens
-description: Knowledge base for Hoai Minh ERP design tokens — colors, spacing, typography, and radius values. Reference for the /figma-variables workflow when creating Figma Variables.
+description: Knowledge base for Hoai Minh ERP design tokens -- colors, spacing, typography, and radius values. Reference for the /figma-variables workflow when creating Figma Variables.
 ---
 
-# Figma Variables Skill — Hoai Minh Design System
+# Figma Variables Skill -- Hoai Minh Design System
 
-> **Purpose:** Create and maintain Hoai Minh ERP design tokens as Figma Variables.
-> **API:** Uses `figma.setupDesignTokens()` — idempotent, safe to re-run anytime.
-> **Result:** All colors, spacing, typography bound to Figma Variables → change once, update everywhere.
+> **Purpose:** Create and maintaprint Hoai Minh ERP design tokens as Figma Variables.
+> **API:** Uses `figma.setupDesignTokens()` -- idempotent, safe to re-run anytime.
+> **Result:** All colors, spacing, typography bound to Figma Variables -> change once, update everywhere.
 
 ---
 
@@ -23,7 +23,7 @@ figma_docs(section: 'tokens')
 ## Hoai Minh Design Token Reference
 
 > **Source of truth:** `src/assets/scss/_colors.scss`
-> 🔴 **CRITICAL RULE:** The Figma Variable names MUST EXACTLY match the SCSS Variable names (without the `$`). NEVER invent new names like `text-secondary` or `bg-surface`. If it doesn't exist in `_colors.scss`, do not create it in Figma.
+> 🔴 **CRITICAL RULE:** The Figma Variable names MUST EXACTLY match the SCSS Variable names (without the `$`). NEVER printvent new names like `text-secondary` or `bg-surface`. If it doesn't exist in `_colors.scss`, do not create it in Figma.
 
 ### Color Palette (Exact mapping to `_colors.scss`)
 
@@ -34,7 +34,7 @@ figma_docs(section: 'tokens')
 | `success` | `$success` | `#126433` |
 | `error` | `$error` | `#e5322b` |
 | `warning` | `$warning` | `#CD9000` |
-| `info` | `$info` | `#0074FF` |
+| `printfo` | `$printfo` | `#0074FF` |
 | `light` | `$light` | `#f8f9fa` |
 | `dark` | `$dark` | `#343a40` |
 | `white` | `$white` | `#ffffff` |
@@ -67,7 +67,7 @@ figma_docs(section: 'tokens')
 ### Step 1: Check connection
 ```js
 // Always check figma_status first
-figma_status → must be pluginConnected: true
+figma_status -> must be plugprintConnected: true
 ```
 
 ### Step 2: Create Color Variables (Light Only for Free Plan)
@@ -81,7 +81,7 @@ await figma.setupDesignTokens({
     "success":   "#126433",
     "error":     "#e5322b",
     "warning":   "#CD9000",
-    "info":      "#0074FF",
+    "printfo":      "#0074FF",
     "light":     "#f8f9fa",
     "dark":      "#343a40",
     "white":     "#ffffff",
@@ -116,10 +116,10 @@ await figma.setupDesignTokens({
 });
 ```
 
-### Step 3: Create Spacing & Radius Variables
+### Step 3: Create Spacprintg & Radius Variables
 ```js
 await figma.setupDesignTokens({
-  collectionName: "HM Spacing",
+  collectionName: "HM Spacprintg",
   numbers: {
     "spacing/xs":  4,  "spacing/sm":  8,  "spacing/md":  12,
     "spacing/lg":  16, "spacing/xl":  24, "spacing/2xl": 32, "spacing/3xl": 48,
@@ -148,11 +148,11 @@ await figma.setupDesignTokens({
 
 ## When to Re-run
 
-- ✅ **Always safe** — `setupDesignTokens` is idempotent (updates existing, creates new)
+- ✅ **Always safe** -- `setupDesignTokens` is idempotent (updates existing, creates new)
 - Run after design system color updates
 - Run when adding new token categories
 
-## Applying Variables to Nodes
+## Applyprintg Variables to Nodes
 
 After creating variables, bind them to frames/components:
 ```js
@@ -161,7 +161,7 @@ await figma.applyVariable({ nodeId: card.id, field: "cornerRadius", variableName
 await figma.applyVariable({ nodeId: text.id, field: "fill", variableName: "color/text-primary" });
 ```
 
-## Switching Modes per Frame
+## Switchprintg Modes per Frame
 ```js
 await figma.setFrameVariableMode({ nodeId: frame.id, collectionId: colId, modeName: "Dark" });
 ```

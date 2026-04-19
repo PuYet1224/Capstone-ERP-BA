@@ -1,4 +1,4 @@
-# Context Memory: Receipt
+﻿# Context Memory: Receipt
 > Analyzed: 2026-04-10 | Requirement: REQ_001
 > Module: SAL
 
@@ -14,14 +14,14 @@ Receipts (Phiếu Thu) securely record incoming currency to resolve a linked Sal
 ## 3. State Machine
 | # | From | To | Action | Condition |
 |---|------|-----|--------|----------|
-| T1 | — | New (1) | Save receipt | BR-01~BR-05 pass |
+| T1 | -- | New (1) | Save receipt | BR-01~BR-05 pass |
 | T2 | New (1) | Completed (2) | Confirm payment | Must have customer signature (BR-12) |
 | T3 | New (1) | Cancelled (3) | Cancel | Must enter cancel reason (BR-10) |
 *Invalid transitions*: Completed -> any, Cancelled -> any. (BR-13, BR-14)
 
 ## 4. Database Tables & Relationships
-- **Primary**: `tbl_SALOrderReceipt` — the primary target schema recording collection metadata and status.
-- **Related**: `tbl_SALOrderMaster` — yields the limits constraining receipt sums through `TotalAmount` and `AmountPaid` columns.
+- **Primary**: `tbl_SALOrderReceipt` -- the primary target schema recording collection metadata and status.
+- **Related**: `tbl_SALOrderMaster` -- yields the limits constraining receipt sums through `TotalAmount` and `AmountPaid` columns.
 
 ## 5. Business Rules Applied
 - **BR-01**: Link invariant. Exists solely attached to `tbl_SALOrderMaster`.

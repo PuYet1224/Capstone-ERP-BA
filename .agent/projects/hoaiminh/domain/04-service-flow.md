@@ -1,4 +1,4 @@
-# Service Flow - Maintenance & Repair Process at Honda HEAD Hoài Minh
+﻿# Service Flow - Maintenance & Repair Process at Honda HEAD Hoài Minh
 
 ## Overview
 
@@ -65,8 +65,8 @@ flowchart TD
 **System lookup:**
 ```
 Query tbl_CSVehicle WHERE PlateNo = scanned_plate
-→ Found: Load full vehicle history + owner info
-→ Not Found: Create new CSVehicle record
+-> Found: Load full vehicle history + owner info
+-> Not Found: Create new CSVehicle record
 ```
 
 ### Step 2: Vehicle Registration (New Vehicles)
@@ -78,9 +78,9 @@ If vehicle is not in system (`IsNewCSVehicle = true`):
   - `FrameSeri` (Số khung)
   - `EngineSeri` (Số máy)
   - `PlateNo` (Biển số)
-  - `VehicleColor` → links to `tbl_LSVehicleColor`
+  - `VehicleColor` -> links to `tbl_LSVehicleColor`
   - `CurrentKm`
-- Collect customer info → create/update `tbl_CSLoyalCustomer`
+- Collect customer info -> create/update `tbl_CSLoyalCustomer`
 - Determine maintenance count (bảo dưỡng lần thứ mấy)
 
 ### Step 3: Work Order Creation
@@ -115,15 +115,15 @@ Create `tbl_CSWorkOrderMaster`:
 **Actor:** Service Consultant / KTV
 
 **Tasks** (`tbl_CSWorkOrderTask`):
-- Select from task bank (`tbl_CSTaskBank`) — predefined service tasks
+- Select from task bank (`tbl_CSTaskBank`) -- predefined service tasks
 - Each task has: `TypeOfTask`, `Quantity`, `UnitPrice`
 - `StatusChecked` tracks if task was performed
 
 **Parts** (`tbl_CSWorkOrderPart`):
 - Select parts needed for repair
-- `TypeOfPart` → `tbl_LSTypeOfPart` (part category)
-- `TypeOfPartSpecs` → `tbl_LSTypeOfPartSpecs` (part specification)
-- `PartItem` → `tbl_LSPartItem` (actual inventory item)
+- `TypeOfPart` -> `tbl_LSTypeOfPart` (part category)
+- `TypeOfPartSpecs` -> `tbl_LSTypeOfPartSpecs` (part specification)
+- `PartItem` -> `tbl_LSPartItem` (actual inventory item)
 - `Quantity`, `UnitPrice`
 - `StatusChecked` tracks if part was used
 - `OrderTask` links part to its parent task
@@ -159,7 +159,7 @@ Create `tbl_CSWorkOrderMaster`:
 
 **Actor:** Cashier / authorized staff
 
-1. Work order status → "Completed" (Hoàn tất)
+1. Work order status -> "Completed" (Hoàn tất)
 2. Print receipt for payment
 3. Payment collection (same flow as Sales receipts/invoices)
 4. Vehicle returned to customer
@@ -175,7 +175,7 @@ Create `tbl_CSWorkOrderMaster`:
 - Automated SMS/Zalo reminders via:
   - `tbl_CSMSAutoConfig` (auto-trigger configuration)
   - `tbl_CSMSTemplate` (message templates for Zalo/SMS)
-  - `tbl_CSMSSendMaster` → `tbl_CSMSSendDetails` (batch send tracking)
+  - `tbl_CSMSSendMaster` -> `tbl_CSMSSendDetails` (batch send tracking)
   - `tbl_CSMSMapping` (customer-to-message mapping)
 
 ## Work Order Status Flow (Progress values in `tbl_LSStatus`, TypeData=13)

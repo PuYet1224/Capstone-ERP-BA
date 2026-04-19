@@ -1,4 +1,4 @@
-# Sales Flow - Vehicle Sales Process at Honda HEAD Hoài Minh
+﻿# Sales Flow - Vehicle Sales Process at Honda HEAD Hoài Minh
 
 ## Overview
 
@@ -90,15 +90,15 @@ flowchart TD
 
 For each vehicle in the cart, customer can choose:
 
-1. **Parts (Phụ tùng)** → `tbl_SALOrderDetailPartItem`
+1. **Parts (Phụ tùng)** -> `tbl_SALOrderDetailPartItem`
    - Accessories, add-on parts (e.g., windshield, floor mat, phone holder)
    - Quantity, UnitPrice tracked per item
 
-2. **Services (Dịch vụ)** → `tbl_SALOrderDetailService`
+2. **Services (Dịch vụ)** -> `tbl_SALOrderDetailService`
    - Additional services (e.g., free first maintenance, extended warranty)
    - Linked to `tbl_CSServiceMaster` catalog
 
-3. **Promotions (Khuyến mãi)** → `tbl_SALOrderDetailPromotion`
+3. **Promotions (Khuyến mãi)** -> `tbl_SALOrderDetailPromotion`
    - Applied from `tbl_POLPromotionMaster` (approved policies only)
    - `DiscountPercentage` or `DiscountAmount`
    - `PromotionType` differentiates discount vs gift
@@ -107,15 +107,15 @@ For each vehicle in the cart, customer can choose:
 
 **Trigger:** Customer negotiates (e.g., "This display bike has scratches, can I get VND 2M off?")
 
-→ See `08-approval-flows.md` for the complete Approval Flow.
+-> See `08-approval-flows.md` for the complete Approval Flow.
 
 **Summary:**
-1. Sales Staff → asks Store Manager (CHT)
-2. CHT → creates Policy Voucher (`tbl_POLPromotionMaster`, Status=Draft)
-3. CHT → sends to Sales Director (TPKD) for review
-4. TPKD → may adjust → forwards to Director (GĐ)
-5. GĐ → final approval or rejection
-6. If approved → Sale applies voucher to order
+1. Sales Staff -> asks Store Manager (CHT)
+2. CHT -> creates Policy Voucher (`tbl_POLPromotionMaster`, Status=Draft)
+3. CHT -> sends to Sales Director (TPKD) for review
+4. TPKD -> may adjust -> forwards to Director (GĐ)
+5. GĐ -> final approval or rejection
+6. If approved -> Sale applies voucher to order
 
 ### Step 6: Customer Documentation
 
@@ -138,8 +138,8 @@ Three payment methods (`tbl_SALOrderMaster.PaymentMethod`):
 | Method | Flow | Receipt Timing |
 |--------|------|----------------|
 | **Installment (Trả góp)** | Bank/3rd-party pays HEAD full amount | Invoice issued immediately |
-| **Full Payment (Cash/Transfer)** | Receipt → then Invoice | Receipt first, Invoice after receipt completes |
-| **Deposit (Đặt cọc)** | Partial receipt → rest later | Receipt per payment, Invoice when fully paid |
+| **Full Payment (Cash/Transfer)** | Receipt -> then Invoice | Receipt first, Invoice after receipt completes |
+| **Deposit (Đặt cọc)** | Partial receipt -> rest later | Receipt per payment, Invoice when fully paid |
 
 - **Receipt** (`tbl_SALOrderReceipt`):
   - `Cashier` = staff collecting payment
@@ -176,7 +176,7 @@ When no stock available anywhere:
 1. Customer signs a pre-order contract
 2. HEAD orders from Honda factory/distributor (`tbl_PURDOMaster`)
 3. Customer pays deposit
-4. When vehicle arrives → standard delivery flow resumes
+4. When vehicle arrives -> standard delivery flow resumes
 5. Customer notified via phone/SMS to pick up
 
 ### Flow C: Revenue Recording

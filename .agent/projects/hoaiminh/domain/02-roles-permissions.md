@@ -1,22 +1,22 @@
-# Roles & Permissions - Honda HEAD Hoài Minh
+﻿# Roles & Permissions - Honda HEAD Hoài Minh
 
 ## Organization Hierarchy
 
 ```
 Director (Giám đốc - GĐ)
-├── Sales Director (Trưởng phòng KD - TPKD)
-├── Store Manager HEAD 1 (Cửa hàng trưởng - CHT)
-│   ├── Sales Staff (NV Sale)
-│   ├── Cashier / Accountant (Thu ngân / Kế toán)
-│   ├── Reception Staff (NV Tiếp nhận)
-│   ├── Technician (KTV)
-│   ├── Parts Warehouse Manager (QL Kho PT)
-│   ├── Vehicle Warehouse Manager (QL Kho XM)
-│   ├── Customer Care Staff (NV CSKH)
-│   └── Marketing Staff (NV Marketing)
-├── Store Manager HEAD 2 (CHT)
-│   └── ... (same structure)
-└── ... (up to 10+ HEADs)
+|--- Sales Director (Trưởng phòng KD - TPKD)
+|--- Store Manager HEAD 1 (Cửa hàng trưởng - CHT)
+|   |--- Sales Staff (NV Sale)
+|   |--- Cashier / Accountant (Thu ngân / Kế toán)
+|   |--- Reception Staff (NV Tiếp nhận)
+|   |--- Technician (KTV)
+|   |--- Parts Warehouse Manager (QL Kho PT)
+|   |--- Vehicle Warehouse Manager (QL Kho XM)
+|   |--- Customer Care Staff (NV CSKH)
+|   `--- Marketing Staff (NV Marketing)
+|--- Store Manager HEAD 2 (CHT)
+|   `--- ... (same structure)
+`--- ... (up to 10+ HEADs)
 ```
 
 ## HEAD (Branch) Registry
@@ -84,21 +84,21 @@ Director (Giám đốc - GĐ)
 ## Permission Mechanism In Database
 
 ```
-tbl_SYSRoles           → Define roles
-tbl_SYSStaffInRoles    → Assign staff to roles (per HEAD)
-tbl_SYSPermissions     → Action-level access (per HEAD + Role)
-tbl_SYSDataPermissions → Data-level access (per HEAD + Role)
-tbl_SYSFunction        → Menu functions
-tbl_SYSAction          → Actions within functions
+tbl_SYSRoles           -> Define roles
+tbl_SYSStaffInRoles    -> Assign staff to roles (per HEAD)
+tbl_SYSPermissions     -> Action-level access (per HEAD + Role)
+tbl_SYSDataPermissions -> Data-level access (per HEAD + Role)
+tbl_SYSFunction        -> Menu functions
+tbl_SYSAction          -> Actions within functions
 ```
 
-> **Critical Rule:** A staff member can belong to multiple HEADs with different roles. `tbl_SYSStaffInRoles.Head` determines the staff's role at a specific HEAD. Example: An employee could be Sales at HEAD 1 but Cashier at HEAD 2 — this is valid.
+> **Critical Rule:** A staff member can belong to multiple HEADs with different roles. `tbl_SYSStaffInRoles.Head` determines the staff's role at a specific HEAD. Example: An employee could be Sales at HEAD 1 but Cashier at HEAD 2 -- this is valid.
 
 ## Special: Flexible Roles
 
 In practice at Hoài Minh, role boundaries are NOT rigid:
-- **Sales Staff may collect payment** if granted permission → Reduces handoff steps
-- **KTV may create work orders** when not busy → Reduces wait time
+- **Sales Staff may collect payment** if granted permission -> Reduces handoff steps
+- **KTV may create work orders** when not busy -> Reduces wait time
 - **CHT can do everything** within their managed HEAD scope
 
-→ **When coding:** Always check permissions via `tbl_SYSPermissions`. NEVER hardcode role names.
+-> **When coding:** Always check permissions via `tbl_SYSPermissions`. NEVER hardcode role names.

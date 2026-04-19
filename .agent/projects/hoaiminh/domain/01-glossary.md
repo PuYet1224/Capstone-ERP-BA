@@ -1,4 +1,4 @@
-# Glossary - Honda HEAD Hoài Minh Internal Terminology
+﻿# Glossary - Honda HEAD Hoài Minh Internal Terminology
 
 ## Organization Terms
 
@@ -37,7 +37,7 @@
 | Hóa đơn (Invoice) | `tbl_SALOrderInvoice` - Legal document when transaction completes |
 | Đặt cọc (Deposit) | Partial payment, remainder collected on delivery |
 | Trả góp (Installment) | Payment via 3rd-party (bank), HEAD receives full amount from financier |
-| Điều chuyển xe (Vehicle Transfer) | Transfer vehicle from HEAD A → HEAD B when current HEAD is out of stock |
+| Điều chuyển xe (Vehicle Transfer) | Transfer vehicle from HEAD A -> HEAD B when current HEAD is out of stock |
 | Đặt xe (Vehicle Order/Reservation) | Order from Honda factory when out of stock; customer signs contract & waits |
 
 ## Service Terms (Maintenance / Repair)

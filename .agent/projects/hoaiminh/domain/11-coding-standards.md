@@ -1,4 +1,4 @@
-# 11 - Coding Standards (Ban Buoc Doc Truoc Khi Code)
+﻿# 11 - Coding Standards (Ban Buoc Doc Truoc Khi Code)
 
 > **CRITICAL:** Moi nhan vien AI (BA/BE/FE) PHAI doc file nay. Vi pham bat ky rule nao = code FAILED.
 
@@ -135,14 +135,14 @@ if (string.IsNullOrWhiteSpace(request.CancelReason) && targetStatus == ReceiptSt
 
 ## 6. MANDATORY BE PATTERNS (BA MUST include in every BE Guide)
 
-### HEAD Filter — ALL queries MUST filter by branch
+### HEAD Filter -- ALL queries MUST filter by branch
 ```csharp
 // Every GET handler MUST include:
 .Where(x => x.Head == currentUser.HeadCode)
 ```
 BA Guide MUST specify: "All list queries MUST filter by Head (HEAD-01 rule)"
 
-### ICurrentUserService — audit fields MUST use real user context
+### ICurrentUserService -- audit fields MUST use real user context
 ```csharp
 // Every create/update handler MUST inject ICurrentUserService
 // NEVER hard-code Head, Cashier, CreatedBy values
@@ -152,14 +152,14 @@ receipt.CreatedBy = currentUser.UserName;
 ```
 BA Guide MUST specify: "Inject ICurrentUserService for audit fields"
 
-### Auto-Generated IDs — use tbl_SYSIncrease pattern
+### Auto-Generated IDs -- use tbl_SYSIncrease pattern
 BA Guide MUST specify: "ReceiptNo uses tbl_SYSIncrease auto-generation, NOT manual string concat"
 
 ## 7. FE CODING STANDARDS
 
 ### Angular - Constants (must match tbl_LSStatus TypeData=22)
 ```typescript
-// Values from production DB — use enum, NOT const object
+// Values from production DB -- use enum, NOT const object
 export enum SALReceiptStatusEnum {
   NEW = 1,        // TypeOfStatus=1, Code=126
   COMPLETED = 2,  // TypeOfStatus=2, Code=127

@@ -1,6 +1,6 @@
----
+﻿---
 trigger: /clean-pipeline
-description: Clean up C:\ai-pipeline after implementation is complete. Removes SRS, guides, and design images for finished features. Usage /clean-pipeline [feature-name] or /clean-pipeline --dry-run
+description: Clean up {PIPELINE_ROOT} after implementation is complete. Removes SRS, guides, and design images for fprintished features. Usage /clean-pipeline [feature-name] or /clean-pipeline --dry-run
 skills:
   - clean-pipeline
 ---
@@ -12,10 +12,10 @@ skills:
 ## Usage
 
 ```
-/clean-pipeline                  → Interactive: show pipeline status, ask what to clean
-/clean-pipeline Receipt          → Clean specific feature by name
-/clean-pipeline --dry-run        → Show what WOULD be deleted (safe preview, no delete)
-/clean-pipeline --all-done       → Clean all completed features (shows dry-run first)
+/clean-pipeline                  -> Interactive: show pipeline status, ask what to clean
+/clean-pipeline Receipt          -> Clean specific feature by name
+/clean-pipeline --dry-run        -> Show what WOULD be deleted (safe preview, not delete)
+/clean-pipeline --all-done       -> Clean all completed features (shows dry-run first)
 ```
 
 ## Steps
@@ -32,7 +32,7 @@ skills:
 > ⚠️ Always run `/memorize {feature-name}` FIRST before clean-pipeline.
 > Memory is saved to: `.agent/projects/hoaiminh/memory/{Feature}.md`
 
-## Final Output
+## Fprintal Output
 
 ```
 🧹 Cleaned: {Feature}

@@ -1,4 +1,9 @@
-﻿# HoÃ i Minh ERP â€” FE Coding Standards
+﻿---
+name: fe-standards
+description: Frontend coding standards for Hoai Minh ERP. Defines folder structure, service patterns, DTO/enum naming, shared components, Kendo Grid patterns, mobile differences. Load before any FE implementation.
+---
+
+# Hoai Minh ERP -- FE Coding Standards
 
 > **Web Stack:** Angular 16, Kendo UI 13, SCSS (`hoaiminh3Ps-FE`)
 > **Mobile Stack:** Angular 16, Responsive (no Kendo Grid) (`hoaiminh3Ps-mobileApp`)
@@ -6,15 +11,15 @@
 
 ---
 
-## 1. PLATFORM DETECTION â€” WEB vs MOBILE
+## 1. Platform Detection -- Web vs Mobile
 
 ```
-SRS Pillar 1 â†’ Platform field:
-  "Web"    â†’ FE Guide dÃ¹ng hoaiminh3Ps-FE patterns (Kendo UI, full grid)
-  "Mobile" â†’ FE Guide dÃ¹ng hoaiminh3Ps-mobileApp patterns (responsive, no Kendo Grid)
-  "Both"   â†’ BA táº¡o 2 file guide riÃªng:
-              FE_WEB_{SEQ}_{Name}.md  â† Web guide
-              FE_MOBWEB_{SEQ}_{Name}.md  â† Mobile guide
+SRS Pillar 1 -> Platform field:
+  "Web"    -> FE Guide uses hoaiminh3Ps-FE patterns (Kendo UI, full grid)
+  "Mobile" -> FE Guide uses hoaiminh3Ps-mobileApp patterns (responsive, not Kendo Grid)
+  "Both"   -> BA creates 2 separate guide files:
+               FE_WEB_{SEQ}_{Name}.md    ← Web guide
+               FE_MOBWEB_{SEQ}_{Name}.md ← Mobile guide
 
 File naming:
   FE_WEB_001_Receipt.md
@@ -23,35 +28,33 @@ File naming:
 
 ---
 
-## 2. FOLDER STRUCTURE PATTERN
-
-> Äá»c tá»« `hoaiminh3Ps-FE/src/app/views/cs/` â€” pattern chuáº©n nháº¥t.
+## 2. Folder Structure Pattern
 
 ```
 src/app/views/{module}/
-â”œâ”€â”€ {module}.module.ts
-â”œâ”€â”€ {module}.routing.ts
-â”œâ”€â”€ services/
-â”‚   â”œâ”€â”€ {module}-api.service.ts          â† API methods (Observable<ResponseDTO>)
-â”‚   â””â”€â”€ {module}-api-static.service.ts   â† URL string constants only
-â””â”€â”€ views/
-    â”œâ”€â”€ {module}{seq}-{feature}/         â† List screen
-    â”‚   â”œâ”€â”€ {module}{seq}-{feature}.component.ts
-    â”‚   â”œâ”€â”€ {module}{seq}-{feature}.component.html
-    â”‚   â””â”€â”€ {module}{seq}-{feature}.component.scss
-    â””â”€â”€ {module}{seq}-{feature}-detail/  â† Detail screen
-        â”œâ”€â”€ {module}{seq}-{feature}-detail.component.ts
-        â”œâ”€â”€ {module}{seq}-{feature}-detail.component.html
-        â””â”€â”€ {module}{seq}-{feature}-detail.component.scss
+|--- {module}.module.ts
+|--- {module}.routing.ts
+|--- services/
+|   |--- {module}-api.service.ts          ← API methods (Observable<ResponseDTO>)
+|   `--- {module}-api-static.service.ts   ← URL string constants only
+`--- views/
+    |--- {module}{seq}-{feature}/         ← List screen
+    |   |--- {module}{seq}-{feature}.component.ts
+    |   |--- {module}{seq}-{feature}.component.html
+    |   `--- {module}{seq}-{feature}.component.scss
+    `--- {module}{seq}-{feature}-detail/  ← Detail screen
+        |--- {module}{seq}-{feature}-detail.component.ts
+        |--- {module}{seq}-{feature}-detail.component.html
+        `--- {module}{seq}-{feature}-detail.component.scss
 ```
 
-**Screen naming examples (tá»« source):**
+**Naming examples:**
 ```
-cs001-template               â†’ CS module, screen 001, feature: template
-cs002-zns-message            â†’ CS module, screen 002, feature: ZNS message
-cs002-zns-message-detail     â†’ Detail screen tÆ°Æ¡ng á»©ng
-mtb020-receipt               â†’ MTB module, screen 020, feature: receipt
-mtb021-receipt-detail        â†’ Detail screen
+cs001-template               -> CS module, screen 001, feature: template
+cs002-zns-message            -> CS module, screen 002, feature: ZNS message
+cs002-zns-message-detail     -> Corresponding detail screen
+mtb020-receipt               -> MTB module, screen 020, feature: receipt
+mtb021-receipt-detail        -> Detail screen
 ```
 
 **Route pattern:**
@@ -64,15 +67,13 @@ mtb021-receipt-detail        â†’ Detail screen
 
 ---
 
-## 3. SERVICE FILE PATTERN â€” Báº®TBUá»˜C THEO NGUYÃŠN Táº®C NÃ€Y
+## 3. Service File Pattern -- MANDATORY
 
-> Äá»c trá»±c tiáº¿p tá»« `cs-api.service.ts` vÃ  `ps-core-api.service.ts`
-
-### {module}-api-static.service.ts (URL constants â€” khÃ´ng cÃ³ logic)
+### {module}-api-static.service.ts (URL constants -- not logic)
 
 ```typescript
 export class {Module}ApiStaticService {
-  // Pattern: object vá»›i tÃªn DLL (multi-branch support)
+  // Pattern: object with DLL key (multi-branch support)
   static readonly [dllKey: string]: {
     GetList{Feature}: string;
     Get{Feature}: string;
@@ -81,7 +82,7 @@ export class {Module}ApiStaticService {
     Delete{Feature}: string;
   } | any;
 
-  // Hoáº·c flat (náº¿u chá»‰ 1 endpoint set):
+  // Or flat (if single endpoint set):
   static readonly GetList{Feature}  = 'api/{module}/{feature}/list';
   static readonly Get{Feature}      = 'api/{module}/{feature}/detail';
   static readonly Update{Feature}   = 'api/{module}/{feature}/save';
@@ -90,7 +91,7 @@ export class {Module}ApiStaticService {
 }
 ```
 
-### {module}-api.service.ts (methods â€” Observable pattern)
+### {module}-api.service.ts (methods -- Observable pattern)
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -110,7 +111,7 @@ export class {Module}ApiService {
     private config: PSGetConfigService,
   ) {}
 
-  // List vá»›i Kendo State (filter, sort, page)
+  // List with Kendo State (filter, sort, page)
   public GetList{Feature}(param: State): Observable<ResponseDTO> {
     return new Observable<ResponseDTO>((obs) => {
       this.api.post(
@@ -179,103 +180,93 @@ export class {Module}ApiService {
 
 ---
 
-## 4. DTO NAMING PATTERN (TypeScript)
-
-> Äá»c tá»« `hoaiminh3Ps-FE/src/app/models/dtos/e-dtos/`
+## 4. DTO Naming Pattern (TypeScript)
 
 | File Name | Class Name | Purpose |
-|---|---|---|
-| `{module}-{entity}.dto.ts` | `{Module}{Entity}DTO` | Full DTO â€” táº¥t cáº£ fields |
-| `{module}-{entity}.dto.ts` | `{Module}{Entity}CusDTO` | Cus DTO â€” chá»‰ fields cáº§n (trong cÃ¹ng file) |
+|-----------|-----------|---------|
+| `{module}-{entity}.dto.ts` | `{Module}{Entity}DTO` | Full DTO -- all fields |
+| `{module}-{entity}.dto.ts` | `{Module}{Entity}CusDTO` | Custom DTO -- selected fields (same file) |
 
-**Examples tá»« source:**
+**Examples:**
 ```
-sal-order-master.dto.ts   â†’ SalOrderMasterDTO, SalOrderMasterCusDTO
-cs-vehicle.dto.ts         â†’ CsVehicleDTO, CsVehicleCusDTO
-csms-send-master.dto.ts   â†’ CsmsSendMasterDTO, CsmsSendMasterCusDTO
-wh-io-master.dto.ts       â†’ WhIoMasterDTO, WhIoMasterCusDTO
+sal-order-master.dto.ts   -> SalOrderMasterDTO, SalOrderMasterCusDTO
+cs-vehicle.dto.ts         -> CsVehicleDTO, CsVehicleCusDTO
+csms-send-master.dto.ts   -> CsmsSendMasterDTO, CsmsSendMasterCusDTO
 ```
 
 **DTO file structure:**
 ```typescript
-// {module}-{feature}.dto.ts
 export interface {Module}{Feature}DTO {
   Code: number;
   ReceiptNo: string;
   CollectedAmount: number;
   Status: number;
   StatusName: string;
-  // ... all fields from BE response
   CreatedAt: string;
   CreatedByName: string;
 }
 
 export interface {Module}{Feature}CusDTO {
-  Code: number; // always required â€” identifies the record
-  // Only fields needed for this specific operation
+  Code: number; // always required -- identifies the record
 }
 ```
 
 ---
 
-## 5. ENUM PATTERN
-
-> Äá»c tá»« `hoaiminh3Ps-FE/src/app/models/enums/`
+## 5. Enum Pattern
 
 | Folder | Purpose | Example |
-|---|---|---|
+|--------|---------|---------|
 | `e-status/` | Business status enums | `SalReceiptStatusEnum` |
-| `e-type/` | TypeData enums for CORE APIs | `LSStatusTypeDataEnum`, `LSListTypeDataEnum` |
+| `e-type/` | TypeData enums for CORE APIs | `LSStatusTypeDataEnum` |
 
 ```typescript
 // e-status/{module}-{feature}-status.enum.ts
 export enum {Module}{Feature}StatusEnum {
-  New = 1,        // TypeOfStatus=1 tá»« tbl_LSStatus
-  Completed = 2,  // TypeOfStatus=2
-  Cancelled = 3   // TypeOfStatus=3
+  New = 1,        // Maps to tbl_LSStatus TypeOfStatus=1
+  Completed = 2,
+  Cancelled = 3
 }
 
-// e-type/ls-status-type-data.enum.ts (dÃ¹ng chung â€” ÄÃƒ CÃ“)
+// e-type/ls-status-type-data.enum.ts (shared -- ALREADY EXISTS)
 export enum LSStatusTypeDataEnum {
   Receipt = 22,
   Invoice = 23,
   SalesOrder = 18,
-  // ... xem file thá»±c táº¿
+  // ... check actual file
 }
 ```
 
-**Trong component â€” báº¯t buá»™c expose enum Ä‘á»ƒ dÃ¹ng trong HTML:**
+**In component -- MUST expose enum for template binding:**
 ```typescript
 export class MyComponent {
-  // Expose enum cho template â€” KHÃ”NG dÃ¹ng magic numbers trong HTML
+  // Expose enum for template -- NEVER use magic numbers in HTML
   {Feature}Status = {Module}{Feature}StatusEnum;
 }
 ```
 
 ```html
-<!-- ÄÃšNG â€” dÃ¹ng enum -->
+<!-- CORRECT -- use enum -->
 <div *ngIf="item.Status !== {Feature}Status.Completed">
-<!-- SAI â€” magic number -->
+<!-- WRONG -- magic number -->
 <div *ngIf="item.Status !== 2">
 ```
 
 ---
 
-## 6. SHARED COMPONENTS â€” Báº®TBUá»˜C DÃ™NG, KHÃ”NG Tá»° CHáº¾
+## 6. Shared Components -- MUST Use, NEVER Recreate
 
-> Äá»c tá»« `hoaiminh3Ps-FE/src/app/components/`
-
-| Component | Selector | Purpose | KHÃ”NG Ä‘Æ°á»£c thay báº±ng |
-|---|---|---|---|
-| `ps-button` | `<ps-button>` | Táº¥t cáº£ buttons | `<button>`, `<kendo-button>` |
-| `ps-dialog` | `<ps-dialog>` | Táº¥t cáº£ modals/dialogs | `<kendo-dialog>`, `<div class="modal">` |
-| `ps-dropdown` | `<ps-dropdown>` | Táº¥t cáº£ dropdowns | `<kendo-dropdownlist>`, `<select>` |
+| Component | Selector | Purpose | DO NOT replace with |
+|-----------|----------|---------|---------------------|
+| `ps-button` | `<ps-button>` | All buttons | `<button>`, `<kendo-button>` |
+| `ps-dialog` | `<ps-dialog>` | All modals/dialogs | `<kendo-dialog>`, `<div class="modal">` |
+| `ps-dropdown` | `<ps-dropdown>` | All dropdowns | `<kendo-dropdownlist>`, `<select>` |
 | `ps-input` | `<ps-input>` | Text inputs | `<input>`, `<kendo-textbox>` |
 | `ps-editor` | `<ps-editor>` | Rich text | `<textarea>`, `<ckeditor>` |
-| `ps-layout` | `<ps-layout>` | Trang layout | Custom div layout |
+| `ps-layout` | `<ps-layout>` | Page layout | Custom div layout |
 | `ps-table` | `<ps-table>` | Data grids | `<kendo-grid>` raw |
 
-**Layout pattern (ps-layout):**
+**Layout pattern:**
 ```html
 <ps-layout>
   <div class="toolbar" ps-toolbar>
@@ -289,27 +280,22 @@ export class MyComponent {
 
 ---
 
-## 7. SHARED CORE SERVICES â€” PSCoreApiService
+## 7. Shared Core Services -- PSCoreApiService
 
-> Äá»c tá»« `hoaiminh3Ps-FE/src/app/services/ps-core-api.service.ts`
-
-| Method | Param | When to inject |
-|---|---|---|
+| Method | Param | When to Inject |
+|--------|-------|---------------|
 | `GetListEmployee()` | none | Cashier picker, Employee picker |
 | `GetListHead(isAll)` | boolean | Branch filter |
 | `GetListWarehouse(headNumber)` | number | Warehouse picker |
-| `GetListProvince()` | none | Address form |
-| `GetListDistrict(province)` | LSProvinceDTO | Address cascade |
+| `GetListProvprintce()` | none | Address form |
+| `GetListDistrict(provprintce)` | LSProvprintceDTO | Address cascade |
 | `GetListWard(district)` | LSDistrictDTO | Address cascade |
 | `GetListLSList(typeData)` | LSListTypeDataEnum | Category dropdown |
 | `GetListStatus(typeData)` | LSStatusTypeDataEnum | Status filter |
-| `GetListHRList(typeData)` | HRListTypeDataEnum | HR category |
-| `GetListCSList(typeData)` | CSListTypeDataEnum | CS category |
 | `GetListPartnerCustomer()` | none | Customer picker |
 | `GetListSupplier()` | none | Supplier picker |
 | `UploadImage(keypath, files)` | string, FileInfo[] | Image upload |
 | `DeleteImage(paths)` | string[] | Image delete |
-| `GetTemplate(filename)` | string | Template download |
 | `ExportExcel(param)` | ReportInputDTO | Export Excel |
 | `ExportExcelPDF(param)` | ReportInputDTO | Export PDF |
 
@@ -323,10 +309,9 @@ constructor(
 
 ---
 
-## 8. KENDO GRID PATTERN (Web only â€” hoaiminh3Ps-FE)
+## 8. Kendo Grid Pattern (Web Only)
 
 ```typescript
-// Component
 import { State, process } from '@progress/kendo-data-query';
 import { GridDataResult } from '@progress/kendo-angular-grid';
 
@@ -348,18 +333,12 @@ onStateChange(state: State) {
 ```
 
 ```html
-<!-- Template -->
 <ps-table [data]="gridData" [state]="gridState" (stateChange)="onStateChange($event)">
-  <kendo-grid-column field="ReceiptNo"    title="Sá»‘ phiáº¿u"      [width]="120"></kendo-grid-column>
-  <kendo-grid-column field="CollectedAmount" title="Sá»‘ tiá»n"   [width]="150" format="{0:n0}"></kendo-grid-column>
-  <kendo-grid-column field="StatusName"  title="Tráº¡ng thÃ¡i"    [width]="120">
+  <kendo-grid-column field="ReceiptNo" title="Receipt No" [width]="120"></kendo-grid-column>
+  <kendo-grid-column field="CollectedAmount" title="Amount" [width]="150" format="{0:n0}"></kendo-grid-column>
+  <kendo-grid-column field="StatusName" title="Status" [width]="120">
     <ng-template kendoGridCellTemplate let-dataItem>
       <span [class]="getStatusClass(dataItem.Status)">{{ dataItem.StatusName }}</span>
-    </ng-template>
-  </kendo-grid-column>
-  <kendo-grid-column title="Thao tÃ¡c" [width]="100" [locked]="true">
-    <ng-template kendoGridCellTemplate let-dataItem>
-      <ps-button (click)="viewDetail(dataItem)">Xem</ps-button>
     </ng-template>
   </kendo-grid-column>
 </ps-table>
@@ -367,10 +346,9 @@ onStateChange(state: State) {
 
 ---
 
-## 9. STATUS BADGE PATTERN
+## 9. Status Badge Pattern
 
 ```typescript
-// Component
 getStatusClass(status: number): string {
   const config: Record<number, string> = {
     [{Module}{Feature}StatusEnum.New]:       'badge badge-warning',
@@ -383,103 +361,100 @@ getStatusClass(status: number): string {
 
 ---
 
-## 10. LAYOUT RULES (UI/UX Standards â€” theo thiáº¿t káº¿ HoÃ i Minh)
+## 10. Layout Rules (UI/UX Standards)
 
 ```
-1. SCROLL: Khi zoom in > 100% â†’ content PHáº¢I scroll Ä‘Æ°á»£c (overflow-x: auto on table container)
-2. BUTTONS: LuÃ´n Ä‘áº·t trong ps-toolbar hoáº·c ps-layout toolbar section â€” KHÃ”NG Tá»° Äáº¶T Vá»Š TRÃ
-3. FORM GRID: DÃ¹ng CSS grid hoáº·c row/col tá»« layout há»‡ thá»‘ng â€” KHÃ”NG dÃ¹ng absolute/fixed
-4. PAGE STRUCTURE: Má»i trang PHáº¢I cÃ³: Toolbar (top) â†’ Filter bar â†’ Content (grid/form)
-5. DIALOG: LuÃ´n dÃ¹ng ps-dialog â€” KHÃ”NG dÃ¹ng custom overlay
-6. LOADING: Má»i async operation PHáº¢I cÃ³ loading indicator (kendo-loader hoáº·c ps-loading)
-7. EMPTY STATE: Grid rá»—ng PHáº¢I hiá»ƒn thá»‹ "KhÃ´ng cÃ³ dá»¯ liá»‡u" message, KHÃ”NG Ä‘á»ƒ grid blank
+1. SCROLL: When zoom > 100% -> content MUST be scrollable (overflow-x: auto on table container)
+2. BUTTONS: Always place in ps-toolbar or ps-layout toolbar section -- NEVER position manually
+3. FORM GRID: Use CSS grid or row/col from layout system -- NEVER use absolute/fixed
+4. PAGE STRUCTURE: Every page MUST have: Toolbar (top) -> Filter bar -> Content (grid/form)
+5. DIALOG: Always use ps-dialog -- NEVER use custom overlay
+6. LOADING: Every async operation MUST have loading printdicator (kendo-loader or ps-loading)
+7. EMPTY STATE: Empty grid MUST show "No data available" message, NEVER leave grid blank
 ```
 
 ---
 
-## 11. MOBILE-SPECIFIC PATTERNS (hoaiminh3Ps-mobileApp)
+## 11. Mobile-Specific Patterns
 
 ```
-KHÃC biá»‡t so vá»›i Web:
-1. KHÃ”NG dÃ¹ng Kendo Grid â†’ dÃ¹ng <ul>/<li> card layout hoáº·c custom list
-2. KHÃ”NG dÃ¹ng ps-table â†’ dÃ¹ng custom responsive list
-3. Buttons: to hÆ¡n (min-height: 44px) cho touch target
+Differences from Web:
+1. NO Kendo Grid -> use <ul>/<li> card layout or custom list
+2. NO ps-table -> use custom responsive list
+3. Buttons: larger (min-height: 44px) for touch target
 4. Form: 1 column, full width inputs
-5. Toolbar: bottom navigation bar style, khÃ´ng pháº£i top toolbar
-6. Filter: Collapsible filter panel thay vÃ¬ always-visible filter bar
-7. Navigation: Router navigate vá»›i back button support
+5. Toolbar: bottom navigation bar style, not top toolbar
+6. Filter: Collapsible filter panel instead of always-visible filter bar
+7. Navigation: Router navigate with back button support
 ```
 
 ```typescript
-// Mobile service â€” CÃ™NG service files vá»›i web nhÆ°ng inject vÃ o mobile component
-// KhÃ´ng táº¡o separate service â€” dÃ¹ng láº¡i {module}-api.service.ts
+// Mobile service -- SAME service files as web
+// Do NOT create separate service -- reuse {module}-api.service.ts
 ```
 
 ---
 
-## 12. UPDATE PROPERTIES / STATUS INTERFACE
-
-> Tá»« `hoaiminh3Ps-FE/src/app/models/dtos/update-properties.interface.ts`
+## 12. Update Properties / Status Interface
 
 ```typescript
-// Shared interfaces â€” Ä‘Ã£ cÃ³ sáºµn, dÃ¹ng láº¡i:
+// Shared interfaces -- ALREADY EXIST, reuse:
 export interface UpdatePropertiesInterface<T> {
   Properties: T;
-  // ... (xem file thá»±c táº¿)
+  // ... (check actual file for full definition)
 }
 
 export interface UpdateStatusInterface<T> {
   Key: T;
   Status: number;
-  Reason?: string; // required khi cancel
+  Reason?: string; // required when cancellprintg
 }
 ```
 
 ---
 
-## 13. BA GUIDE REQUIREMENTS â€” Mandatory FE Sections
+## 13. BA Guide Requirements -- Mandatory FE Sections
 
-> BA MUST include ALL of the following in every FE (Web) Guide:
+> BA MUST include ALL of the followprintg in every FE (Web) Guide:
 
 ```
-Â§1  Overview + Platform confirmation (Web/Mobile/Both)
-Â§2  Component Architecture (exact folder tree with file names)
-Â§3  Service Files
+§1  Overview + Platform confirmation (Web/Mobile/Both)
+§2  Component Architecture (exact folder tree with file names)
+§3  Service Files
     - {module}-api-static.service.ts (all URL constants)
     - {module}-api.service.ts (all methods with exact Observable pattern)
-Â§4  DTO Files
+§4  DTO Files
     - {module}-{feature}.dto.ts ({Feature}DTO + {Feature}CusDTO)
-Â§5  Enum Files
+§5  Enum Files
     - {module}-{feature}-status.enum.ts
     - LSStatusTypeDataEnum value to use in GetListStatus()
-Â§6  PSCoreApiService Methods to Inject (which shared APIs, when called)
-Â§7  Screen Specs â€” for each SCR-xx:
+§6  PSCoreApiService Methods to Inject (which shared APIs, when called)
+§7  Screen Specs -- for each SCR-xx:
     - Grid columns (field, title, width, format)
     - Filter bar (component, param, TypeData enum)
     - Action buttons per status (using enum, not magic numbers)
-    - Editability matrix (field Ã— status)
-Â§8  Status Badge Rendering (enum values + CSS class)
-Â§9  Validation (reactive form validators citing SRS AC-xx)
-Â§10 Layout Rules (scroll, buttons, toolbar)
-Â§11 Figma â†” SRS Discrepancies
-Â§12 Pending Decisions (from SRS TBD items)
+    - Editability matrix (field × status)
+§8  Status Badge Rendering (enum values + CSS class)
+§9  Validation (reactive form validators citing SRS AC-xx)
+§10 Layout Rules (scroll, buttons, toolbar)
+§11 Figma ↔ SRS Discrepancies
+§12 Pending Decisions (from SRS TBD items)
 ```
 
-> BA MUST include ALL of the following in every FE (Mobile) Guide:
+> BA MUST include ALL of the followprintg in every FE (Mobile) Guide:
 
 ```
-Â§1  Overview + Platform: Mobile
-Â§2  Component Architecture (mobile folder tree)
-Â§3  Service Files (same as web â€” reuse {module}-api.service.ts)
-Â§4  DTO Files (same as web)
-Â§5  Enum Files (same as web)
-Â§6  PSCoreApiService Methods to Inject
-Â§7  Screen Specs â€” List as card layout, Detail as form:
+§1  Overview + Platform: Mobile
+§2  Component Architecture (mobile folder tree)
+§3  Service Files (same as web -- reuse {module}-api.service.ts)
+§4  DTO Files (same as web)
+§5  Enum Files (same as web)
+§6  PSCoreApiService Methods to Inject
+§7  Screen Specs -- List as card layout, Detail as form:
     - Card fields (what to show in each card)
     - Detail form layout (1 column, full width)
     - Bottom action bar buttons
-Â§8  Navigation & Back Button pattern
-Â§9  Touch target sizes (min 44px buttons)
-Â§10 Pending Decisions
+§8  Navigation & Back Button pattern
+§9  Touch target sizes (min 44px buttons)
+§10 Pending Decisions
 ```
-

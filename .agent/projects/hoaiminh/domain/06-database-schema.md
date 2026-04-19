@@ -1,4 +1,4 @@
-# Database Schema - Honda HEAD Hoài Minh ERP
+﻿# Database Schema - Honda HEAD Hoài Minh ERP
 
 ## Database Overview
 
@@ -41,7 +41,7 @@ erDiagram
     tbl_WHZone ||--o{ tbl_WHLocation : "has locations"
 ```
 
-## Module: Sales (SAL) — 9 Tables
+## Module: Sales (SAL) -- 9 Tables
 
 ### tbl_SALOrderMaster (Sales Order Header)
 | Column | Type | PK | Nullable | Description |
@@ -49,18 +49,18 @@ erDiagram
 | Code | bigint | ✅ | NO | Primary key |
 | ID | nvarchar(30) | - | NO | Order display ID |
 | UserID | int | - | YES | Creating user |
-| Customer | bigint | - | YES | FK → tbl_CSLoyalCustomer |
+| Customer | bigint | - | YES | FK -> tbl_CSLoyalCustomer |
 | IsNewCustomer | bit | - | YES | First-time customer flag |
-| Partner | bigint | - | YES | FK → tbl_LSPartner (wholesale buyer) |
+| Partner | bigint | - | YES | FK -> tbl_LSPartner (wholesale buyer) |
 | SaleDate | datetime | - | YES | Transaction date |
-| SaleStaff | int | - | YES | FK → tbl_HREmployee |
+| SaleStaff | int | - | YES | FK -> tbl_HREmployee |
 | AmountPaid | float | - | YES | Total paid amount |
 | PaymentMethod | int | - | YES | Payment type code |
 | PaymentCount | int | - | YES | Number of payments made |
 | TypeData | int | - | NO | Order type (retail/wholesale) |
-| Status | int | - | NO | FK → tbl_LSStatus |
-| HeadOut | bigint | - | NO | FK → tbl_LSHead (selling branch) |
-| WHOut | bigint | - | YES | FK → tbl_LSWarehouse |
+| Status | int | - | NO | FK -> tbl_LSStatus |
+| HeadOut | bigint | - | NO | FK -> tbl_LSHead (selling branch) |
+| WHOut | bigint | - | YES | FK -> tbl_LSWarehouse |
 | CustomerName | nvarchar(500) | - | YES | Quick-entry customer name |
 | CustomerGender | int | - | YES | Gender code |
 | CustomerNeeds | nvarchar(MAX) | - | YES | Customer requirements notes |
@@ -68,15 +68,15 @@ erDiagram
 | CustomerExpectation | nvarchar(MAX) | - | YES | What customer expects |
 | CustomerPreferences | nvarchar(MAX) | - | YES | Customer preferences |
 | CustomerNotes | nvarchar(MAX) | - | YES | Additional notes |
-| SIOMasterVehicle | bigint | - | YES | FK → stock out reference |
+| SIOMasterVehicle | bigint | - | YES | FK -> stock out reference |
 
 ### tbl_SALOrderDetail (Order Line Items)
 | Column | Type | Description |
 |--------|------|-------------|
 | Code | bigint (PK) | Primary key |
-| OrderMaster | bigint | FK → tbl_SALOrderMaster |
-| VehicleColor | bigint | FK → tbl_LSVehicleColor |
-| CSVehicle | bigint | FK → tbl_CSVehicle (specific unit) |
+| OrderMaster | bigint | FK -> tbl_SALOrderMaster |
+| VehicleColor | bigint | FK -> tbl_LSVehicleColor |
+| CSVehicle | bigint | FK -> tbl_CSVehicle (specific unit) |
 | UnitPrice | float | Price of vehicle |
 | Quantity | int | Number of units |
 | TypeData | int | Line type |
@@ -85,8 +85,8 @@ erDiagram
 | Column | Type | Description |
 |--------|------|-------------|
 | Code | bigint (PK) | Primary key |
-| OrderDetail | bigint | FK → tbl_SALOrderDetail |
-| PartItem | bigint | FK → tbl_LSPartItem |
+| OrderDetail | bigint | FK -> tbl_SALOrderDetail |
+| PartItem | bigint | FK -> tbl_LSPartItem |
 | Quantity | int | Quantity |
 | UnitPrice | float | Unit price |
 | BaseUnit | int | Base unit of measure |
@@ -99,8 +99,8 @@ erDiagram
 | Column | Type | Description |
 |--------|------|-------------|
 | Code | bigint (PK) | Primary key |
-| Head | bigint | FK → tbl_LSHead |
-| OrderMaster | bigint | FK → tbl_SALOrderMaster |
+| Head | bigint | FK -> tbl_LSHead |
+| OrderMaster | bigint | FK -> tbl_SALOrderMaster |
 | InvoiceNo / InvoiceSerial | nvarchar | Invoice identifiers |
 | TotalAmount | float | Invoice total |
 | VATAmount | float | VAT tax amount |
@@ -112,16 +112,16 @@ erDiagram
 | Column | Type | Description |
 |--------|------|-------------|
 | Code | bigint (PK) | Primary key |
-| Head | bigint | FK → tbl_LSHead |
-| OrderMaster | bigint | FK → tbl_SALOrderMaster |
-| Cashier | int | FK → tbl_HREmployee |
+| Head | bigint | FK -> tbl_LSHead |
+| OrderMaster | bigint | FK -> tbl_SALOrderMaster |
+| Cashier | int | FK -> tbl_HREmployee |
 | CollectedAmount | float | Amount collected |
 | PaymentMethod | int | Cash / Bank transfer |
 | Customer / CustomerName | - | Customer reference |
 | Signature | nvarchar(MAX) | Digital signature |
 | Status | int | Receipt status |
 
-## Module: Customer Service (CS) — 16 Tables
+## Module: Customer Service (CS) -- 16 Tables
 
 ### tbl_CSWorkOrderMaster (Work Order)
 See `04-service-flow.md` for full field documentation.
@@ -130,7 +130,7 @@ See `04-service-flow.md` for full field documentation.
 | Column | Type | Description |
 |--------|------|-------------|
 | Code | bigint (PK) | Primary key |
-| VehicleColor | bigint | FK → tbl_LSVehicleColor |
+| VehicleColor | bigint | FK -> tbl_LSVehicleColor |
 | FrameSeri | nvarchar(50) | Chassis/frame number |
 | EngineSeri | nvarchar(50) | Engine number |
 | PlateNo | nvarchar(50) | License plate |
@@ -160,7 +160,7 @@ See `04-service-flow.md` for full field documentation.
 | Zalo | nvarchar(15) | Zalo account |
 | MyHonda / OA | int | MyHonda app / OA follow status |
 
-## Module: Master Data (LS) — 20 Tables
+## Module: Master Data (LS) -- 20 Tables
 
 ### Key Master Tables
 
@@ -177,7 +177,7 @@ See `04-service-flow.md` for full field documentation.
 | `tbl_LSStatus` | Status definitions | StatusName, TypeOfStatus, TypeData |
 | `tbl_LSList` | Generic lookup lists | Parent-child hierarchy for dropdowns |
 
-## Module: System (SYS) — 12 Tables
+## Module: System (SYS) -- 12 Tables
 
 | Table | Purpose |
 |-------|---------|
@@ -194,11 +194,11 @@ See `04-service-flow.md` for full field documentation.
 | `tbl_SYSIncrease` | Auto-increment sequences |
 | `tbl_SYSMachine` | Registered devices |
 
-## Module: Warehouse (WH) — 13 Tables
+## Module: Warehouse (WH) -- 13 Tables
 
 See `05-warehouse-flow.md` for detailed flow.
 
-## Module: HR — 4 Tables
+## Module: HR -- 4 Tables
 
 | Table | Purpose | Key Fields |
 |-------|---------|------------|
@@ -212,7 +212,7 @@ See `05-warehouse-flow.md` for detailed flow.
 All tables follow these conventions:
 - `Code` (bigint/int) = Primary Key (auto-increment)
 - `TypeData` (int) = Sub-type discriminator (e.g., retail=1, wholesale=3)
-- `Status` / `StatusID` (int) = FK → tbl_LSStatus
+- `Status` / `StatusID` (int) = FK -> tbl_LSStatus
 - `CreateBy` / `CreatedBy` (nvarchar 100) = Who created
 - `CreateTime` / `CreatedTime` (datetime) = When created
 - `LastModifiedBy` (nvarchar 100) = Last editor

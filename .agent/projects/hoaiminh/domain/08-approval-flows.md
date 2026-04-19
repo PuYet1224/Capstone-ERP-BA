@@ -1,4 +1,4 @@
-# Approval Flows - Multi-Level Approval at Honda HEAD Hoài Minh
+﻿# Approval Flows - Multi-Level Approval at Honda HEAD Hoài Minh
 
 ## Overview
 
@@ -29,9 +29,9 @@ stateDiagram-v2
 |------|-------|--------|--------------|
 | 1 | NV Sale | Verbally requests discount from CHT | None (offline) |
 | 2 | CHT | Creates `tbl_POLPromotionMaster` with Status=`Draft` | INSERT |
-| 3 | CHT | Submits to TPKD | UPDATE Status → `Pending` |
+| 3 | CHT | Submits to TPKD | UPDATE Status -> `Pending` |
 | 4 | TPKD | Reviews, may adjust amounts | UPDATE fields + forward |
-| 5 | GĐ | Final approval or rejection | UPDATE Status → `Approved` or `Rejected` |
+| 5 | GĐ | Final approval or rejection | UPDATE Status -> `Approved` or `Rejected` |
 | 6 | NV Sale | Applies approved voucher to order | INSERT `tbl_SALOrderDetailPromotion` |
 
 ### Status Values (`tbl_LSStatus`, TypeData=1)
@@ -50,7 +50,7 @@ stateDiagram-v2
 - NV Sale **CANNOT** see `Draft` status policies
 - Only `Approved` + within `StartDate`/`EndDate` policies are visible to Sale
 - Rejection **MUST** include a reason (stored in Description)
-- Approved policies are **IMMUTABLE** — to change, create new version
+- Approved policies are **IMMUTABLE** -- to change, create new version
 
 ## Flow 2: Purchase Order Approval (DO - Delivery Order)
 
