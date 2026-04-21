@@ -1,4 +1,4 @@
-﻿# Existing API Patterns â€" HoÃ i Minh ERP
+# Existing API Patterns - Hoai Minh ERP
 
 > BA MUST reference this file when writing BE_Guide.md.
 > These are the ACTUAL patterns used in the codebase. DO NOT invent new patterns.
@@ -13,26 +13,26 @@
 
 ```
 modules/MTB/Features/
-â"œâ"€â"€ GetListVehicle.cs              â† Shared across modules
-â"œâ"€â"€ F.Config/                      â† Config features (CRUD vehicles, colors)
-â"‚   â"œâ"€â"€ DeleteTypeOfVehicle.cs
-â"‚   â"œâ"€â"€ UpdateVehicle.cs
-â"‚   â""â"€â"€ UpdateVehicleColor.cs
-â"œâ"€â"€ M.Sale/                        â† Sale module features
-â"‚   â"œâ"€â"€ GetSaleOverview.cs
-â"‚   â"œâ"€â"€ GetListSALMaster.cs
-â"‚   â"œâ"€â"€ UpdateSALMaster.cs
-â"‚   â"œâ"€â"€ GetListSALInvoice.cs
-â"‚   â"œâ"€â"€ UpdateSALReceipt.cs
-â"‚   â""â"€â"€ F.Consult/                 â† Sub-feature
-â"‚       â""â"€â"€ GetSALMaster.cs
-â"œâ"€â"€ M.Warehouse/                   â† Warehouse module
-â"‚   â""â"€â"€ F.DeliveryOrder/
-â"‚       â"œâ"€â"€ GetListDOMaster.cs
-â"‚       â""â"€â"€ UpdateDOMaster.cs
-â""â"€â"€ M.Repair/                      â† Repair/Service module
-    â"œâ"€â"€ F.Consult/
-    â""â"€â"€ F.Task/
+-- GetListVehicle.cs               Shared across modules
+-- F.Config/                       Config features (CRUD vehicles, colors)
+|   -- DeleteTypeOfVehicle.cs
+|   -- UpdateVehicle.cs
+|   -- UpdateVehicleColor.cs
+-- M.Sale/                         Sale module features
+|   -- GetSaleOverview.cs
+|   -- GetListSALMaster.cs
+|   -- UpdateSALMaster.cs
+|   -- GetListSALInvoice.cs
+|   -- UpdateSALReceipt.cs
+|   -- F.Consult/                  Sub-feature
+|       -- GetSALMaster.cs
+-- M.Warehouse/                    Warehouse module
+|   -- F.DeliveryOrder/
+|       -- GetListDOMaster.cs
+|       -- UpdateDOMaster.cs
+-- M.Repair/                       Repair/Service module
+    -- F.Consult/
+    -- F.Task/
 ```
 
 ## CQRS Pattern (MediatR)
@@ -90,28 +90,28 @@ return ApiResponse<object>.NotFound("Order not found");
 
 ## Naming Conventions
 
-### ⚠️ CHỈ ĐƯỢC DÙNG 4 PREFIX SAU (KHÔNG CÓ NGOẠI LỆ):
+### ONLY 4 PREFIXES ALLOWED (NO EXCEPTIONS):
 
-| Prefix | Ý nghĩa | Ví dụ |
-|:-------|:---------|:------|
-| **Get** | Lấy data (1 item hoặc danh sách) | `GetSALReceipt`, `GetListSALMaster` |
-| **Update** | Tạo mới, sửa, đổi trạng thái | `UpdateSALReceipt`, `UpdateSALReceiptStatus` |
-| **Delete** | Xóa | `DeleteSODetail`, `DeleteSALPartItem` |
-| **Add** | Thêm item vào collection cùng field | `AddSALSelectedVehicles` |
+| Prefix | Meaning | Example |
+|:-------|:--------|:-------|
+| **Get** | Fetch data (single or list) | `GetSALReceipt`, `GetListSALMaster` |
+| **Update** | Create, edit, or change status | `UpdateSALReceipt`, `UpdateSALReceiptStatus` |
+| **Delete** | Delete | `DeleteSODetail`, `DeleteSALPartItem` |
+| **Add** | Add item to collection with field | `AddSALSelectedVehicles` |
 
-### ❌ CÁC PREFIX BỊ CẤM (TUYỆT ĐỐI KHÔNG DÙNG):
+### FORBIDDEN PREFIXES (ABSOLUTELY DO NOT USE):
 
-| Prefix cấm | Thay bằng | Lý do |
-|:------------|:----------|:------|
-| ~~Create~~ | **Update** | Tạo mới = Update (nếu Code=0 thì tạo, nếu có Code thì sửa) |
-| ~~Cancel~~ | **Update...Status** | Hủy = đổi trạng thái -> `UpdateSALReceiptStatus` |
-| ~~Complete~~ | **Update...Status** | Hoàn tất = đổi trạng thái -> `UpdateSALReceiptStatus` |
-| ~~Insert~~ | **Update** hoặc **Add** | Không dùng Insert |
-| ~~Remove~~ | **Delete** | Không dùng Remove |
-| ~~Set~~ | **Update** | Không dùng Set |
-| ~~Patch~~ | **Update** | Không dùng Patch |
+| Forbidden | Replace with | Reason |
+|:----------|:------------|:-------|
+| ~~Create~~ | **Update** | Create = Update with Code=0 (insert), Code>0 (update) |
+| ~~Cancel~~ | **Update...Status** | Cancel = status change -> `UpdateSALReceiptStatus` |
+| ~~Complete~~ | **Update...Status** | Complete = status change -> `UpdateSALReceiptStatus` |
+| ~~Insert~~ | **Update** or **Add** | Do not use Insert |
+| ~~Remove~~ | **Delete** | Do not use Remove |
+| ~~Set~~ | **Update** | Do not use Set |
+| ~~Patch~~ | **Update** | Do not use Patch |
 
-### Quy tắc đặt tên
+### Naming Rules
 
 | Type | Pattern | Example |
 |:---|:---|:---|
@@ -122,14 +122,14 @@ return ApiResponse<object>.NotFound("Order not found");
 | File name | `{Action}.cs` | `GetListSALMaster.cs` |
 | Namespace | `HoaiMinh.ERP.Modules.Sale.Features.{Module}` | |
 
-### Ví dụ mapping:
+### Example mapping:
 ```
-Tạo phiếu thu     -> UpdateSALReceipt (Code=0 -> insert, Code>0 -> update)
-Hủy phiếu thu     -> UpdateSALReceiptStatus (Status = ReceiptStatus.Cancelled)
-Hoàn tất phiếu thu -> UpdateSALReceiptStatus (Status = ReceiptStatus.Completed)
-Lấy danh sách     -> GetListSALReceipt
-Lấy chi tiết      -> GetSALReceipt
-Xóa phiếu thu     -> DeleteSALReceipt
+Create receipt        -> UpdateSALReceipt (Code=0 -> insert, Code>0 -> update)
+Cancel receipt        -> UpdateSALReceiptStatus (Status = ReceiptStatus.Cancelled)
+Complete receipt      -> UpdateSALReceiptStatus (Status = ReceiptStatus.Completed)
+Get list              -> GetListSALReceipt
+Get detail            -> GetSALReceipt
+Delete receipt        -> DeleteSALReceipt
 ```
 
 ## Key Namespaces
@@ -144,14 +144,14 @@ using Microsoft.EntityFrameworkCore;               // AsNoTracking, ToListAsync
 ## DbContext DbSet Naming
 
 Entity tables map to DbSet with prefix removed:
-- `tbl_SALOrderMaster` â†' `_db.SALOrderMasters`
-- `tbl_LSVehicle` â†' `_db.LSVehicles`
-- `tbl_CSWorkOrderMaster` â†' `_db.CSWorkOrderMasters`
+- `tbl_SALOrderMaster` -> `_db.SALOrderMasters`
+- `tbl_LSVehicle` -> `_db.LSVehicles`
+- `tbl_CSWorkOrderMaster` -> `_db.CSWorkOrderMasters`
 
 ## Performance Rules for BE_Guide
 
 1. ALWAYS use `.AsNoTracking()` for read-only queries
-2. ALWAYS use `.Select()` projection â€" NEVER return full entity to client
+2. ALWAYS use `.Select()` projection - NEVER return full entity to client
 3. Use `CancellationToken ct` in all async methods
 4. Primary constructor `Handler(HoaiMinhDbContext db)` for simple DI
 
@@ -187,19 +187,19 @@ UpdateVehicle, DeleteVehicle, UpdateVehicleColor, DeleteVehicleColor,
 UpdateTypeOfVehicle, DeleteTypeOfVehicle, GetListVehicleColorCodeImage,
 GetListVehicleSettingImage, GetListVehicleReceipt
 
-## ⚠️ DEPRECATED Patterns (DO NOT USE for NEW code)
+## DEPRECATED Patterns (DO NOT USE for NEW code)
 
 The following patterns exist in LEGACY handlers but MUST NOT be used for new features:
 
-### ❌ `dynamic Payload` -- DEPRECATED
+### `dynamic Payload` - DEPRECATED
 ```csharp
-// OLD pattern (only in existing ~95 handlers) -- DO NOT COPY
+// OLD pattern (only in existing ~95 handlers) - DO NOT COPY
 public record GetListSALMasterQuery(dynamic Payload) : IRequest<ApiResponse<object>>;
 ```
 
-### ✅ Typed Record -- USE THIS for all new handlers
+### Typed Record - USE THIS for all new handlers
 ```csharp
-// NEW pattern -- MANDATORY for all new features
+// NEW pattern - MANDATORY for all new features
 public record GetListSALReceiptQuery(
     int? Status,
     long? OrderMasterCode,

@@ -1,13 +1,13 @@
-﻿---
+---
 trigger: /memorize
-description: Read SRS + actual code (BE + FE) + guides and distill into a permanent English memory file in BA. Run BEFORE /clean-pipeline. Usage /memorize [feature-name]
+description: Distill SRS + actual code (BE + FE) + guides into a permanent English memory file in BA workspace. Run BEFORE /clean-pipeline. Usage /memorize [feature-name]
 skills:
   - memorize
 ---
 
 # /memorize [feature-name]
 
-> **Mandatory: run BEFORE `/clean-pipeline`.**  
+> **MUST run BEFORE `/clean-pipeline`.**
 > Load and follow skill `memorize` exactly.
 
 ## Steps
@@ -28,13 +28,13 @@ skills:
 (create folder if doesn't exist)
 ```
 
-## Fprintal Output
+## Final Output
 
 ```
-✅ Memorized: {Feature}
-   📝 Memory: .agent/projects/hoaiminh/memory/{Feature}.md
-   ⚡ Deviations from plan: {N}
-   🧠 Covers: {N} states, {N} rules, {N} APIs, {N} gotchas
+[OK] Memorized: {Feature}
+    Memory: .agent/projects/hoaiminh/memory/{Feature}.md
+    Deviations from plan: {N}
+    Covers: {N} states, {N} rules, {N} APIs, {N} gotchas
 
-✅ Safe to run: /clean-pipeline {feature-name}
+[OK] Safe to run: /clean-pipeline {feature-name}
 ```

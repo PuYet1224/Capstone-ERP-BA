@@ -1,16 +1,16 @@
-﻿# Warehouse Flow - Stock Management at Honda HEAD Hoài Minh
+# Warehouse Flow - Stock Management at Honda HEAD Hoài Minh
 
 ## Overview
 
-Warehouse management handles two distinct inventory types: **Vehicles (xe máy)** and **Parts (phụ tùng)**. Each has separate tables and flows but shares common warehouse infrastructure.
+Warehouse management handles two distinct inventory types: **Vehicles** and **Parts**. Each has separate tables and flows but shares common warehouse infrastructure.
 
 ## Warehouse Structure
 
 ```
 tbl_LSHead (HEAD/Branch)
-`--- tbl_LSWarehouse (Warehouse per HEAD)
-    `--- tbl_WHZone (Zones within warehouse)
-        `--- tbl_WHLocation (Locations within zone)
+-- tbl_LSWarehouse (Warehouse per HEAD)
+    -- tbl_WHZone (Zones within warehouse)
+        -- tbl_WHLocation (Locations within zone)
 ```
 
 - Each HEAD can have multiple warehouses
@@ -29,7 +29,7 @@ tbl_LSHead (HEAD/Branch)
 | `tbl_SIODetailVehicle` | Stock In/Out transaction details |
 | `tbl_SIOCurrentVehicle` | Current vehicle stock snapshot |
 
-### Vehicle Stock In (Nhập kho xe)
+### Vehicle Stock In
 
 ```mermaid
 flowchart LR
@@ -40,7 +40,7 @@ flowchart LR
     E --> F[Update LSVehicleColorStock.Quantity += received]
 ```
 
-### Vehicle Stock Out (Xuất kho xe - Sales)
+### Vehicle Stock Out (Sales)
 
 ```mermaid
 flowchart LR
@@ -50,7 +50,7 @@ flowchart LR
     D --> E[Create CSVehicle record for customer]
 ```
 
-### Vehicle Transfer Between HEADs (Điều chuyển)
+### Vehicle Transfer Between HEADs
 
 ```mermaid
 flowchart LR
@@ -102,7 +102,7 @@ Key fields:
 
 ### Parts Stock Out (for Service/Repair)
 
-When KTV uses parts during repair:
+When Technician uses parts during repair:
 1. Parts selected in `tbl_CSWorkOrderPart`
 2. System creates corresponding `WHIOMaster` / `WHIODetail` for stock-out
 3. `LSPartWarehouse.Quantity` decremented
@@ -114,16 +114,16 @@ When KTV uses parts during repair:
 - `AvgPriceMonth` = monthly average price
 - Used for cost calculation in repairs
 
-## Inventory Audit (Kiểm kê)
+## Inventory Audit
 
 ### Audit Hierarchy
 
 ```
 tbl_WHInventoryMaster (Audit campaign)
-`--- tbl_WHInventoryPoint (Audit points - per warehouse)
-    `--- tbl_WHInventorySession (Count sessions)
-        `--- tbl_WHInventory (Individual count records)
-            `--- tbl_WHInventoryScan (Scan records)
+-- tbl_WHInventoryPoint (Audit points - per warehouse)
+    -- tbl_WHInventorySession (Count sessions)
+        -- tbl_WHInventory (Individual count records)
+            -- tbl_WHInventoryScan (Scan records)
 ```
 
 ### Audit Flow
@@ -140,14 +140,14 @@ tbl_WHInventoryMaster (Audit campaign)
 
 | Code | Status |
 |------|--------|
-| 10 | Lập kế hoạch (Planning) |
-| 11 | Đang kiểm kê (Counting) |
-| 12 | Hoàn tất (Completed) |
-| 13 | Hủy kiểm kê (Cancelled) |
+| 10 | Planning |
+| 11 | Counting |
+| 12 | Completed |
+| 13 | Cancelled |
 
 ## Stock Lock Mechanism
 
-`tbl_LSVehicleColorStock.Lock` -- Number of vehicles "locked" (reserved but not yet delivered):
+`tbl_LSVehicleColorStock.Lock` - Number of vehicles "locked" (reserved but not yet delivered):
 - When a sales order selects a vehicle -> `Lock` increments
 - When sale is cancelled -> `Lock` decrements
 - Available stock = `Quantity - Lock`

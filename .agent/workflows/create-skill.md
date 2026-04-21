@@ -1,12 +1,12 @@
-﻿---
-description: Create or audit agent skills followprintg the open standard (agentskills.io). Enforces English-only, YAML frontmatter, progressive disclosure, <500 lines. Usage /create-skill [skill-name] or /create-skill --audit
+---
+description: Create or audit agent skills following the open standard (agentskills.io). Enforces English-only, YAML frontmatter, progressive disclosure, <500 lines. Usage /create-skill [skill-name] or /create-skill --audit
 ---
 
 # /create-skill -- Skill Factory & Auditor
 
 > **Purpose:** Create new skills or audit existing ones against the open standard.
 > **Standard:** agentskills.io + Gemini CLI conventions
-> **Language Rule:** ALL skills/workflows/standards MUST be in English. Vietnamese is ONLY for human-facprintg output (reports, encyclopedia).
+> **Language Rule:** ALL skills/workflows/standards MUST be in English. Vietnamese is ONLY for human-facing output (reports, encyclopedia).
 
 ---
 
@@ -38,11 +38,11 @@ Ask user for:
 ### Step 2: Validate Name
 
 ```
-✅ VALID:   api-patterns, clean-code, be-pipeline, mobile-design
-❌ INVALID: ApiPatterns (no uppercase)
-❌ INVALID: clean pipeline (no spaces)
-❌ INVALID: -my-skill- (no leading/trailprintg hyphens)
-❌ INVALID: my_skill (no underscores -- use hyphens)
+ VALID:   api-patterns, clean-code, be-pipeline, mobile-design
+ INVALID: ApiPatterns (no uppercase)
+ INVALID: clean pipeline (no spaces)
+ INVALID: -my-skill- (no leading/trailprintg hyphens)
+ INVALID: my_skill (no underscores -- use hyphens)
 ```
 
 Name MUST match the parent directory name exactly.
@@ -102,11 +102,11 @@ description: {1-2 sentences: what it does + when to trigger. Max 1024 chars. Inc
 > For schema details, read `references/schema.md`
 ```
 
-### Step 4: Quality Checklist (MANDATORY before savprintg)
+### Step 4: Quality Checklist (MANDATORY before saving)
 
 | # | Check | Rule |
 |---|-------|------|
-| 1 | Language | 🇬🇧 English ONLY -- zero Vietnamese text |
+| 1 | Language |  English ONLY -- zero Vietnamese text |
 | 2 | YAML frontmatter | `name` + `description` present and valid |
 | 3 | Name match | `name` field = parent directory name |
 | 4 | Description quality | Actionable: describes WHEN to trigger + WHEN NOT to trigger |
@@ -120,12 +120,12 @@ description: {1-2 sentences: what it does + when to trigger. Max 1024 chars. Inc
 ### Step 5: Save and Report
 
 ```
-✅ Skill Created:
-   📁 Path: .agent/skills/{skill-name}/SKILL.md
-   📏 Lines: {N} (limit: 500)
-   🇬🇧 Language: English ✓
-   📋 Checklist: {passed}/{total}
-   🎯 Target: {workspace(s)}
+ Skill Created:
+    Path: .agent/skills/{skill-name}/SKILL.md
+    Lines: {N} (limit: 500)
+    Language: English 
+    Checklist: {passed}/{total}
+    Target: {workspace(s)}
 
    Copy to other workspaces? (y/n)
 ```
@@ -148,7 +148,7 @@ FAIL: Missing frontmatter, missing 'name', or missing 'description'
 
 #### Check 2: Language (CRITICAL)
 ```
-Scan for Vietnamese characters: [àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợatỡùúụủũưừứựửữỳýỵỷỹđ]
+Scan for Vietnamese characters: [?at?]
 PASS: Zero matches (English only)
 FAIL: Vietnamese text found -- list lines with Vietnamese
 EXCEPTION: Vietnamese business terms inside backticks are OK (e.g., `"Receipt"`)
@@ -176,34 +176,34 @@ FAIL: Description is too vague or too short (< 20 chars)
 
 #### Check 6: Encoding
 ```
-PASS: UTF-8 without BOM artifacts (no â€", â€™, etc.)
+PASS: UTF-8 without BOM artifacts (no --, ?, etc.)
 FAIL: Garbled characters detected -- re-save as UTF-8
 ```
 
 #### Check 7: Deprecated Content
 ```
-FAIL: References to .NET 4.7.2, IDistributedCache (should be HybridCache)
+FAIL: References to legacy architectures (e.g., Capstone, monolithic MVC).
 FAIL: References to removed/moved paths
 ```
 
 ### Audit Output Template
 
 ```
-📋 Skill Audit Report -- {Workspace Name}
+ Skill Audit Report -- {Workspace Name}
    Date: {YYYY-MM-DD}
    Total skills: {N} | Total workflows: {N}
 
-🔴 FAIL ({N}):
+ FAIL ({N}):
    | # | File | Issue | Rule |
    |---|------|-------|------|
    | 1 | skills/xyz/SKILL.md | Vietnamese text on lines 12,15,23 | Language |
    | 2 | workflows/abc.md | Missing YAML frontmatter | Frontmatter |
 
-🟡 WARN ({N}):
+ WARN ({N}):
    | # | File | Issue | Rule |
    |---|------|-------|------|
 
-🟢 PASS ({N}):
+ PASS ({N}):
    | File | Lines | Description Quality |
    |------|-------|---------------------|
 
@@ -222,8 +222,8 @@ When `--fix` is specified, automatically:
 4. Trim to < 500 lines (move excess to `references/`)
 5. After fix -> re-run audit to verify
 
-> ⚠️ Auto-fix NEVER changes business logic or domain terms.
-> ⚠️ Auto-fix ALWAYS shows diff before savprintg -- user must confirm.
+>  Auto-fix NEVER changes business logic or domain terms.
+>  Auto-fix ALWAYS shows diff before saving -- user must confirm.
 
 ---
 
@@ -233,28 +233,28 @@ When `--fix` is specified, automatically:
 
 ```
 ENGLISH ONLY in:
-  ✅ SKILL.md files
-  ✅ workflow.md files
-  ✅ standards/*.md files
-  ✅ GEMINI.md
-  ✅ domain/*.md (instruction frame)
-  ✅ memory/*.md
+   SKILL.md files
+   workflow.md files
+   standards/*.md files
+   GEMINI.md
+   domain/*.md (instruction frame)
+   memory/*.md
 
 VIETNAMESE ALLOWED in:
-  ✅ Human-facprintg reports/artifacts (review_*.md)
-  ✅ Encyclopedia/manual documents
-  ✅ Vietnamese business terms inside backticks: `"Receipt"` (Receipt)
-  ✅ Status labels that exist in DB as Vietnamese: `"New"`, `"Completed"`
+   Human-facing reports/artifacts (review_*.md)
+   Encyclopedia/manual documents
+   Vietnamese business terms inside backticks: `"Receipt"` (Receipt)
+   Status labels that exist in DB as Vietnamese: `"New"`, `"Completed"`
 ```
 
 ### Structural Rules
 
 ```
-skill-name/              ← lowercase + hyphens, matches YAML 'name'
-|--- SKILL.md             ← REQUIRED: YAML frontmatter + instructions
-|--- references/          ← OPTIONAL: large docs, schemas, specs
-|--- scripts/             ← OPTIONAL: executable helpers
-`--- assets/              ← OPTIONAL: templates, images
+skill-name/               lowercase + hyphens, matches YAML 'name'
+|--- SKILL.md              REQUIRED: YAML frontmatter + instructions
+|--- references/           OPTIONAL: large docs, schemas, specs
+|--- scripts/              OPTIONAL: executable helpers
+`--- assets/               OPTIONAL: templates, images
 ```
 
 ### Content Rules
@@ -267,5 +267,5 @@ skill-name/              ← lowercase + hyphens, matches YAML 'name'
 5. All code blocks must have language labels
 6. Max 500 lines -- use references/ for overflow
 7. Include "Constraints" or "DO NOT" section
-8. No hardcoded absolute paths without clear markprintg
+8. No hardcoded absolute paths without clear marking
 ```

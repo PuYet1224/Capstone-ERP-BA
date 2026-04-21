@@ -1,6 +1,6 @@
-﻿---
+---
 trigger: /clean-pipeline
-description: Clean up {PIPELINE_ROOT} after implementation is complete. Removes SRS, guides, and design images for fprintished features. Usage /clean-pipeline [feature-name] or /clean-pipeline --dry-run
+description: Clean up {PROJECT_PIPELINE} after implementation is complete. Removes SRS, guides, and design images for finished features. Usage /clean-pipeline [feature-name] or /clean-pipeline --dry-run
 skills:
   - clean-pipeline
 ---
@@ -12,10 +12,10 @@ skills:
 ## Usage
 
 ```
-/clean-pipeline                  -> Interactive: show pipeline status, ask what to clean
-/clean-pipeline Receipt          -> Clean specific feature by name
-/clean-pipeline --dry-run        -> Show what WOULD be deleted (safe preview, not delete)
-/clean-pipeline --all-done       -> Clean all completed features (shows dry-run first)
+/clean-pipeline                   Interactive: show pipeline status, ask what to clean
+/clean-pipeline Receipt           Clean specific feature by name
+/clean-pipeline --dry-run         Show what WOULD be deleted (safe preview, no delete)
+/clean-pipeline --all-done        Clean all completed features (shows dry-run first)
 ```
 
 ## Steps
@@ -25,19 +25,19 @@ skills:
 
 ## Safety Reminder
 
-> ⚠️ Files are **permanently deleted**. Recommend git commit before running.
+>  Files are **permanently deleted**. Recommend git commit before running.
 
 ## Important
 
-> ⚠️ Always run `/memorize {feature-name}` FIRST before clean-pipeline.
+>  Always run `/memorize {feature-name}` FIRST before clean-pipeline.
 > Memory is saved to: `.agent/projects/hoaiminh/memory/{Feature}.md`
 
-## Fprintal Output
+## Final Output
 
 ```
-🧹 Cleaned: {Feature}
+ Cleaned: {Feature}
    Deleted: {N} files ({N} images + SRS + BE guide + FE guide)
-   📝 Memory preserved: .agent/projects/hoaiminh/memory/{Feature}.md
+    Memory preserved: .agent/projects/hoaiminh/memory/{Feature}.md
    
-📁 Pipeline remaining: {N} features still in progress
+ Pipeline remaining: {N} features still in progress
 ```

@@ -1,9 +1,9 @@
-﻿# Context Memory: Receipt
+# Context Memory: Receipt
 > Analyzed: 2026-04-10 | Requirement: REQ_001
 > Module: SAL
 
 ## 1. Business Context Summary
-Receipts (Phiếu Thu) securely record incoming currency to resolve a linked Sales Order's remaining debt. It strictly safeguards cash validation workflows, verifying signatures and enforcing valid bounds before locking in financial milestones to the general Sales and Invoicing modules.
+Receipts (Phiu Thu) securely record incoming currency to resolve a linked Sales Order's remaining debt. It strictly safeguards cash validation workflows, verifying signatures and enforcing valid bounds before locking in financial milestones to the general Sales and Invoicing modules.
 
 ## 2. Key Decisions & Rationale
 - **Enforced Single Status System**: Hard requirement to use integers `1`, `2`, `3` tracking against TypeOfStatus `126`, `127`, `128` uniformly mapped across the architecture logic instead of database primary keys.
@@ -14,14 +14,14 @@ Receipts (Phiếu Thu) securely record incoming currency to resolve a linked Sal
 ## 3. State Machine
 | # | From | To | Action | Condition |
 |---|------|-----|--------|----------|
-| T1 | -- | New (1) | Save receipt | BR-01~BR-05 pass |
+| T1 | - | New (1) | Save receipt | BR-01~BR-05 pass |
 | T2 | New (1) | Completed (2) | Confirm payment | Must have customer signature (BR-12) |
 | T3 | New (1) | Cancelled (3) | Cancel | Must enter cancel reason (BR-10) |
 *Invalid transitions*: Completed -> any, Cancelled -> any. (BR-13, BR-14)
 
 ## 4. Database Tables & Relationships
-- **Primary**: `tbl_SALOrderReceipt` -- the primary target schema recording collection metadata and status.
-- **Related**: `tbl_SALOrderMaster` -- yields the limits constraining receipt sums through `TotalAmount` and `AmountPaid` columns.
+- **Primary**: `tbl_SALOrderReceipt` - the primary target schema recording collection metadata and status.
+- **Related**: `tbl_SALOrderMaster` - yields the limits constraining receipt sums through `TotalAmount` and `AmountPaid` columns.
 
 ## 5. Business Rules Applied
 - **BR-01**: Link invariant. Exists solely attached to `tbl_SALOrderMaster`.

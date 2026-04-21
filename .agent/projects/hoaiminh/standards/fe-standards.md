@@ -1,25 +1,20 @@
-﻿---
-name: fe-standards
-description: Frontend coding standards for Hoai Minh ERP. Defines folder structure, service patterns, DTO/enum naming, shared components, Kendo Grid patterns, mobile differences. Load before any FE implementation.
----
+# Hoai Minh ERP - FE Coding Standards
 
-# Hoai Minh ERP -- FE Coding Standards
-
-> **Web Stack:** Angular 16, Kendo UI 13, SCSS (`hoaiminh3Ps-FE`)
-> **Mobile Stack:** Angular 16, Responsive (no Kendo Grid) (`hoaiminh3Ps-mobileApp`)
+> **Web Stack:** Angular 16, Kendo UI 13, SCSS (`HoaiMinh.FEWeb`)
+> **Mobile Stack:** Angular 16, Responsive (no Kendo Grid) (`HoaiMinh.FEMobileWeb`)
 > **MANDATORY:** BA Guide MUST include all patterns from this file for every FE feature.
 
 ---
 
-## 1. Platform Detection -- Web vs Mobile
+## 1. PLATFORM DETECTION - WEB vs MOBILE
 
 ```
-SRS Pillar 1 -> Platform field:
-  "Web"    -> FE Guide uses hoaiminh3Ps-FE patterns (Kendo UI, full grid)
-  "Mobile" -> FE Guide uses hoaiminh3Ps-mobileApp patterns (responsive, not Kendo Grid)
-  "Both"   -> BA creates 2 separate guide files:
-               FE_WEB_{SEQ}_{Name}.md    ← Web guide
-               FE_MOBWEB_{SEQ}_{Name}.md ← Mobile guide
+SRS Pillar 1  Platform field:
+  "Web"     FE Guide uses Web patterns (Kendo UI, full grid)
+  "Mobile"  FE Guide uses Mobile patterns (responsive, no Kendo Grid)
+  "Both"    BA creates 2 separate guide files:
+              FE_WEB_{SEQ}_{Name}.md   Web guide
+              FE_MOBWEB_{SEQ}_{Name}.md   Mobile guide
 
 File naming:
   FE_WEB_001_Receipt.md
@@ -28,33 +23,35 @@ File naming:
 
 ---
 
-## 2. Folder Structure Pattern
+## 2. FOLDER STRUCTURE PATTERN
+
+> Read from `{FE_ROOT}/src/app/views/cs/` - the most standard pattern.
 
 ```
 src/app/views/{module}/
-|--- {module}.module.ts
-|--- {module}.routing.ts
-|--- services/
-|   |--- {module}-api.service.ts          ← API methods (Observable<ResponseDTO>)
-|   `--- {module}-api-static.service.ts   ← URL string constants only
-`--- views/
-    |--- {module}{seq}-{feature}/         ← List screen
-    |   |--- {module}{seq}-{feature}.component.ts
-    |   |--- {module}{seq}-{feature}.component.html
-    |   `--- {module}{seq}-{feature}.component.scss
-    `--- {module}{seq}-{feature}-detail/  ← Detail screen
-        |--- {module}{seq}-{feature}-detail.component.ts
-        |--- {module}{seq}-{feature}-detail.component.html
-        `--- {module}{seq}-{feature}-detail.component.scss
+-- {module}.module.ts
+-- {module}.routing.ts
+-- services/
+|   -- {module}-api.service.ts           API methods (Observable<ResponseDTO>)
+|   -- {module}-api-static.service.ts    URL string constants only
+-- views/
+    -- {module}{seq}-{feature}/          List screen
+    |   -- {module}{seq}-{feature}.component.ts
+    |   -- {module}{seq}-{feature}.component.html
+    |   -- {module}{seq}-{feature}.component.scss
+    -- {module}{seq}-{feature}-detail/   Detail screen
+        -- {module}{seq}-{feature}-detail.component.ts
+        -- {module}{seq}-{feature}-detail.component.html
+        -- {module}{seq}-{feature}-detail.component.scss
 ```
 
-**Naming examples:**
+**Screen naming examples (from source):**
 ```
-cs001-template               -> CS module, screen 001, feature: template
-cs002-zns-message            -> CS module, screen 002, feature: ZNS message
-cs002-zns-message-detail     -> Corresponding detail screen
-mtb020-receipt               -> MTB module, screen 020, feature: receipt
-mtb021-receipt-detail        -> Detail screen
+cs001-template                CS module, screen 001, feature: template
+cs002-zns-message             CS module, screen 002, feature: ZNS message
+cs002-zns-message-detail      Corresponding detail screen
+mtb020-receipt                MTB module, screen 020, feature: receipt
+mtb021-receipt-detail         Detail screen
 ```
 
 **Route pattern:**
@@ -67,13 +64,15 @@ mtb021-receipt-detail        -> Detail screen
 
 ---
 
-## 3. Service File Pattern -- MANDATORY
+## 3. SERVICE FILE PATTERN - MUST FOLLOW THIS EXACTLY
 
-### {module}-api-static.service.ts (URL constants -- not logic)
+> Read directly from `cs-api.service.ts` and `ps-core-api.service.ts`
+
+### {module}-api-static.service.ts (URL constants - no logic)
 
 ```typescript
 export class {Module}ApiStaticService {
-  // Pattern: object with DLL key (multi-branch support)
+  // Pattern: object with DLL name (multi-branch support)
   static readonly [dllKey: string]: {
     GetList{Feature}: string;
     Get{Feature}: string;
@@ -82,7 +81,7 @@ export class {Module}ApiStaticService {
     Delete{Feature}: string;
   } | any;
 
-  // Or flat (if single endpoint set):
+  // Or flat (if only 1 endpoint set):
   static readonly GetList{Feature}  = 'api/{module}/{feature}/list';
   static readonly Get{Feature}      = 'api/{module}/{feature}/detail';
   static readonly Update{Feature}   = 'api/{module}/{feature}/save';
@@ -91,7 +90,7 @@ export class {Module}ApiStaticService {
 }
 ```
 
-### {module}-api.service.ts (methods -- Observable pattern)
+### {module}-api.service.ts (methods - Observable pattern)
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -180,84 +179,94 @@ export class {Module}ApiService {
 
 ---
 
-## 4. DTO Naming Pattern (TypeScript)
+## 4. DTO NAMING PATTERN (TypeScript)
+
+> Read from `{FE_ROOT}/src/app/models/dtos/e-dtos/`
 
 | File Name | Class Name | Purpose |
-|-----------|-----------|---------|
-| `{module}-{entity}.dto.ts` | `{Module}{Entity}DTO` | Full DTO -- all fields |
-| `{module}-{entity}.dto.ts` | `{Module}{Entity}CusDTO` | Custom DTO -- selected fields (same file) |
+|---|---|---|
+| `{module}-{entity}.dto.ts` | `{Module}{Entity}DTO` | Full DTO - all fields |
+| `{module}-{entity}.dto.ts` | `{Module}{Entity}CusDTO` | Custom DTO - only needed fields (same file) |
 
-**Examples:**
+**Examples from source:**
 ```
-sal-order-master.dto.ts   -> SalOrderMasterDTO, SalOrderMasterCusDTO
-cs-vehicle.dto.ts         -> CsVehicleDTO, CsVehicleCusDTO
-csms-send-master.dto.ts   -> CsmsSendMasterDTO, CsmsSendMasterCusDTO
+sal-order-master.dto.ts    SalOrderMasterDTO, SalOrderMasterCusDTO
+cs-vehicle.dto.ts          CsVehicleDTO, CsVehicleCusDTO
+csms-send-master.dto.ts    CsmsSendMasterDTO, CsmsSendMasterCusDTO
+wh-io-master.dto.ts        WhIoMasterDTO, WhIoMasterCusDTO
 ```
 
 **DTO file structure:**
 ```typescript
+// {module}-{feature}.dto.ts
 export interface {Module}{Feature}DTO {
   Code: number;
   ReceiptNo: string;
   CollectedAmount: number;
   Status: number;
   StatusName: string;
+  // ... all fields from BE response
   CreatedAt: string;
   CreatedByName: string;
 }
 
 export interface {Module}{Feature}CusDTO {
-  Code: number; // always required -- identifies the record
+  Code: number; // always required - identifies the record
+  // Only fields needed for this specific operation
 }
 ```
 
 ---
 
-## 5. Enum Pattern
+## 5. ENUM PATTERN
+
+> Read from `{FE_ROOT}/src/app/models/enums/`
 
 | Folder | Purpose | Example |
-|--------|---------|---------|
+|---|---|---|
 | `e-status/` | Business status enums | `SalReceiptStatusEnum` |
-| `e-type/` | TypeData enums for CORE APIs | `LSStatusTypeDataEnum` |
+| `e-type/` | TypeData enums for CORE APIs | `LSStatusTypeDataEnum`, `LSListTypeDataEnum` |
 
 ```typescript
 // e-status/{module}-{feature}-status.enum.ts
 export enum {Module}{Feature}StatusEnum {
-  New = 1,        // Maps to tbl_LSStatus TypeOfStatus=1
-  Completed = 2,
-  Cancelled = 3
+  New = 1,        // TypeOfStatus=1 from tbl_LSStatus
+  Completed = 2,  // TypeOfStatus=2
+  Cancelled = 3   // TypeOfStatus=3
 }
 
-// e-type/ls-status-type-data.enum.ts (shared -- ALREADY EXISTS)
+// e-type/ls-status-type-data.enum.ts (shared - ALREADY EXISTS)
 export enum LSStatusTypeDataEnum {
   Receipt = 22,
   Invoice = 23,
   SalesOrder = 18,
-  // ... check actual file
+  // ... see actual file for full list
 }
 ```
 
-**In component -- MUST expose enum for template binding:**
+**In component - MUST expose enum for template use:**
 ```typescript
 export class MyComponent {
-  // Expose enum for template -- NEVER use magic numbers in HTML
+  // Expose enum to template - DO NOT use magic numbers in HTML
   {Feature}Status = {Module}{Feature}StatusEnum;
 }
 ```
 
 ```html
-<!-- CORRECT -- use enum -->
+<!-- CORRECT - use enum -->
 <div *ngIf="item.Status !== {Feature}Status.Completed">
-<!-- WRONG -- magic number -->
+<!-- WRONG - magic number -->
 <div *ngIf="item.Status !== 2">
 ```
 
 ---
 
-## 6. Shared Components -- MUST Use, NEVER Recreate
+## 6. SHARED COMPONENTS - MUST USE, DO NOT REINVENT
+
+> Read from `{FE_ROOT}/src/app/components/`
 
 | Component | Selector | Purpose | DO NOT replace with |
-|-----------|----------|---------|---------------------|
+|---|---|---|---|
 | `ps-button` | `<ps-button>` | All buttons | `<button>`, `<kendo-button>` |
 | `ps-dialog` | `<ps-dialog>` | All modals/dialogs | `<kendo-dialog>`, `<div class="modal">` |
 | `ps-dropdown` | `<ps-dropdown>` | All dropdowns | `<kendo-dropdownlist>`, `<select>` |
@@ -266,7 +275,7 @@ export class MyComponent {
 | `ps-layout` | `<ps-layout>` | Page layout | Custom div layout |
 | `ps-table` | `<ps-table>` | Data grids | `<kendo-grid>` raw |
 
-**Layout pattern:**
+**Layout pattern (ps-layout):**
 ```html
 <ps-layout>
   <div class="toolbar" ps-toolbar>
@@ -280,22 +289,27 @@ export class MyComponent {
 
 ---
 
-## 7. Shared Core Services -- PSCoreApiService
+## 7. SHARED CORE SERVICES - PSCoreApiService
 
-| Method | Param | When to Inject |
-|--------|-------|---------------|
+> Read from `{FE_ROOT}/src/app/services/ps-core-api.service.ts`
+
+| Method | Param | When to inject |
+|---|---|---|
 | `GetListEmployee()` | none | Cashier picker, Employee picker |
 | `GetListHead(isAll)` | boolean | Branch filter |
 | `GetListWarehouse(headNumber)` | number | Warehouse picker |
-| `GetListProvprintce()` | none | Address form |
-| `GetListDistrict(provprintce)` | LSProvprintceDTO | Address cascade |
+| `GetListProvince()` | none | Address form |
+| `GetListDistrict(province)` | LSProvinceDTO | Address cascade |
 | `GetListWard(district)` | LSDistrictDTO | Address cascade |
 | `GetListLSList(typeData)` | LSListTypeDataEnum | Category dropdown |
 | `GetListStatus(typeData)` | LSStatusTypeDataEnum | Status filter |
+| `GetListHRList(typeData)` | HRListTypeDataEnum | HR category |
+| `GetListCSList(typeData)` | CSListTypeDataEnum | CS category |
 | `GetListPartnerCustomer()` | none | Customer picker |
 | `GetListSupplier()` | none | Supplier picker |
 | `UploadImage(keypath, files)` | string, FileInfo[] | Image upload |
 | `DeleteImage(paths)` | string[] | Image delete |
+| `GetTemplate(filename)` | string | Template download |
 | `ExportExcel(param)` | ReportInputDTO | Export Excel |
 | `ExportExcelPDF(param)` | ReportInputDTO | Export PDF |
 
@@ -309,9 +323,10 @@ constructor(
 
 ---
 
-## 8. Kendo Grid Pattern (Web Only)
+## 8. KENDO GRID PATTERN (Web only)
 
 ```typescript
+// Component
 import { State, process } from '@progress/kendo-data-query';
 import { GridDataResult } from '@progress/kendo-angular-grid';
 
@@ -333,12 +348,18 @@ onStateChange(state: State) {
 ```
 
 ```html
+<!-- Template -->
 <ps-table [data]="gridData" [state]="gridState" (stateChange)="onStateChange($event)">
-  <kendo-grid-column field="ReceiptNo" title="Receipt No" [width]="120"></kendo-grid-column>
-  <kendo-grid-column field="CollectedAmount" title="Amount" [width]="150" format="{0:n0}"></kendo-grid-column>
-  <kendo-grid-column field="StatusName" title="Status" [width]="120">
+  <kendo-grid-column field="ReceiptNo"       title="Receipt No"     [width]="120"></kendo-grid-column>
+  <kendo-grid-column field="CollectedAmount"  title="Amount"         [width]="150" format="{0:n0}"></kendo-grid-column>
+  <kendo-grid-column field="StatusName"       title="Status"         [width]="120">
     <ng-template kendoGridCellTemplate let-dataItem>
       <span [class]="getStatusClass(dataItem.Status)">{{ dataItem.StatusName }}</span>
+    </ng-template>
+  </kendo-grid-column>
+  <kendo-grid-column title="Actions" [width]="100" [locked]="true">
+    <ng-template kendoGridCellTemplate let-dataItem>
+      <ps-button (click)="viewDetail(dataItem)">View</ps-button>
     </ng-template>
   </kendo-grid-column>
 </ps-table>
@@ -346,42 +367,43 @@ onStateChange(state: State) {
 
 ---
 
-## 9. Status Badge Pattern
+## 9. STATUS BADGE PATTERN
 
 ```typescript
+// Component
 getStatusClass(status: number): string {
   const config: Record<number, string> = {
     [{Module}{Feature}StatusEnum.New]:       'badge badge-warning',
     [{Module}{Feature}StatusEnum.Completed]: 'badge badge-success',
     [{Module}{Feature}StatusEnum.Cancelled]: 'badge badge-danger',
   };
-  return config[status] ?? 'badge badge-secondary';
+  return config[status] ? 'badge badge-secondary';
 }
 ```
 
 ---
 
-## 10. Layout Rules (UI/UX Standards)
+## 10. LAYOUT RULES (UI/UX Standards - Hoai Minh design)
 
 ```
-1. SCROLL: When zoom > 100% -> content MUST be scrollable (overflow-x: auto on table container)
-2. BUTTONS: Always place in ps-toolbar or ps-layout toolbar section -- NEVER position manually
-3. FORM GRID: Use CSS grid or row/col from layout system -- NEVER use absolute/fixed
-4. PAGE STRUCTURE: Every page MUST have: Toolbar (top) -> Filter bar -> Content (grid/form)
-5. DIALOG: Always use ps-dialog -- NEVER use custom overlay
-6. LOADING: Every async operation MUST have loading printdicator (kendo-loader or ps-loading)
-7. EMPTY STATE: Empty grid MUST show "No data available" message, NEVER leave grid blank
+1. SCROLL: When zoom > 100%  content MUST be scrollable (overflow-x: auto on table container)
+2. BUTTONS: Always place inside ps-toolbar or ps-layout toolbar section - DO NOT position manually
+3. FORM GRID: Use CSS grid or system row/col - DO NOT use absolute/fixed positioning
+4. PAGE STRUCTURE: Every page MUST have: Toolbar (top)  Filter bar  Content (grid/form)
+5. DIALOG: Always use ps-dialog - DO NOT use custom overlay
+6. LOADING: Every async operation MUST have a loading indicator (kendo-loader or ps-loading)
+7. EMPTY STATE: Empty grid MUST show "No data available" message, DO NOT leave grid blank
 ```
 
 ---
 
-## 11. Mobile-Specific Patterns
+## 11. MOBILE-SPECIFIC PATTERNS (FEMobileWeb)
 
 ```
-Differences from Web:
-1. NO Kendo Grid -> use <ul>/<li> card layout or custom list
-2. NO ps-table -> use custom responsive list
-3. Buttons: larger (min-height: 44px) for touch target
+DIFFERENCES from Web:
+1. DO NOT use Kendo Grid  use <ul>/<li> card layout or custom list
+2. DO NOT use ps-table  use custom responsive list
+3. Buttons: larger (min-height: 44px) for touch targets
 4. Form: 1 column, full width inputs
 5. Toolbar: bottom navigation bar style, not top toolbar
 6. Filter: Collapsible filter panel instead of always-visible filter bar
@@ -389,72 +411,74 @@ Differences from Web:
 ```
 
 ```typescript
-// Mobile service -- SAME service files as web
-// Do NOT create separate service -- reuse {module}-api.service.ts
+// Mobile service - SAME service files as web, injected into mobile component
+// DO NOT create separate service - reuse {module}-api.service.ts
 ```
 
 ---
 
-## 12. Update Properties / Status Interface
+## 12. UPDATE PROPERTIES / STATUS INTERFACE
+
+> From `{FE_ROOT}/src/app/models/dtos/update-properties.interface.ts`
 
 ```typescript
-// Shared interfaces -- ALREADY EXIST, reuse:
+// Shared interfaces - ALREADY EXIST, reuse them:
 export interface UpdatePropertiesInterface<T> {
   Properties: T;
-  // ... (check actual file for full definition)
+  // ... (see actual file)
 }
 
 export interface UpdateStatusInterface<T> {
   Key: T;
   Status: number;
-  Reason?: string; // required when cancellprintg
+  Reason?: string; // required when cancelling
 }
 ```
 
 ---
 
-## 13. BA Guide Requirements -- Mandatory FE Sections
+## 13. BA GUIDE REQUIREMENTS - Mandatory FE Sections
 
-> BA MUST include ALL of the followprintg in every FE (Web) Guide:
+> BA MUST include ALL of the following in every FE (Web) Guide:
 
 ```
-§1  Overview + Platform confirmation (Web/Mobile/Both)
-§2  Component Architecture (exact folder tree with file names)
-§3  Service Files
+S1  Overview + Platform confirmation (Web/Mobile/Both)
+S2  Component Architecture (exact folder tree with file names)
+S3  Service Files
     - {module}-api-static.service.ts (all URL constants)
     - {module}-api.service.ts (all methods with exact Observable pattern)
-§4  DTO Files
+S4  DTO Files
     - {module}-{feature}.dto.ts ({Feature}DTO + {Feature}CusDTO)
-§5  Enum Files
+S5  Enum Files
     - {module}-{feature}-status.enum.ts
     - LSStatusTypeDataEnum value to use in GetListStatus()
-§6  PSCoreApiService Methods to Inject (which shared APIs, when called)
-§7  Screen Specs -- for each SCR-xx:
+S6  PSCoreApiService Methods to Inject (which shared APIs, when called)
+S7  Screen Specs - for each SCR-xx:
     - Grid columns (field, title, width, format)
     - Filter bar (component, param, TypeData enum)
     - Action buttons per status (using enum, not magic numbers)
-    - Editability matrix (field × status)
-§8  Status Badge Rendering (enum values + CSS class)
-§9  Validation (reactive form validators citing SRS AC-xx)
-§10 Layout Rules (scroll, buttons, toolbar)
-§11 Figma ↔ SRS Discrepancies
-§12 Pending Decisions (from SRS TBD items)
+    - Editability matrix (field x status)
+S8  Status Badge Rendering (enum values + CSS class)
+S9  Validation (reactive form validators citing SRS AC-xx)
+S10 Layout Rules (scroll, buttons, toolbar)
+S11 Figma  SRS Discrepancies
+S12 Pending Decisions (from SRS TBD items)
 ```
 
-> BA MUST include ALL of the followprintg in every FE (Mobile) Guide:
+> BA MUST include ALL of the following in every FE (Mobile) Guide:
 
 ```
-§1  Overview + Platform: Mobile
-§2  Component Architecture (mobile folder tree)
-§3  Service Files (same as web -- reuse {module}-api.service.ts)
-§4  DTO Files (same as web)
-§5  Enum Files (same as web)
-§6  PSCoreApiService Methods to Inject
-§7  Screen Specs -- List as card layout, Detail as form:
+S1  Overview + Platform: Mobile
+S2  Component Architecture (mobile folder tree)
+S3  Service Files (same as web - reuse {module}-api.service.ts)
+S4  DTO Files (same as web)
+S5  Enum Files (same as web)
+S6  PSCoreApiService Methods to Inject
+S7  Screen Specs - List as card layout, Detail as form:
     - Card fields (what to show in each card)
     - Detail form layout (1 column, full width)
     - Bottom action bar buttons
-§8  Navigation & Back Button pattern
-§9  Touch target sizes (min 44px buttons)
-§10 Pending Decisions
+S8  Navigation & Back Button pattern
+S9  Touch target sizes (min 44px buttons)
+S10 Pending Decisions
 ```

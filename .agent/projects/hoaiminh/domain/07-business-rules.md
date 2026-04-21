@@ -1,6 +1,6 @@
-﻿# Business Rules - Hard Constraints for Honda HEAD Hoài Minh
+# Business Rules - Hard Constraints for Honda HEAD Hoài Minh
 
-> ⚠️ **WARNING:** These rules are HARD CONSTRAINTS. Code that violates ANY of these rules is considered a **critical bug**. Always validate these before generating business logic.
+>  **WARNING:** These rules are HARD CONSTRAINTS. Code that violates ANY of these rules is considered a **critical bug**. Always validate these before generating business logic.
 
 ## Rule Category: Identity & Authentication
 
@@ -14,12 +14,12 @@
 
 | ID | Rule | Consequence if Violated |
 |----|------|------------------------|
-| SAL-01 | **A Sales Order can be created with ONLY a customer name.** Phone/address NOT required at creation time. | UX failure -- customers feel pressured |
+| SAL-01 | **A Sales Order can be created with ONLY a customer name.** Phone/address NOT required at creation time. | UX failure - customers feel pressured |
 | SAL-02 | **Receipt MUST be issued BEFORE Invoice** for Cash/Transfer payments. Invoice cannot exist without a completed receipt. | Accounting violation |
 | SAL-03 | **Installment payments: Invoice is issued IMMEDIATELY** (HEAD receives full amount from bank). No receipt needed from customer. | Delayed revenue recording |
-| SAL-04 | **Deposit (Đặt cọc) creates a partial Receipt.** Full Invoice only after total payment equals order amount. | Premature invoice generation |
+| SAL-04 | **Deposit creates a partial Receipt.** Full Invoice only after total payment equals order amount. | Premature invoice generation |
 | SAL-05 | **Only `Approved` promotions within valid date range** can be applied to orders. `Draft` promotions are INVISIBLE to Sales Staff. | Unauthorized discounts |
-| SAL-06 | **Special discount vouchers require multi-level approval:** Sale -> CHT -> TPKD -> GĐ. Skipping levels is NOT allowed. | Unauthorized financial commitment |
+| SAL-06 | **Special discount vouchers require multi-level approval:** Sale -> CHT -> TPKD -> G. Skipping levels is NOT allowed. | Unauthorized financial commitment |
 | SAL-07 | **Customer documentation MUST be completed BEFORE payment collection.** | Legal/compliance failure |
 | SAL-08 | **Vehicle must exist in stock (`LSVehicleColorStock.Quantity - Lock > 0`)** before adding to order. | Selling non-existent inventory |
 

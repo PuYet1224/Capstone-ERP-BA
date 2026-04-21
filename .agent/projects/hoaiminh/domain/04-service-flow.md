@@ -1,8 +1,8 @@
-﻿# Service Flow - Maintenance & Repair Process at Honda HEAD Hoài Minh
+# Service Flow - Maintenance & Repair Process at Honda HEAD Hoài Minh
 
 ## Overview
 
-The service flow handles vehicle maintenance (bảo dưỡng) and repair (sửa chữa) at HEAD. It starts from vehicle arrival, through diagnosis, parts/service selection, repair execution, to payment and vehicle return.
+The service flow handles vehicle maintenance and repair at HEAD. It starts from vehicle arrival, through diagnosis, parts/service selection, repair execution, to payment and vehicle return.
 
 ## Complete Service Flow Diagram
 
@@ -48,25 +48,25 @@ flowchart TD
     T --> U
     
     U --> V[Print receipt & invoice]
-    V --> W[Customer pays & receives vehicle ✅]
+    V --> W[Customer pays & receives vehicle ]
 ```
 
 ## Step-by-Step Breakdown
 
 ### Step 1: Vehicle Arrival & Identification
 
-**Actor:** Reception Staff / KTV / Automatic Scanner
+**Actor:** Reception Staff / Technician / Automatic Scanner
 
 - **Automatic scanning:** When vehicle passes entry point, system reads license plate
-  - Reason: KTV's hands may be dirty from repairs, can't handle reception
+  - Reason: Technician's hands may be dirty from repairs, can't handle reception
   - Any staff or automated machine can handle this step
 - **Manual entry:** Staff types plate number if scanner unavailable
 
 **System lookup:**
 ```
 Query tbl_CSVehicle WHERE PlateNo = scanned_plate
--> Found: Load full vehicle history + owner info
--> Not Found: Create new CSVehicle record
+ Found: Load full vehicle history + owner info
+ Not Found: Create new CSVehicle record
 ```
 
 ### Step 2: Vehicle Registration (New Vehicles)
@@ -75,17 +75,17 @@ Query tbl_CSVehicle WHERE PlateNo = scanned_plate
 
 If vehicle is not in system (`IsNewCSVehicle = true`):
 - Collect vehicle details:
-  - `FrameSeri` (Số khung)
-  - `EngineSeri` (Số máy)
-  - `PlateNo` (Biển số)
-  - `VehicleColor` -> links to `tbl_LSVehicleColor`
+  - `FrameSeri`
+  - `EngineSeri`
+  - `PlateNo`
+  - `VehicleColor`  links to `tbl_LSVehicleColor`
   - `CurrentKm`
 - Collect customer info -> create/update `tbl_CSLoyalCustomer`
-- Determine maintenance count (bảo dưỡng lần thứ mấy)
+- Determine maintenance count
 
 ### Step 3: Work Order Creation
 
-**Actor:** Service Consultant / KTV
+**Actor:** Service Consultant / Technician
 
 Create `tbl_CSWorkOrderMaster`:
 
@@ -112,10 +112,10 @@ Create `tbl_CSWorkOrderMaster`:
 
 ### Step 4: Service & Parts Selection
 
-**Actor:** Service Consultant / KTV
+**Actor:** Service Consultant / Technician
 
 **Tasks** (`tbl_CSWorkOrderTask`):
-- Select from task bank (`tbl_CSTaskBank`) -- predefined service tasks
+- Select from task bank (`tbl_CSTaskBank`) - predefined service tasks
 - Each task has: `TypeOfTask`, `Quantity`, `UnitPrice`
 - `StatusChecked` tracks if task was performed
 
@@ -136,7 +136,7 @@ Create `tbl_CSWorkOrderMaster`:
 
 ### Step 5: Repair Execution
 
-**Actor:** KTV (Technician)
+**Actor:** Technician
 
 - Performs the actual repair/maintenance work
 - Updates `StatusChecked` on tasks and parts as completed
@@ -159,7 +159,7 @@ Create `tbl_CSWorkOrderMaster`:
 
 **Actor:** Cashier / authorized staff
 
-1. Work order status -> "Completed" (Hoàn tất)
+1. Work order status -> "Completed"
 2. Print receipt for payment
 3. Payment collection (same flow as Sales receipts/invoices)
 4. Vehicle returned to customer
@@ -167,7 +167,7 @@ Create `tbl_CSWorkOrderMaster`:
 
 ### Step 8: Post-Service (Customer Care)
 
-**Actor:** CSKH
+**Actor:** Customer Care Staff
 
 - System tracks next maintenance milestone:
   - Based on `CurrentKm` + standard interval (e.g., +4,000km)
@@ -182,10 +182,10 @@ Create `tbl_CSWorkOrderMaster`:
 
 | Code | Status | Meaning |
 |------|--------|---------|
-| 69 | Tiếp nhận xe | Vehicle received at HEAD |
-| 70 | Tiếp nhận khách | Customer reception completed |
-| 71 | Chờ giao xe | Waiting for vehicle return to customer |
-| 72 | Hoàn tất | Work order completed |
+| 69 | Vehicle Received | Vehicle received at HEAD |
+| 70 | Customer Received | Customer reception completed |
+| 71 | Pending Return | Waiting for vehicle return to customer |
+| 72 | Completed | Work order completed |
 
 ## Customer Loyalty Tracking
 

@@ -1,22 +1,22 @@
-﻿# Roles & Permissions - Honda HEAD Hoài Minh
+# Roles & Permissions - Honda HEAD Hoài Minh
 
 ## Organization Hierarchy
 
 ```
-Director (Giám đốc - GĐ)
-|--- Sales Director (Trưởng phòng KD - TPKD)
-|--- Store Manager HEAD 1 (Cửa hàng trưởng - CHT)
-|   |--- Sales Staff (NV Sale)
-|   |--- Cashier / Accountant (Thu ngân / Kế toán)
-|   |--- Reception Staff (NV Tiếp nhận)
-|   |--- Technician (KTV)
-|   |--- Parts Warehouse Manager (QL Kho PT)
-|   |--- Vehicle Warehouse Manager (QL Kho XM)
-|   |--- Customer Care Staff (NV CSKH)
-|   `--- Marketing Staff (NV Marketing)
-|--- Store Manager HEAD 2 (CHT)
-|   `--- ... (same structure)
-`--- ... (up to 10+ HEADs)
+Director (G)
+-- Sales Director (TPKD)
+-- Store Manager HEAD 1 (CHT)
+|   -- Sales Staff (NV Sale)
+|   -- Cashier / Accountant (Thu ngân / Kế toán)
+|   -- Reception Staff (NV Tiếp nhận)
+|   -- Technician (KTV)
+|   -- Parts Warehouse Manager (QL Kho PT)
+|   -- Vehicle Warehouse Manager (QL Kho XM)
+|   -- Customer Care Staff (NV CSKH)
+|   -- Marketing Staff (NV Marketing)
+-- Store Manager HEAD 2 (CHT)
+|   -- ... (same structure)
+-- ... (up to 10+ HEADs)
 ```
 
 ## HEAD (Branch) Registry
@@ -50,55 +50,55 @@ Director (Giám đốc - GĐ)
 
 ### Sales Module
 
-| Action | GĐ | TPKD | CHT | NV Sale | Cashier |
+| Action | G | TPKD | CHT | NV Sale | Cashier |
 |--------|:---:|:----:|:---:|:-------:|:-------:|
-| Create sales order | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Select vehicle for customer | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Request discount policy | ❌ | ❌ | ❌ | ✅ (propose) | ❌ |
-| Create discount policy voucher | ✅ | ✅ | ✅ (creates) | ❌ | ❌ |
-| Final approval on policy | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Collect payment | ✅ | ❌ | ✅ | ✅ (if granted) | ✅ |
-| Issue receipt | ✅ | ❌ | ✅ | ❌ | ✅ |
-| Issue invoice | ✅ | ❌ | ✅ | ❌ | ✅ |
+| Create sales order |  |  |  | x |  |
+| Select vehicle for customer |  |  |  | x |  |
+| Request discount policy |  |  |  | x (propose) |  |
+| Create discount policy voucher |  |  | x (creates) |  |  |
+| Final approval on policy | x |  |  |  |  |
+| Collect payment |  |  |  | x (if granted) | x |
+| Issue receipt |  |  |  |  | x |
+| Issue invoice |  |  |  |  | x |
 
 ### Service Module (CS)
 
-| Action | GĐ | CHT | KTV | Reception | CSKH |
+| Action | G | CHT | KTV | Reception | CSKH |
 |--------|:---:|:---:|:---:|:---------:|:----:|
-| Create work order | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Select parts/services | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Perform repair | ❌ | ❌ | ✅ | ❌ | ❌ |
-| Complete work order | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Send SMS reminders | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Create work order |  |  |  | x |  |
+| Select parts/services |  |  | x |  |  |
+| Perform repair |  |  | x |  |  |
+| Complete work order |  |  | x |  |  |
+| Send SMS reminders |  |  |  |  | x |
 
 ### Warehouse Module
 
-| Action | GĐ | CHT | Parts WH Mgr | Vehicle WH Mgr | WH Accountant |
+| Action | G | CHT | Parts WH Mgr | Vehicle WH Mgr | WH Accountant |
 |--------|:---:|:---:|:----------:|:--------------:|:-------------:|
-| Stock in | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Stock out | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Inter-HEAD transfer | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Inventory audit | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Stock reconciliation | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Stock in |  |  | x | x |  |
+| Stock out |  |  | x | x |  |
+| Inter-HEAD transfer |  | x |  |  |  |
+| Inventory audit |  |  | x | x |  |
+| Stock reconciliation |  |  |  |  | x |
 
 ## Permission Mechanism In Database
 
 ```
-tbl_SYSRoles           -> Define roles
-tbl_SYSStaffInRoles    -> Assign staff to roles (per HEAD)
-tbl_SYSPermissions     -> Action-level access (per HEAD + Role)
-tbl_SYSDataPermissions -> Data-level access (per HEAD + Role)
-tbl_SYSFunction        -> Menu functions
-tbl_SYSAction          -> Actions within functions
+tbl_SYSRoles            Define roles
+tbl_SYSStaffInRoles     Assign staff to roles (per HEAD)
+tbl_SYSPermissions      Action-level access (per HEAD + Role)
+tbl_SYSDataPermissions  Data-level access (per HEAD + Role)
+tbl_SYSFunction         Menu functions
+tbl_SYSAction           Actions within functions
 ```
 
-> **Critical Rule:** A staff member can belong to multiple HEADs with different roles. `tbl_SYSStaffInRoles.Head` determines the staff's role at a specific HEAD. Example: An employee could be Sales at HEAD 1 but Cashier at HEAD 2 -- this is valid.
+> **Critical Rule:** A staff member can belong to multiple HEADs with different roles. `tbl_SYSStaffInRoles.Head` determines the staff's role at a specific HEAD. Example: An employee could be Sales at HEAD 1 but Cashier at HEAD 2 - this is valid.
 
 ## Special: Flexible Roles
 
 In practice at Hoài Minh, role boundaries are NOT rigid:
-- **Sales Staff may collect payment** if granted permission -> Reduces handoff steps
-- **KTV may create work orders** when not busy -> Reduces wait time
+- **Sales Staff may collect payment** if granted permission  Reduces handoff steps
+- **KTV may create work orders** when not busy  Reduces wait time
 - **CHT can do everything** within their managed HEAD scope
 
--> **When coding:** Always check permissions via `tbl_SYSPermissions`. NEVER hardcode role names.
+ **When coding:** Always check permissions via `tbl_SYSPermissions`. NEVER hardcode role names.

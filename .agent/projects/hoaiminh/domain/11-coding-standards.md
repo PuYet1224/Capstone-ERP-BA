@@ -1,59 +1,59 @@
-﻿# 11 - Coding Standards (Ban Buoc Doc Truoc Khi Code)
+# 11 - Coding Standards (Bắt Buộc Đọc Trước Khi Code)
 
-> **CRITICAL:** Moi nhan vien AI (BA/BE/FE) PHAI doc file nay. Vi pham bat ky rule nao = code FAILED.
+> **CRITICAL:** Mọi nhân viên AI (BA/BE/FE) PHẢI đọc file này. Vi phạm bất kỳ rule nào = code FAILED.
 
-## 0. API NAMING - CHI 4 PREFIX DUOC PHEP
+## 0. API NAMING - CHỈ 4 PREFIX ĐƯỢC PHÉP
 
-| Prefix | Y nghia | Vi du |
+| Prefix | Ý nghĩa | Ví dụ |
 |:-------|:--------|:------|
-| **Get** | Lay data | `GetListSALReceipt`, `GetSALReceipt` |
-| **Update** | Tao moi + sua + doi trang thai | `UpdateSALReceipt`, `UpdateSALReceiptStatus` |
-| **Delete** | Xoa | `DeleteSALReceipt` |
-| **Add** | Them item vao collection | `AddSALSelectedVehicles` |
+| **Get** | Lấy data | `GetListSALReceipt`, `GetSALReceipt` |
+| **Update** | Tạo mới + sửa + đổi trạng thái | `UpdateSALReceipt`, `UpdateSALReceiptStatus` |
+| **Delete** | Xóa | `DeleteSALReceipt` |
+| **Add** | Thêm item vào collection | `AddSALSelectedVehicles` |
 
-**CAM TUYET DOI:** ~~Create~~, ~~Cancel~~, ~~Complete~~, ~~Insert~~, ~~Remove~~, ~~Set~~, ~~Patch~~
-- Tao moi = `Update` (Code=0 thi insert, Code>0 thi update)
-- Huy = `UpdateStatus` (Status = Cancelled)
-- Hoan tat = `UpdateStatus` (Status = Completed)
+**CẤM TUYỆT ĐỐI:** ~~Create~~, ~~Cancel~~, ~~Complete~~, ~~Insert~~, ~~Remove~~, ~~Set~~, ~~Patch~~
+- Tạo mới = `Update` (Code=0 thì insert, Code>0 thì update)
+- Hủy = `UpdateStatus` (Status = Cancelled)
+- Hoàn tất = `UpdateStatus` (Status = Completed)
 
-## 1. CAM TUYET DOI HARD-CODE MAGIC NUMBERS
+## 1. CẤM TUYỆT ĐỐI HARD-CODE MAGIC NUMBERS
 
-### Sai (BI CAM)
+### Sai (BỊ CẤM)
 ```csharp
 // SAI - hard-code status number
-if (receipt.Status == 30) // 30 la gi???
+if (receipt.Status == 30) // 30 là gì?
 receipt.Status = 10;
 var allowed = (10, 30) => true; // magic numbers
-order.PaymentMethod == 3; // 3 la gi???
+order.PaymentMethod == 3; // 3 là gì?
 ```
 
-### Dung (BAT BUOC)
+### Đúng (BẮT BUỘC)
 ```csharp
-// DUNG - dung constants mapped to tbl_LSStatus TypeData=22
+// ĐÚNG - dùng constants mapped to tbl_LSStatus TypeData=22
 public static class ReceiptStatus
 {
-    public const int New = 1;        // TypeOfStatus=1, Code=126, "Moi"
-    public const int Completed = 2;  // TypeOfStatus=2, Code=127, "Hoan tat"
-    public const int Cancelled = 3;  // TypeOfStatus=3, Code=128, "Huy giao dich"
+    public const int New = 1;        // TypeOfStatus=1, Code=126, "Mới"
+    public const int Completed = 2;  // TypeOfStatus=2, Code=127, "Hoàn tất"
+    public const int Cancelled = 3;  // TypeOfStatus=3, Code=128, "Hủy giao dịch"
 }
 
-// DUNG - su dung constant
+// ĐÚNG - sử dụng constant
 if (receipt.Status == ReceiptStatus.Completed)
 var allowed = (ReceiptStatus.New, ReceiptStatus.Completed) => true;
 ```
 
-## 2. CAM DUNG `dynamic Payload` CHO HANDLER MOI
+## 2. CẤM DÙNG `dynamic Payload` CHO HANDLER MỚI
 
-### Sai (pattern cu - chi chap nhan cho handler da ton tai)
+### Sai (pattern cũ - chỉ chấp nhận cho handler đã tồn tại)
 ```csharp
-// SAI - khong type-safe, khong validate duoc
+// SAI - không type-safe, không validate được
 public record UpdateSALReceiptCommand(dynamic Payload) : IRequest<ApiResponse<object>>;
-long code = (long)request.Payload.Code; // runtime error neu thieu field
+long code = (long)request.Payload.Code; // runtime error nếu thiếu field
 ```
 
-### Dung (BAT BUOC cho code moi)
+### Đúng (BẮT BUỘC cho code mới)
 ```csharp
-// DUNG - strongly-typed request
+// ĐÚNG - strongly-typed request
 public record UpdateSALReceiptCommand(
     long OrderMasterCode,
     double CollectedAmount,
@@ -61,7 +61,7 @@ public record UpdateSALReceiptCommand(
     string? Note
 ) : IRequest<ApiResponse<object>>;
 
-// Access truc tiep - compile-time safe
+// Access trực tiếp - compile-time safe
 var order = await db.SALOrderMasters
     .FirstOrDefaultAsync(o => o.Code == request.OrderMasterCode, ct);
 ```
@@ -73,39 +73,39 @@ var order = await db.SALOrderMasters
 ### Receipt Status (SALOrderReceipt, TypeData=22)
 | TypeOfStatus | Name | Code (PK) | Description |
 |:-------------|:-----|:----------|:------------|
-| 1 | New (Moi) | 126 | Receipt created, not yet confirmed |
-| 2 | Completed (Hoan tat) | 127 | Payment collected and confirmed |
-| 3 | Cancelled (Huy giao dich) | 128 | Receipt cancelled |
+| 1 | New (Mới) | 126 | Receipt created, not yet confirmed |
+| 2 | Completed (Hoàn tất) | 127 | Payment collected and confirmed |
+| 3 | Cancelled (Hủy giao dịch) | 128 | Receipt cancelled |
 
 ### Invoice Status (SALOrderInvoice, TypeData=23)
 | TypeOfStatus | Name | Code (PK) | Description |
 |:-------------|:-----|:----------|:------------|
-| 1 | New (Moi) | 129 | Invoice created |
-| 2 | Completed (Hoan tat) | 130 | Invoice issued |
-| 3 | Cancelled (Huy giao dich) | 131 | Invoice cancelled |
+| 1 | New (Mới) | 129 | Invoice created |
+| 2 | Completed (Hoàn tất) | 130 | Invoice issued |
+| 3 | Cancelled (Hủy giao dịch) | 131 | Invoice cancelled |
 
 ### Sales Order Status (SALOrderMaster, TypeData=18)
 | TypeOfStatus | Name | Code (PK) | Description |
 |:-------------|:-----|:----------|:------------|
-| 1 | Created (Tao moi) | 92 | Order just created |
-| 2 | Returned (Tra ve) | 93 | Order returned for revision |
-| 3 | Pending (Cho xu ly) | 94 | Waiting for processing |
-| 4 | Processing (Dang xu ly) | 95 | Active order in progress |
-| 5 | Completed (Hoan tat) | 96 | Order fulfilled |
-| 6 | Cancelled (Huy giao dich) | 133 | Order cancelled |
+| 1 | Created (Tạo mới) | 92 | Order just created |
+| 2 | Returned (Trả về) | 93 | Order returned for revision |
+| 3 | Pending (Chờ xử lý) | 94 | Waiting for processing |
+| 4 | Processing (Đang xử lý) | 95 | Active order in progress |
+| 5 | Completed (Hoàn tất) | 96 | Order fulfilled |
+| 6 | Cancelled (Hủy giao dịch) | 133 | Order cancelled |
 
 ### Payment Method (SALOrderMaster.PaymentMethod)
 | Value | Name | Description |
 |:------|:-----|:------------|
-| 1 | Cash (Tien mat) | Thanh toan tien mat |
-| 2 | Transfer (Chuyen khoan) | Chuyen khoan ngan hang |
-| 3 | Installment (Tra gop) | Tra gop qua ngan hang |
+| 1 | Cash (Tiền mặt) | Thanh toán tiền mặt |
+| 2 | Transfer (Chuyển khoản) | Chuyển khoản ngân hàng |
+| 3 | Installment (Trả góp) | Trả góp qua ngân hàng |
 
 ## 4. RESPONSE PATTERN
 
-### Dung
+### Đúng
 ```csharp
-// DUNG - tra ve typed object
+// ĐÚNG - trả về typed object
 return ApiResponse<object>.Ok(new SALReceiptResponse
 {
     Code = receipt.Code,
@@ -118,31 +118,31 @@ return ApiResponse<object>.Ok(new SALReceiptResponse
 
 ### Sai
 ```csharp
-// SAI - tra ve anonymous object khong co structure
+// SAI - trả về anonymous object không có structure
 return ApiResponse<object>.Ok(new { receipt.Code, receipt.Status });
 ```
 
 ## 5. VALIDATION RULES
 
 ```csharp
-// BAT BUOC validate dau vao
+// BẮT BUỘC validate đầu vào
 if (request.CollectedAmount <= 0)
-    return ApiResponse<object>.BadRequest("So tien phai lon hon 0");
+    return ApiResponse<object>.BadRequest("Số tiền phải lớn hơn 0");
 
 if (string.IsNullOrWhiteSpace(request.CancelReason) && targetStatus == ReceiptStatus.Cancelled)
-    return ApiResponse<object>.BadRequest("Huy phieu thu phai co ly do");
+    return ApiResponse<object>.BadRequest("Hủy phiếu thu phải có lý do");
 ```
 
 ## 6. MANDATORY BE PATTERNS (BA MUST include in every BE Guide)
 
-### HEAD Filter -- ALL queries MUST filter by branch
+### HEAD Filter - ALL queries MUST filter by branch
 ```csharp
 // Every GET handler MUST include:
 .Where(x => x.Head == currentUser.HeadCode)
 ```
 BA Guide MUST specify: "All list queries MUST filter by Head (HEAD-01 rule)"
 
-### ICurrentUserService -- audit fields MUST use real user context
+### ICurrentUserService - audit fields MUST use real user context
 ```csharp
 // Every create/update handler MUST inject ICurrentUserService
 // NEVER hard-code Head, Cashier, CreatedBy values
@@ -152,14 +152,14 @@ receipt.CreatedBy = currentUser.UserName;
 ```
 BA Guide MUST specify: "Inject ICurrentUserService for audit fields"
 
-### Auto-Generated IDs -- use tbl_SYSIncrease pattern
+### Auto-Generated IDs - use tbl_SYSIncrease pattern
 BA Guide MUST specify: "ReceiptNo uses tbl_SYSIncrease auto-generation, NOT manual string concat"
 
 ## 7. FE CODING STANDARDS
 
 ### Angular - Constants (must match tbl_LSStatus TypeData=22)
 ```typescript
-// Values from production DB -- use enum, NOT const object
+// Values from production DB - use enum, NOT const object
 export enum SALReceiptStatusEnum {
   NEW = 1,        // TypeOfStatus=1, Code=126
   COMPLETED = 2,  // TypeOfStatus=2, Code=127
