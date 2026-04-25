@@ -14,7 +14,7 @@ description: Clean up {PROJECT_PIPELINE} after implementation and review is done
 Before ANY deletion, verify memory file exists:
 
 ```
-Check: .agent\projects\hoaiminh\memory\{Feature}.md
+Check: .agent\projects\Capstone\memory\{Feature}.md
 ```
 
 **If memory file does NOT exist:**

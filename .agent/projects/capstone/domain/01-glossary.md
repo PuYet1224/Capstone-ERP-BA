@@ -1,4 +1,4 @@
-# Glossary - Honda HEAD Hoài Minh Internal Terminology
+# Glossary - Capstone Hoài Minh Internal Terminology
 
 ## Organization Terms
 

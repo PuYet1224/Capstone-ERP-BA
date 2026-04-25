@@ -1,9 +1,9 @@
-# Database Schema - Honda HEAD Hoài Minh ERP
+# Database Schema - Capstone Hoài Minh ERP
 
 ## Database Overview
 
 - **Server:** SQL Server
-- **Database:** `HOAIMINH.ERP`
+- **Database:** `Capstone.ERP`
 - **Total Tables:** 95
 - **Naming Convention:** `tbl_{Module}{EntityName}` (e.g., `tbl_SALOrderMaster`)
 

@@ -12,7 +12,7 @@
 | **Framework** | .NET 10 (LTS) |
 | **Architecture** | Modular Monolith + Vertical Slice |
 | **Database** | SQL Server - Code-First (reverse-engineered from legacy DB) |
-| **Authentication** | JWT Bearer - External Identity Server (`identity.hoaiminh.vn`) |
+| **Authentication** | JWT Bearer - External Identity Server (`identity.Capstone.vn`) |
 | **API Style** | Minimal API (No traditional Controllers) |
 | **ORM** | Entity Framework Core 10 |
 | **API Docs** | Swagger / OpenAPI (auto-generated) |
@@ -22,29 +22,29 @@
 ## 2. Directory Structure
 
 ```
-HoaiMinh.ERP/
+Capstone.ERP/
 |
 --  .agent/                           AI Brain (not deployed)
-|   -- agents/hoaiminh-analyst.md       AI Business Analyst
-|   -- skills/hoaiminh-domain/          Domain knowledge (8 sections)
+|   -- agents/Capstone-analyst.md       AI Business Analyst
+|   -- skills/Capstone-domain/          Domain knowledge (8 sections)
 |   -- workflows/hm-feature.md         Auto feature pipeline
 |
 --  docs/                             Project Documents
 |   -- requirements/                    Business Requirements
 |
 --  src/                              Host Application
-|   -- HoaiMinh.ERP.API/
+|   -- Capstone.ERP.API/
 |       -- Program.cs                   Entry point (config + routing only)
 |       -- appsettings.json             Connection string, Auth config
 |       -- Properties/
 |           -- launchSettings.json      IIS Express + Kestrel profiles
 |
 --  modules/                          Business Logic (ALL code goes here)
-|   -- HoaiMinh.ERP.Modules.Core/      Shared: DbContext, Entities, DTOs
-|   -- HoaiMinh.ERP.Modules.Identity/  Auth: User Profiles, JWT mapping
-|   -- HoaiMinh.ERP.Modules.Sale/      Sales: Orders, Invoices, Receipts
+|   -- Capstone.ERP.Modules.Core/      Shared: DbContext, Entities, DTOs
+|   -- Capstone.ERP.Modules.Identity/  Auth: User Profiles, JWT mapping
+|   -- Capstone.ERP.Modules.Sale/      Sales: Orders, Invoices, Receipts
 |
--- HoaiMinh.ERP.slnx                   Solution file
+-- Capstone.ERP.slnx                   Solution file
 ```
 
 ---
@@ -55,7 +55,7 @@ HoaiMinh.ERP/
 
 ```mermaid
 flowchart LR
-    subgraph API["src/HoaiMinh.ERP.API"]
+    subgraph API["src/Capstone.ERP.API"]
         P["Program.cs\n(Config + Routing only)"]
     end
     
@@ -66,7 +66,7 @@ flowchart LR
     end
     
     subgraph DB["Database"]
-        SQL["SQL Server\nHOAIMINH.ERP\n95 tables"]
+        SQL["SQL Server\nCapstone.ERP\n95 tables"]
     end
     
     API --> SALE
@@ -78,7 +78,7 @@ flowchart LR
 
 ### 3 Golden Rules:
 
-1. **`src/HoaiMinh.ERP.API/` contains NO business logic** - only server configuration and module registration
+1. **`src/Capstone.ERP.API/` contains NO business logic** - only server configuration and module registration
 2. **Each module is self-contained** - Entity, DTO, Endpoint, Service
 3. **Vertical Slice** - 1 feature = 1 neat folder, easy to navigate
 
@@ -91,7 +91,7 @@ flowchart LR
 ```
 Modules.Core/
 -- Data/
-|   -- HoaiMinhDbContext.cs           91 DbSets (all DB tables)
+|   -- CapstoneDbContext.cs           91 DbSets (all DB tables)
 |   -- Entities/                      91 entity classes
 |       -- tbl_SALOrderMaster.cs
 |       -- tbl_CSWorkOrderMaster.cs
@@ -175,7 +175,7 @@ Modules.Identity/
 
 ```
 # Step 1: Create new module
-modules/HoaiMinh.ERP.Modules.CustomerService/
+modules/Capstone.ERP.Modules.CustomerService/
 
 # Step 2: Create feature folder
 Features/WorkOrders/WorkOrderEndpoints.cs
@@ -191,7 +191,7 @@ app.MapCustomerServiceModuleEndpoints();
 
 ```bash
 # Run dev server
-dotnet run --project src/HoaiMinh.ERP.API
+dotnet run --project src/Capstone.ERP.API
 
 # Or F5 in Visual Studio -> IIS Express
 # Swagger UI available at: http://localhost:5200/swagger

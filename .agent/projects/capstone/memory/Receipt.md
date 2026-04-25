@@ -49,4 +49,4 @@ Receipts (Phiu Thu) securely record incoming currency to resolve a linked Sales 
 - **PaymentMethods**: 1=Cash, 2=Transfer, 4=Cash+Transfer
 
 ## 10. Revision History
-- 2026-04-10: Pipeline Auto-Analysis processing REQ_001_Receipt.md against Hoai Minh Database rules. Overwrote isolated legacy tracking memory file with updated deep-analysis schema mappings.
+- 2026-04-10: Pipeline Auto-Analysis processing REQ_001_Receipt.md against Capstone Database rules. Overwrote isolated legacy tracking memory file with updated deep-analysis schema mappings.

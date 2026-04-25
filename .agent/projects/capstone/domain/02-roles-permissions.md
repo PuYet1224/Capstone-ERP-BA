@@ -1,4 +1,4 @@
-# Roles & Permissions - Honda HEAD Hoài Minh
+# Roles & Permissions - Capstone Hoài Minh
 
 ## Organization Hierarchy
 

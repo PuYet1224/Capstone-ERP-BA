@@ -1,13 +1,13 @@
 ---
 trigger: /figma-variables
-description: Create or update Hoai Minh ERP design system variables in Figma. Establishes HM Colors, HM Spacing, HM Typography collections. Usage /figma-variables or /figma-variables --reset
+description: Create or update Capstone ERP design system variables in Figma. Establishes HM Colors, HM Spacing, HM Typography collections. Usage /figma-variables or /figma-variables --reset
 skills:
   - figma-variables
 ---
 
 # /figma-variables [options]
 
-> Creates all Hoai Minh design tokens as Figma Variables - safe to re-run anytime (idempotent).
+> Creates all Capstone design tokens as Figma Variables - safe to re-run anytime (idempotent).
 
 ## Usage
 

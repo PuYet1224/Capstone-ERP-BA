@@ -4,7 +4,7 @@ description: |
   Figma MCP live reader for BA design analysis.
   Reads live Figma Desktop data via MCP bridge, analyzes BODY content only.
   CRITICAL: ALWAYS skips sidebar and header nodes - only analyzes the main content area.
-  Maps colors to SCSS variables, components to Hoai Minh wrappers.
+  Maps colors to SCSS variables, components to Capstone wrappers.
   NEVER reads from local images or archives.
 triggers:
   - "analyze"
@@ -135,7 +135,7 @@ If a color is NOT in this table  flag it: " Unknown color #XXXXXX - needs SCSS v
 
 ## COMPONENT MAPPING (MANDATORY)
 
->  NEVER reference raw Kendo component names in guides. Always map to Hoai Minh wrappers.
+>  NEVER reference raw Kendo component names in guides. Always map to Capstone wrappers.
 
 | Figma Element | Correct Angular Component |
 |---|---|

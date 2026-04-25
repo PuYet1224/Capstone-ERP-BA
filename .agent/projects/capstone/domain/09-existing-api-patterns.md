@@ -1,4 +1,4 @@
-# Existing API Patterns - Hoai Minh ERP
+# Existing API Patterns - Capstone ERP
 
 > BA MUST reference this file when writing BE_Guide.md.
 > These are the ACTUAL patterns used in the codebase. DO NOT invent new patterns.
@@ -7,7 +7,7 @@
 
 - .NET 10, Minimal API, EF Core 10, MediatR (CQRS)
 - DB: SQL Server (Code-First, reverse-engineered from legacy DB)
-- Auth: JWT Bearer from external identity.hoaiminh.vn
+- Auth: JWT Bearer from external identity.Capstone.vn
 
 ## Project Structure
 
@@ -45,8 +45,8 @@ public record GetListSALMasterQuery(dynamic Payload) : IRequest<ApiResponse<obje
 // Handler = business logic
 public class GetListSALMasterHandler : IRequestHandler<GetListSALMasterQuery, ApiResponse<object>>
 {
-    private readonly HoaiMinhDbContext _db;
-    public GetListSALMasterHandler(HoaiMinhDbContext db) => _db = db;
+    private readonly CapstoneDbContext _db;
+    public GetListSALMasterHandler(CapstoneDbContext db) => _db = db;
 
     public async Task<ApiResponse<object>> Handle(GetListSALMasterQuery request, CancellationToken ct)
     {
@@ -64,7 +64,7 @@ public class GetListSALMasterHandler : IRequestHandler<GetListSALMasterQuery, Ap
 ```csharp
 public record UpdateSALMasterCommand(dynamic Payload) : IRequest<ApiResponse<object>>;
 
-public class UpdateSALMasterHandler(HoaiMinhDbContext db) 
+public class UpdateSALMasterHandler(CapstoneDbContext db) 
     : IRequestHandler<UpdateSALMasterCommand, ApiResponse<object>>
 {
     public async Task<ApiResponse<object>> Handle(UpdateSALMasterCommand request, CancellationToken ct)
@@ -120,7 +120,7 @@ return ApiResponse<object>.NotFound("Order not found");
 | Status command | `Update{Entity}StatusCommand` | `UpdateSALReceiptStatusCommand` |
 | Handler class | `{Action}Handler` | `GetListSALMasterHandler` |
 | File name | `{Action}.cs` | `GetListSALMaster.cs` |
-| Namespace | `HoaiMinh.ERP.Modules.Sale.Features.{Module}` | |
+| Namespace | `Capstone.ERP.Modules.Sale.Features.{Module}` | |
 
 ### Example mapping:
 ```
@@ -135,8 +135,8 @@ Delete receipt        -> DeleteSALReceipt
 ## Key Namespaces
 
 ```csharp
-using HoaiMinh.ERP.Infrastructure.Persistence;  // HoaiMinhDbContext
-using HoaiMinh.ERP.Shared.Responses;             // ApiResponse<T>
+using Capstone.ERP.Infrastructure.Persistence;  // CapstoneDbContext
+using Capstone.ERP.Shared.Responses;             // ApiResponse<T>
 using MediatR;                                     // IRequest, IRequestHandler
 using Microsoft.EntityFrameworkCore;               // AsNoTracking, ToListAsync
 ```
@@ -153,7 +153,7 @@ Entity tables map to DbSet with prefix removed:
 1. ALWAYS use `.AsNoTracking()` for read-only queries
 2. ALWAYS use `.Select()` projection - NEVER return full entity to client
 3. Use `CancellationToken ct` in all async methods
-4. Primary constructor `Handler(HoaiMinhDbContext db)` for simple DI
+4. Primary constructor `Handler(CapstoneDbContext db)` for simple DI
 
 ## Existing Feature List (95 handlers as of April 2026)
 

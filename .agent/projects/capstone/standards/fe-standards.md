@@ -1,7 +1,7 @@
-# Hoai Minh ERP - FE Coding Standards
+# Capstone ERP - FE Coding Standards
 
-> **Web Stack:** Angular 16, Kendo UI 13, SCSS (`HoaiMinh.FEWeb`)
-> **Mobile Stack:** Angular 16, Responsive (no Kendo Grid) (`HoaiMinh.FEMobileWeb`)
+> **Web Stack:** Angular 16, Kendo UI 13, SCSS (`Capstone.FEWeb`)
+> **Mobile Stack:** Angular 16, Responsive (no Kendo Grid) (`Capstone.FEMobileWeb`)
 > **MANDATORY:** BA Guide MUST include all patterns from this file for every FE feature.
 
 ---
@@ -383,7 +383,7 @@ getStatusClass(status: number): string {
 
 ---
 
-## 10. LAYOUT RULES (UI/UX Standards - Hoai Minh design)
+## 10. LAYOUT RULES (UI/UX Standards - Capstone design)
 
 ```
 1. SCROLL: When zoom > 100%  content MUST be scrollable (overflow-x: auto on table container)

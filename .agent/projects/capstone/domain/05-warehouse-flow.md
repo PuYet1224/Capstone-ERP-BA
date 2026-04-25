@@ -1,4 +1,4 @@
-# Warehouse Flow - Stock Management at Honda HEAD Hoài Minh
+# Warehouse Flow - Stock Management at Capstone Hoài Minh
 
 ## Overview
 

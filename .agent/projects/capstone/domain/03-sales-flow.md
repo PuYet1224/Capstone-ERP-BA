@@ -1,4 +1,4 @@
-# Sales Flow - Vehicle Sales Process at Honda HEAD Hoài Minh
+# Sales Flow - Vehicle Sales Process at Capstone Hoài Minh
 
 ## Overview
 

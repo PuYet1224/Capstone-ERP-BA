@@ -1,11 +1,11 @@
 ---
 name: figma-variables
-description: Knowledge base for Hoai Minh ERP design tokens - colors, spacing, typography, and radius values. Reference for the /figma-variables workflow when creating Figma Variables.
+description: Knowledge base for Capstone ERP design tokens - colors, spacing, typography, and radius values. Reference for the /figma-variables workflow when creating Figma Variables.
 ---
 
-# Figma Variables Skill - Hoai Minh Design System
+# Figma Variables Skill - Capstone Design System
 
-> **Purpose:** Create and maintain Hoai Minh ERP design tokens as Figma Variables.
+> **Purpose:** Create and maintain Capstone ERP design tokens as Figma Variables.
 > **API:** Uses `figma.setupDesignTokens()` - idempotent, safe to re-run anytime.
 > **Result:** All colors, spacing, typography bound to Figma Variables  change once, update everywhere.
 
@@ -20,7 +20,7 @@ figma_docs(section: 'tokens')
 
 ---
 
-## Hoai Minh Design Token Reference
+## Capstone Design Token Reference
 
 > **Source of truth:** `src/assets/scss/_colors.scss`
 >  **CRITICAL RULE:** The Figma Variable names MUST EXACTLY match the SCSS Variable names (without the `$`). NEVER invent new names like `text-secondary` or `bg-surface`. If it doesn't exist in `_colors.scss`, do not create it in Figma.
@@ -56,8 +56,8 @@ figma_docs(section: 'tokens')
 | `gray-900` | `$gray-900` | `#23282c` |
 | `gray-color` | `$gray-color` | `#999999` |
 | `black-color` | `$black-color` | `#3C4858` |
-| `hoaiminh-primary` | `$hoaiminh-primary` | `#e5322b` |
-| `hoaiminh-secondary` | `$hoaiminh-secondary` | `#fff00d` |
+| `Capstone-primary` | `$Capstone-primary` | `#e5322b` |
+| `Capstone-secondary` | `$Capstone-secondary` | `#fff00d` |
 | `logo-primary` | `$logo-primary` | `#891728` |
 
 ---
@@ -109,8 +109,8 @@ await figma.setupDesignTokens({
     "black-color": "#3C4858",
     
     // Brand Specific
-    "hoaiminh-primary": "#e5322b",
-    "hoaiminh-secondary": "#fff00d",
+    "Capstone-primary": "#e5322b",
+    "Capstone-secondary": "#fff00d",
     "logo-primary": "#891728"
   }
 });

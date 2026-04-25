@@ -17,9 +17,9 @@ skills:
 
 ## Memory Output Path
 
-**Hoai Minh ERP projects:**
+**Capstone ERP projects:**
 ```
-.agent/projects/hoaiminh/memory/{Feature}.md
+.agent/projects/Capstone/memory/{Feature}.md
 ```
 
 **Other projects:**
@@ -32,7 +32,7 @@ skills:
 
 ```
 [OK] Memorized: {Feature}
-    Memory: .agent/projects/hoaiminh/memory/{Feature}.md
+    Memory: .agent/projects/Capstone/memory/{Feature}.md
     Deviations from plan: {N}
     Covers: {N} states, {N} rules, {N} APIs, {N} gotchas
 

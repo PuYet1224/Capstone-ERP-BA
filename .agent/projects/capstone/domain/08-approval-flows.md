@@ -1,4 +1,4 @@
-# Approval Flows - Multi-Level Approval at Honda HEAD Hoài Minh
+# Approval Flows - Multi-Level Approval at Capstone Hoài Minh
 
 ## Overview
 

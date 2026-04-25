@@ -33,7 +33,7 @@ Activate when user provides ANY of:
 ### Step A: Detect Project Context
 Read the notes and identify:
 ```
-- PROJECT NAME: (e.g., "Hoai Minh ERP", "E-Commerce Platform", "Hospital PMS")
+- PROJECT NAME: (e.g., "Capstone ERP", "E-Commerce Platform", "Hospital PMS")
 - FEATURE NAME: (PascalCase - will be used in filename)
 - MODULE/DOMAIN: (e.g., Sales, Billing, HR, Inventory, Auth)
 - PLATFORM: Web | Mobile | Both | API-only
@@ -42,9 +42,9 @@ Read the notes and identify:
 ```
 
 ### Step B: Load Domain Context (if project has domain files)
-If working in Hoai Minh ERP project:
-- `.agent\projects\hoaiminh\domain\01-glossary.md` - always
-- `.agent\projects\hoaiminh\domain\07-business-rules.md` - always
+If working in Capstone ERP project:
+- `.agent\projects\Capstone\domain\01-glossary.md` - always
+- `.agent\projects\Capstone\domain\07-business-rules.md` - always
 - Module-specific sections based on domain detected
 
 For OTHER projects: skip domain files, rely on notes only.
@@ -415,10 +415,10 @@ Final: {End state / output produced}
 
 | Asset | Reference Info |
 |---|---|
-| Figma File Name | {Name of the Figma file - e.g., "Hoai Minh ERP v2"} |
+| Figma File Name | {Name of the Figma file - e.g., "Capstone ERP v2"} |
 | Figma Page Name | {Page name inside Figma - e.g., "SAL - Sales Module"} |
 | Frame / Screen Names | {List of screen/frame names as they appear in Figma - e.g., "MTB020 - Receipt List", "MTB021 - Receipt Detail"} |
-| Design System | {Component library name - e.g., "Hoai Minh Design System", "Material UI"} |
+| Design System | {Component library name - e.g., "Capstone Design System", "Material UI"} |
 | Prototype Link | {Figma prototype URL if available - otherwise leave blank} |
 
 > **NOTE:** If the PM does not know the Figma frame names, leave them blank. The BA will locate
@@ -612,7 +612,7 @@ This skill works for ANY project. AI must adapt these elements based on context:
 
 | Project Context | Adaptation |
 |---|---|
-| Hoai Minh ERP | Load domain files, use SAL/CS/WH/HR module codes, use VND currency, Vietnamese labels |
+| Capstone ERP | Load domain files, use SAL/CS/WH/HR module codes, use VND currency, Vietnamese labels |
 | E-Commerce | Use ORDER/CART/PRODUCT module codes, multi-currency, cart abandonment risks |
 | Hospital PMS | Use PATIENT/WARD/PHARMACY codes, add HIPAA compliance NFR-S rows |
 | SaaS Platform | Use TENANT/SUBSCRIPTION/BILLING codes, add multi-tenancy risks |

@@ -34,7 +34,7 @@ WRITE:  {PROJECT_PIPELINE}\guides\           (BE_*.md + FE_*.md -- output for de
 ```
 UNIVERSAL SKILLS: .agent\skills\          (generic -- works for any project)
 PROJECT KNOWLEDGE: .agent\projects\       (project-specific -- load per project)
-  +-- hoaiminh\
+  +-- Capstone\
       |-- PROJECT.md                      (meta + trigger rules)
       |-- domain\*.md                     (business flows, schema, rules)
       |-- standards\be-standards.md       (BE coding standards)
@@ -199,17 +199,17 @@ APPENDIX C -> Extract:
 
 **Detect project** from SRS Pillar 1 (module code, terminology, currency):
 
-**If Hoai Minh ERP** (SAL / CS / WH / HR / SYS / MTB module codes, VND, Honda/3PS terms):
+**If Capstone ERP** (SAL / CS / WH / HR / SYS / MTB module codes, VND, Honda/3PS terms):
 ```
 MANDATORY LOAD:
-  .agent\projects\hoaiminh\standards\be-standards.md   (BE stack, API naming, DTO patterns)
-  .agent\projects\hoaiminh\standards\fe-standards.md   (FE stack, Angular patterns, components)
+  .agent\projects\Capstone\standards\be-standards.md   (BE stack, API naming, DTO patterns)
+  .agent\projects\Capstone\standards\fe-standards.md   (FE stack, Angular patterns, components)
 
 LOAD BASED ON MODULE:
-  .agent\projects\hoaiminh\domain\01-glossary.md
-  .agent\projects\hoaiminh\domain\06-database-schema.md
-  .agent\projects\hoaiminh\domain\07-business-rules.md
-  .agent\projects\hoaiminh\domain\11-coding-standards.md
+  .agent\projects\Capstone\domain\01-glossary.md
+  .agent\projects\Capstone\domain\06-database-schema.md
+  .agent\projects\Capstone\domain\07-business-rules.md
+  .agent\projects\Capstone\domain\11-coding-standards.md
   [SAL/MTB] -> domain\03-sales-flow.md + domain\08-approval-flows.md
   [CS]      -> domain\04-service-flow.md
   [WH]      -> domain\05-warehouse-flow.md
@@ -217,7 +217,7 @@ LOAD BASED ON MODULE:
   [PART]    -> domain\05-warehouse-flow.md
 
 CHECK MEMORY:
-  .agent\projects\hoaiminh\memory\{FeatureName}.md  -> additional context
+  .agent\projects\Capstone\memory\{FeatureName}.md  -> additional context
 ```
 
 **Conflict resolution (AUTO -- never ask user):**
@@ -463,7 +463,7 @@ Save to: `{PROJECT_PIPELINE}\guides\BE_{SEQ}_{FeatureName}.md`
 
 ## 3. DTO Definitions
 
-> File location: `modules/HoaiMinh.ERP.Modules.{Module}/Features/{Feature}/{Feature}Dto.cs`
+> File location: `modules/Capstone.ERP.Modules.{Module}/Features/{Feature}/{Feature}Dto.cs`
 
 ### {Feature}SaveRequest (Create or Update -- Code=0->INSERT, Code>0->UPDATE)
 ```csharp
@@ -542,7 +542,7 @@ public enum ENUM{TableName}Status
 ## 5. VSA File Structure
 
 ```
-modules/HoaiMinh.ERP.Modules.{Module}/
+modules/Capstone.ERP.Modules.{Module}/
 +-- Features/
     +-- {Feature}/
         |-- {Feature}Endpoints.cs           -> Route registration + MediatR dispatch
@@ -680,7 +680,7 @@ Save to: `{PROJECT_PIPELINE}\guides\FE_WEB_{SEQ}_{FeatureName}.md`
 # FE Web Implementation Guide: {FeatureName}
 > **Generated from:** REQ_{SEQ}_{Name}.md + Figma Analysis
 > **Generated at:** {ISO timestamp}
-> **Module:** {module} | **Platform:** Web (HoaiMinh.FEWeb -- Angular 16 + Kendo UI 13)
+> **Module:** {module} | **Platform:** Web (Capstone.FEWeb -- Angular 16 + Kendo UI 13)
 > **Stack:** Angular 16, Kendo UI 13, SCSS, PSAPIService, PSCoreApiService
 
 ---
@@ -892,7 +892,7 @@ Save to: `{PROJECT_PIPELINE}\guides\FE_MOBWEB_{SEQ}_{FeatureName}.md`
 
 ```markdown
 # FE Mobile Implementation Guide: {FeatureName}
-> **Platform:** Mobile (HoaiMinh.FEMobileWeb -- Angular 16, Responsive)
+> **Platform:** Mobile (Capstone.FEMobileWeb -- Angular 16, Responsive)
 > **Key differences from Web:** No Kendo Grid, card-based lists, bottom action bar, touch targets 44px+
 
 ---
@@ -921,7 +921,7 @@ Save to: `{PROJECT_PIPELINE}\guides\FE_MOBWEB_{SEQ}_{FeatureName}.md`
 ### STEP 10 -- Save Memory File
 
 ```
-Path: .agent\projects\hoaiminh\memory\{FeatureName}.md (if HM project)
+Path: .agent\projects\Capstone\memory\{FeatureName}.md (if HM project)
 
 Content:
 - SRS filename + key design decisions
@@ -1014,8 +1014,8 @@ Content:
 
 | Project Type | Adaptation |
 |---|---|
-| **Hoai Minh ERP** | Load `projects/hoaiminh/` -- use HM standards, module codes, VND |
-| **Any other project** | Do NOT load projects/hoaiminh/ -- use only SRS content |
+| **Capstone ERP** | Load `projects/Capstone/` -- use HM standards, module codes, VND |
+| **Any other project** | Do NOT load projects/Capstone/ -- use only SRS content |
 | **Stack unknown** | Infer from SRS technology constraints or ask once |
 | **Platform unknown** | Default to Web only |
 

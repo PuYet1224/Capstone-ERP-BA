@@ -1,22 +1,21 @@
-# Hoai Minh Honda ERP - Project Knowledge Base
+# Capstone ERP - Project Knowledge Base
 
-> **Project**: Hoai Minh Honda ERP (Production)
-> **Company**: 3PS Technology
-> **Type**: Internal ERP for Honda HEAD Dealership
+> **Project**: Capstone ERP (Academic Capstone)
+> **Type**: ERP System for Capstone Dealership
 
 ---
 
 ## Trigger Rules (When should BA load this namespace)
 
-`ba-pipeline` automatically loads `projects/hoaiminh/` when detecting **any** of the following:
-- SRS header contains: "Hoai Minh", "Honda", "3PS", "HM_ERP", "SAL", "CS", "WH", "HR", "SYS" module codes
+`ba-pipeline` automatically loads `projects/capstone/` when detecting **any** of the following:
+- SRS header contains: "Capstone", "ERP", "SAL", "CS", "WH", "HR", "SYS" module codes
 - SRS uses VND currency or mentions branch/HEAD
-- User mentions "hoai minh", "3ps", "honda head"
+- User mentions "capstone", "erp"
 
 ## Directory Structure
 
 ```
-projects/hoaiminh/
+projects/capstone/
 |-- PROJECT.md               This file - meta & trigger rules
 |-- domain/                  Business knowledge (11 sections)
 |   |-- 01-glossary.md
@@ -31,8 +30,8 @@ projects/hoaiminh/
 |   |-- 10-project-architecture.md
 |   |-- 11-coding-standards.md
 |-- standards/               Technical coding standards
-|   |-- be-standards.md      .NET 10 VSA CQRS + company patterns
-|   |-- fe-standards.md      Angular + Kendo + 3PS component patterns
+|   |-- be-standards.md      .NET 10 VSA CQRS patterns
+|   |-- fe-standards.md      Angular + Kendo component patterns
 |-- memory/                  Feature analysis memories (Long-term AI memory)
     |-- {FeatureName}.md
 ```
@@ -51,11 +50,11 @@ projects/hoaiminh/
 
 | Code | Module | Vietnamese Name |
 |---|---|---|
-| SAL | Sales | Bán hàng |
-| CS | Customer Service | Dịch vụ khách hàng |
-| WH | Warehouse | Kho hàng |
-| HR | Human Resources | Nhân sự |
-| SYS | System | Hệ thống |
-| MTB | Finance | Phiếu thu / Quỹ |
-| PART | Parts | Phụ tùng |
-| REP | Report | Báo cáo |
+| SAL | Sales | Ban hang |
+| CS | Customer Service | Dich vu khach hang |
+| WH | Warehouse | Kho hang |
+| HR | Human Resources | Nhan su |
+| SYS | System | He thong |
+| MTB | Finance | Phieu thu / Quy |
+| PART | Parts | Phu tung |
+| REP | Report | Bao cao |

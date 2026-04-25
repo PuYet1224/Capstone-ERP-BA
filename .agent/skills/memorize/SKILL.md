@@ -84,7 +84,7 @@ The code is what's running in production. If guide said X but code does Y -> mem
 
 ## 4. Memory File Template
 
-**Output path:** `{BA_ROOT}\.agent\projects\hoaiminh\memory\{Feature}.md`
+**Output path:** `{BA_ROOT}\.agent\projects\Capstone\memory\{Feature}.md`
 
 > Overwrite if exists. This is the final, authoritative version.
 
@@ -233,7 +233,7 @@ After saving memory file:
 ```
 [OK] Memorized: {Feature}
 
--- Memory saved: .agent\projects\hoaiminh\memory\{Feature}.md
+-- Memory saved: .agent\projects\Capstone\memory\{Feature}.md
 
 -- Distilled from:
    -- REQ_{SEQ}_{Feature}.md

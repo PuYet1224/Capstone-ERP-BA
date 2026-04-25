@@ -1,4 +1,4 @@
-# Business Rules - Hard Constraints for Honda HEAD Hoài Minh
+# Business Rules - Hard Constraints for Capstone Hoài Minh
 
 >  **WARNING:** These rules are HARD CONSTRAINTS. Code that violates ANY of these rules is considered a **critical bug**. Always validate these before generating business logic.
 

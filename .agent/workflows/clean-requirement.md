@@ -14,6 +14,6 @@ description: Transform messy post-meeting notes into a structured SRS (3-pillar 
 
 ## Quick Reference
 
-- **Read domain from:** `.agent\projects\hoaiminh\domain\` (HM project) or SRS notes only (other projects)
+- **Read domain from:** `.agent\projects\Capstone\domain\` (HM project) or SRS notes only (other projects)
 - **Write SRS to:** `{PROJECT_PIPELINE}\requirements\`
 - **Template:** 7-Pillar SRS (IEEE 29148)

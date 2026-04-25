@@ -30,14 +30,14 @@ skills:
 ## Important
 
 >  Always run `/memorize {feature-name}` FIRST before clean-pipeline.
-> Memory is saved to: `.agent/projects/hoaiminh/memory/{Feature}.md`
+> Memory is saved to: `.agent/projects/Capstone/memory/{Feature}.md`
 
 ## Final Output
 
 ```
  Cleaned: {Feature}
    Deleted: {N} files ({N} images + SRS + BE guide + FE guide)
-    Memory preserved: .agent/projects/hoaiminh/memory/{Feature}.md
+    Memory preserved: .agent/projects/Capstone/memory/{Feature}.md
    
  Pipeline remaining: {N} features still in progress
 ```

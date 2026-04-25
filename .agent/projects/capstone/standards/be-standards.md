@@ -1,4 +1,4 @@
-# Hoai Minh ERP - BE Coding Standards
+# Capstone ERP - BE Coding Standards
 
 > **Target Stack:** .NET 10 LTS (supported until May 2028), Minimal API, VSA (Vertical Slice Architecture), CQRS (MediatR 12), EF Core 10, C# 14
 > **Cache Strategy:** IDistributedCache interface - Redis impl for production, MemoryCache impl for local dev
@@ -7,7 +7,7 @@
 
 ## 1. API NAMING - ONLY 4 PREFIXES (COMPANY LAW)
 
-> This is an immutable rule for Hoai Minh ERP architecture.
+> This is an immutable rule for Capstone ERP architecture.
 
 | Prefix | Meaning | Examples | Notes |
 |---|---|---|---|
@@ -174,24 +174,24 @@ public static class {Feature}Endpoints
 ```csharp
 // File: GetListSALReceipt.cs (Record + Handler in 1 file)
 using HM_ERP.DTO;
-using HoaiMinh.ERP.Infrastructure.Persistence;
-using HoaiMinh.ERP.Shared.Abstractions;
-using HoaiMinh.ERP.Shared.Responses;
+using Capstone.ERP.Infrastructure.Persistence;
+using Capstone.ERP.Shared.Abstractions;
+using Capstone.ERP.Shared.Responses;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace HoaiMinh.ERP.Modules.Sale.Features.M.Sale.F.Receipt;
+namespace Capstone.ERP.Modules.Sale.Features.M.Sale.F.Receipt;
 
 public sealed record GetListSALReceiptQuery(dynamic Param) : IRequest<ApiResponse<object>>;
 
 public sealed class GetListSALReceiptHandler : IRequestHandler<GetListSALReceiptQuery, ApiResponse<object>>
 {
-    private readonly HoaiMinhDbContext _db;
+    private readonly CapstoneDbContext _db;
     private readonly ICurrentUserService _currentUser;
     private readonly IMemoryCache _cache;
 
-    public GetListSALReceiptHandler(HoaiMinhDbContext db, ICurrentUserService currentUser, IMemoryCache cache)
+    public GetListSALReceiptHandler(CapstoneDbContext db, ICurrentUserService currentUser, IMemoryCache cache)
     {
         _db = db;
         _currentUser = currentUser;
@@ -230,7 +230,7 @@ public sealed class GetListSALReceiptHandler : IRequestHandler<GetListSALReceipt
 
 ```csharp
 // Update{Feature}Handler.cs
-public class Update{Feature}Handler(HoaiMinhDbContext db, ICurrentUserService currentUser, IDistributedCache cache)
+public class Update{Feature}Handler(CapstoneDbContext db, ICurrentUserService currentUser, IDistributedCache cache)
     : IRequestHandler<Update{Feature}Command, ApiResponse<object>>
 {
     public async Task<ApiResponse<object>> Handle(Update{Feature}Command request, CancellationToken ct)
@@ -388,7 +388,7 @@ builder.Services.AddStackExchangeRedisCache(opt =>
 builder.Services.AddHybridCache();
 
 // Handler:
-public class GetList{Feature}Handler(HoaiMinhDbContext db, HybridCache hybridCache) : IRequestHandler<...>
+public class GetList{Feature}Handler(CapstoneDbContext db, HybridCache hybridCache) : IRequestHandler<...>
 {
     public async Task<...> Handle(..., CancellationToken ct)
     {

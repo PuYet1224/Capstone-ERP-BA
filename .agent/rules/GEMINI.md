@@ -2,7 +2,7 @@
 trigger: always_on
 ---
 
-# BA Workspace -- Hoai Minh ERP Business Analysis
+# BA Workspace -- Capstone ERP Business Analysis
 
 > Rules for all agents working on the BA workspace.
 > **Purpose:** Read requirements, analyze business logic, produce BE + FE implementation guides.
@@ -72,7 +72,7 @@ trigger: always_on
 - Box-drawing chars: use `+--` `|--` `|` instead
 - Section sign, multiplication sign, ellipsis: use `S` `x` `...` instead
 
-**Why:** Non-ASCII characters render as mojibake (`?` or garbled text) on different systems, editors, and servers. This makes files unpresentable and unreliable.
+**Why:** Non-ASCII characters render as mojibake on different systems, editors, and servers.
 
 ### Self-Check (MANDATORY before every file save):
 
@@ -91,7 +91,7 @@ Before saving any `.agent/` file, verify:
 
 ```
 PIPELINE_ROOT:      C:\ai.pipeline
-PROJECT_PIPELINE:   {PIPELINE_ROOT}\Hoai-Minh-Project
+PROJECT_PIPELINE:   {PIPELINE_ROOT}\Capstone-ERP-Project
 ```
 
 > Deploy to new machine? Update PIPELINE_ROOT above.
@@ -114,9 +114,9 @@ FORBIDDEN:
 ### Internal Paths (your own workspace)
 
 ```
-Project Knowledge:  .agent\projects\hoaiminh\domain\      (business flows, schema, rules)
-Project Standards:  .agent\projects\hoaiminh\standards\    (BE + FE coding standards)
-Project Memory:     .agent\projects\hoaiminh\memory\       (feature analysis history)
+Project Knowledge:  .agent\projects\capstone\domain\      (business flows, schema, rules)
+Project Standards:  .agent\projects\capstone\standards\    (BE + FE coding standards)
+Project Memory:     .agent\projects\capstone\memory\       (feature analysis history)
 ```
 
 ---
@@ -125,7 +125,7 @@ Project Memory:     .agent\projects\hoaiminh\memory\       (feature analysis his
 
 ### Skills
 
-- `hoaiminh-domain` - domain knowledge (glossary, flows, schema, rules, architecture)
+- `capstone-domain` - domain knowledge (glossary, flows, schema, rules, architecture)
 - `ba-pipeline` - core workflow for analyzing requirements and creating guides
 - `clean-requirement` - transform messy meeting notes into structured SRS (7 pillars)
 - `memorize` - distill SRS + code + guides into permanent memory file

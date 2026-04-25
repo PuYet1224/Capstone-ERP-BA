@@ -1,6 +1,6 @@
-> **Architecture Notes for BA Agents:** This document describes the AI pipeline workflow and workspace layout for the Hoai Minh ERP project.
+> **Architecture Notes for BA Agents:** This document describes the AI pipeline workflow and workspace layout for the Capstone ERP project.
 
-# AI Pipeline Architecture - Hoai Minh ERP (BA View)
+# AI Pipeline Architecture - Capstone ERP (BA View)
 
 ## Workspace Map
 
@@ -15,7 +15,7 @@
 
 ```
 {PIPELINE_ROOT}\                          C:\ai.pipeline
-|--- Hoai-Minh-Project\                   {PROJECT_PIPELINE} for this project
+|--- Capstone-ERP-Project\                   {PROJECT_PIPELINE} for this project
 |    |--- requirements\    <- BA writes REQ_{ID}_{Feature}.md here
 |    |--- guides\          <- BA writes BE_*.md + FE_*.md here (BE/FE teams read)
 |--- Other-Project\                       Future projects go here
@@ -58,7 +58,7 @@
 |    `--- GEMINI.md    # BA identity + rules
 |--- ARCHITECTURE.md    # This file
 |--- agents\            # Specialized agents (ui-designer, etc.)
-|--- skills\            # BA skills (ba-pipeline, hoaiminh-domain, figma-reader, memorize...)
+|--- skills\            # BA skills (ba-pipeline, Capstone-domain, figma-reader, memorize...)
 |--- workflows\         # BA commands (/ba-analyst, /clean-requirement, /memorize...)
 `--- projects\          # Project-specific context
 ```
