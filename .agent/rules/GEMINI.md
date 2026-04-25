@@ -20,7 +20,7 @@ trigger: always_on
 | Reading from | Must state |
 |---|---|
 | `figma_read` Figma Desktop live | "Reading from **Figma Desktop (live)**" |
-| `.design-archive/*.png` | "Reading from **archived images** at `.design-archive/`" |
+| `{PROJECT_PIPELINE}\designs\{feature}\*.png` | "Reading from **pipeline design images**" |
 | `{PIPELINE_ROOT}\designs\*.png` | "Reading from **pipeline images**" |
 | Current code files | "Reading from **current code**" |
 | Requirements / documents | "Reading from **requirements input** at `{PIPELINE_ROOT}\requirements\`" |
@@ -36,9 +36,9 @@ trigger: always_on
 
 ```
 1. State clearly: "figma_read failed - Figma Desktop not connected."
-2. Ask user: "Use images from .design-archive as fallback?"
+2. Ask user: "Use images from {PROJECT_PIPELINE}\designs\ as fallback?"
 3. ONLY use local images AFTER user confirms.
-4. Always label: "[Analysis from archive image - not live Figma]"
+4. Always label: "[Analysis from pipeline design images - not live Figma]"
 ```
 
 ---
@@ -142,7 +142,15 @@ Project Memory:     .agent\projects\hoaiminh\memory\       (feature analysis his
 
 ---
 
-## P2 -- LANGUAGE AND QUALITY
+## P3 -- TOOL RELIABILITY RULES (CRITICAL)
+
+1. **`view_file` first** -- If you know the file path, use `view_file`. Do NOT grep for it.
+2. **NEVER `grep_search` on root folders or `node_modules`** -- `grep_search` WILL HANG and cause context freeze. Use PowerShell `Select-String` instead.
+3. **Tool timeout = abort** -- If a tool call times out, do NOT retry. Use alternative approach.
+
+---
+
+## P4 -- LANGUAGE AND QUALITY
 
 ### Response Language
 

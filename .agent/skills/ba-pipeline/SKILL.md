@@ -9,9 +9,9 @@ skills:
   - figma-reader
 ---
 
-# BA Pipeline Skill — Requirements-to-Guide Generator v3.0
+# BA Pipeline Skill â€” Requirements-to-Guide Generator v3.0
 
-> **Purpose:** Read 7-Pillar SRS → analyze Figma design → produce zero-ambiguity implementation guides.
+> **Purpose:** Read 7-Pillar SRS â†’ analyze Figma design â†’ produce zero-ambiguity implementation guides.
 > **Mission:** Read 7-Pillar SRS -> load project-specific standards -> analyze Figma design -> resolve full technical contract -> create zero-ambiguity implementation guides.
 > **Quality bar:** A developer who was NOT in any meeting can implement 100% correctly on the FIRST try.
 > **Standard:** Every guide section cites the source requirement (BR-xx, FR-xx, NFR-xx, AC-xx).
@@ -79,10 +79,19 @@ Read the entire SRS file. Extract and organize into working memory:
 
 ```
 PILLAR 1 -> Extract:
-  - Feature name, module code (SAL/CS/WH/HR/SYS/MTB/PART)
+  - Feature Key: read from SRS metadata field. If missing, derive from filename REQ_001_{Key}.md
+  - Primary Table: read from SRS metadata (e.g. tbl_SALOrderReceipt). API/DTO names derive from THIS.
+  - Module code (SAL/CS/WH/HR/SYS/MTB/PART)
   - Platform: Web | Mobile | Both (determines number of FE guides)
   - Actors: role list -> role-permission matrix for guides
   - Assumptions, Dependencies, Constraints (-> guide caveats)
+
+  NAMING RULE (derive from Feature Key + Primary Table):
+    Guide files    = BE_{SEQ}_{FeatureKey}.md
+    API names      = GetList + table minus tbl_ (tbl_SALOrderReceipt -> GetListSALReceipt)
+    DTO names      = DTO + table minus tbl_ (DTOSALOrderReceipt)
+    ENUM names     = ENUM + table minus tbl_ + Status (ENUMSALOrderReceiptStatus)
+    Feature folder = F.{FeatureKey} (F.Receipt)
 
 PILLAR 2 -> Extract:
   - ALL BR-xx rules (verbatim) with rationale
@@ -296,7 +305,7 @@ FE TypeScript DTOs:
 For each status entity in SRS Sec. 6.4 / Sec. 5.2:
 
 BE (C#) -- in {Feature}Dto.cs or Constants/{Feature}Status.cs:
-  public static class {Feature}Status
+  public enum ENUM{TableName}Status
   {
     public const int {StatusName} = {TypeOfStatus int};  // from tbl_LSStatus
     public static string GetName(int? s) => ...
@@ -371,7 +380,8 @@ For each SCR-xx in SRS Sec. 7.2:
 ```
 -- ANALYSIS: {FeatureName}
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
--- SRS: REQ_{SEQ}_{Name}.md  [OK] Figma: {Connected -> / Not Connected ?} -- Frames: {list}
+-- SRS: REQ_{SEQ}_{Name}.md
+  [OK] Figma: {Connected -> / Not Connected ?} -- Frames: {list}
 |--  Module: {SAL|CS|...} | Platform: {Web|Mobile|Both}
 -- Guides: {BE_xxx.md} + {FE_WEB_xxx.md} [+ FE_MOBWEB_xxx.md if Both]
 
@@ -396,8 +406,10 @@ STATE MACHINE: {N} statuses
 
 FIGMA vs SRS DISCREPANCIES:
   |-- UNDOCUMENTED in SRS: {list} or "None"
-  +-- MISSING in Figma: {list} or "None"  [OK] PENDING DECISIONS: {N} items
-  +-- TBD-01: {question} -> blocks FR-{xx}  [OK] Generating guides now...
+  +-- MISSING in Figma: {list} or "None"
+  [OK] PENDING DECISIONS: {N} items
+  +-- TBD-01: {question} -> blocks FR-{xx}
+  [OK] Generating guides now...
 ```
 
 **Approval Gate:**
@@ -431,7 +443,7 @@ Save to: `{PROJECT_PIPELINE}\guides\BE_{SEQ}_{FeatureName}.md`
 | Concurrent users | {N} simultaneous | NFR-P03 |
 | Auth | JWT Bearer required on all endpoints | NFR-S01 |
 | Audit | CreatedBy/UpdatedBy from ICurrentUserService | NFR-S04 |
-| HEAD filter | All list queries MUST filter by current user's HeadCode | BR-{nn} |
+| HEAD filter | All list queries MUST filter by _currentUser.CompanyId | BR-{nn} |
 
 ---
 
@@ -504,7 +516,7 @@ public record {Feature}Response(
 ### BE C# (StatusConstants)
 ```csharp
 // File: modules/.../Features/{Feature}/{Feature}Dto.cs
-public static class {Feature}Status
+public enum ENUM{TableName}Status
 {
     public const int {StatusName1} = {N};   // TypeOfStatus={N}, display: "{Display}" -- [SRS Sec. 6.4]
     public const int {StatusName2} = {N};
@@ -558,7 +570,7 @@ Step 2: Try cache.GetStringAsync(key) -> return if hit
         [Comment out Redis -> use IMemoryCache if Redis not setup]
 Step 3: Query tbl_{PrimaryTable}
         -> .Where(x => !x.IsDeleted)                         -> soft delete
-        -> .Where(x => x.Head == currentUser.HeadCode)       -> HEAD-01 -> MANDATORY
+        -> .Where(x => x.Head == _currentUser.CompanyId)       -> HEAD-01 -> MANDATORY
         -> .Where(x => filter.DateFrom == null || x.CreatedDate >= filter.DateFrom)
         -> .Where(x => filter.Status == null || x.Status == filter.Status)
         -> .AsNoTracking()                                    -> read-only -> performance
@@ -581,9 +593,9 @@ Step 2: if Code == 0 -> CREATE branch:
         -> Verify no duplicate {uniqueField} (if BR-xx requires uniqueness)
         -> Generate {FeatureNo} via SysIncreaseService.NextAsync("{PREFIX}")
         -> new tbl_{PrimaryTable} {
-            Head      = currentUser.HeadCode,    -> ICurrentUserService -- NEVER hardcode
-            Cashier   = currentUser.EmployeeCode,
-            CreatedBy = currentUser.UserName,
+            Head      = _currentUser.CompanyId,    -> ICurrentUserService -- NEVER hardcode
+            Cashier   = _currentUser.LegacyUserId,
+            CreatedBy = _currentUser.UserCode,
             CreatedDate = DateTime.UtcNow,
             Status    = {Feature}Status.{InitialStatus}
           }
@@ -924,9 +936,11 @@ Content:
 
 ### STEP 11 -- Report to User
 
-```  [OK] BA Analysis Complete: {FeatureName}
+```
+  [OK] BA Analysis Complete: {FeatureName}
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-?*?*
--- SRS: REQ_{SEQ}_{Name}.md  [OK] Figma: {status}
+-- SRS: REQ_{SEQ}_{Name}.md
+  [OK] Figma: {status}
 
 -- Guides created:
    -> {PROJECT_PIPELINE}\guides\BE_{SEQ}_{Name}.md        ({N} lines)
@@ -939,7 +953,9 @@ Content:
    Enums:    {N} status constants + {N} TypeScript enums
    Shared:   {N} PSCoreApiService methods required
    Cache:    Redis list cache (5min) + {N} invalidation triggers
-   Screens:  {N} screens ({Web grid + detail} / {Mobile card + form})  [OK]  Discrepancies: {N} Figma vs SRS conflicts -> see Sec. 10 in FE guides  [OK]  Pending:       {N} TBD items -> {list which FRs blocked}
+   Screens:  {N} screens ({Web grid + detail} / {Mobile card + form})
+  [OK]  Discrepancies: {N} Figma vs SRS conflicts -> see Sec. 10 in FE guides
+  [OK]  Pending:       {N} TBD items -> {list which FRs blocked}
 
 --- Next steps:
    BE team  -> read BE_{SEQ}_{Name}.md
@@ -1006,4 +1022,3 @@ Content:
 > **GOLDEN RULE:** Never output a guide with placeholder text like "{api_name}" or "{field}".
 > Every single field, method name, endpoint path, enum value MUST be concrete and project-specific.
 > If information is genuinely unknown -> write "? TBD: {specific question}" -- NOT a generic placeholder.
-

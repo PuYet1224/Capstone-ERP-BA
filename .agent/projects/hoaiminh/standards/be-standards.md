@@ -35,73 +35,94 @@ UpdateSALOrderStatus      cancel / complete order
 
 ## 2. DTO NAMING PATTERN
 
-> Consistent pattern for Hoai Minh DTO mapping.
+> DTO name MUST match the DB table name. `tbl_SALOrderReceipt` → `DTOSALOrderReceipt`.
 
-### BE C# DTOs:
+### DTO Location: `src/Domain/DTO/` (NEVER in Feature folders)
 
-| Pattern | Usage | Example |
-|---|---|---|
-| `DTO{Module}{Entity}` | Full DTO - all fields from DB | `DTOSALOrderReceipt`, `DTOCSWorkOrderMaster` |
-| `DTO{Module}{Entity}Cus` | Custom DTO - only fields needed for 1 use case | `DTOSALOrderReceiptCus`, `DTOCSWorkOrderMasterCus` |
+| Pattern | Usage | Example | File |
+|---|---|---|---|
+| `DTO{Table}` | Base DTO - ALL columns from DB table | `DTOSALOrderReceipt` | `src/Domain/DTO/DTOSALOrderReceipt.cs` |
+| `DTO{Table}Cus` | Custom DTO - joined/computed fields | `DTOSALOrderReceiptCus` | `src/Domain/DTO/DTOSALOrderReceiptCus.cs` |
 
-**Production (.NET 10) - Request/Response DTOs:**
+### Namespace: `namespace HM_ERP.DTO`
+
+**Base DTO (mirrors DB table columns):**
 ```csharp
-// Request DTO (input from FE)
-public record {Feature}SaveRequest(
-    long Code,           // 0 = create, >0 = update
-    long OrderMasterCode,
-    decimal CollectedAmount,
-    int PaymentType,
-    string? Note
-);
+// File: src/Domain/DTO/DTOSALOrderReceipt.cs
+namespace HM_ERP.DTO
+{
+    public class DTOSALOrderReceipt
+    {
+        public long Code { get; set; }            // PK
+        public long Head { get; set; }             // branch
+        public long OrderMaster { get; set; }      // FK
+        public Nullable<int> Cashier { get; set; } // FK tbl_HREmployee
+        public Nullable<double> CollectedAmount { get; set; }
+        public Nullable<int> PaymentMethod { get; set; }
+        public int Status { get; set; }
+        public string CreatedBy { get; set; }
+        public Nullable<DateTime> CreatedTime { get; set; }
+        // ... ALL other columns from DB
+    }
+}
+```
 
-// Cus DTO (identify record - used in Get/Delete/Status)
-public record {Feature}CusRequest(long Code);
+**Custom DTO (joined/computed fields only):**
+```csharp
+// File: src/Domain/DTO/DTOSALOrderReceiptCus.cs
+namespace HM_ERP.DTO
+{
+    public class DTOSALOrderReceiptCus : DTOSALOrderReceipt
+    {
+        public string StatusName { get; set; }     // joined from tbl_LSStatus
+        public string CashierName { get; set; }    // joined from tbl_HREmployee
+        public string CustomerName { get; set; }   // joined from tbl_CSLoyalCustomer
+        // ... only joined/computed fields
+    }
+}
+```
 
-// Filter DTO (list query params)
-public record {Feature}FilterRequest(
-    DateOnly? DateFrom,
-    DateOnly? DateTo,
-    int? Status,
-    int Page = 1,
-    int PageSize = 20
-);
-
-// Response DTO (output for FE)
-public record {Feature}Response(
-    long Code,
-    string ReceiptNo,
-    long OrderMasterCode,
-    decimal CollectedAmount,
-    int Status,
-    string StatusName,
-    // ... all fields FE needs
-    DateTimeOffset CreatedAt,
-    string CreatedByName
-);
+### 🔴 BANNED
+```
+❌ public record XxxResponse(...)        → use class with { get; set; }
+❌ DTO inside Feature folder             → always src/Domain/DTO/
+❌ DTO name ≠ table name                 → DTOSALOrderReceipt = tbl_SALOrderReceipt
+❌ Inventing names like SALPaymentOrder  → match EXACT table name
 ```
 
 ---
 
-## 3. PROJECT ARCHITECTURE - VSA (Vertical Slice)
+## 3. PROJECT ARCHITECTURE - VSA (1 File Per Handler, FLAT)
+
+> Each handler = 1 .cs file containing BOTH the Record and Handler class.
+> Feature folders are FLAT — NO subfolders (no Constants/, no Endpoints.cs).
 
 ```
-modules/HoaiMinh.ERP.Modules.{Module}/
--- Features/
-|   -- {Feature}/
-|       -- {Feature}Endpoints.cs        Minimal API route registration ONLY
-|       -- GetList{Feature}Query.cs     CQRS Query record
-|       -- GetList{Feature}Handler.cs   Query Handler (EF Core, LINQ, Redis)
-|       -- Get{Feature}Query.cs
-|       -- Get{Feature}Handler.cs
-|       -- Update{Feature}Command.cs    CQRS Command record
-|       -- Update{Feature}Handler.cs    Command Handler
-|       -- UpdateStatus{Feature}Command.cs
-|       -- UpdateStatus{Feature}Handler.cs
-|       -- Delete{Feature}Command.cs
-|       -- Delete{Feature}Handler.cs
-|       -- {Feature}Dto.cs              All DTOs for this feature
--- {Module}ModuleExtensions.cs          DI & route registration
+modules/MTB/
+├── Features/
+│   └── M.Sale/
+│       └── F.Receipt/              ← FLAT folder, no subfolders
+│           ├── GetListSALReceipt.cs     (Record + Handler in 1 file)
+│           ├── GetSALReceipt.cs
+│           ├── UpdateSALReceipt.cs
+│           ├── UpdateSALReceiptStatus.cs
+│           └── DeleteSALReceipt.cs
+├── MtbModuleConfig.cs              ← endpoint registration
+
+src/Domain/
+├── DTO/
+│   ├── DTOSALOrderReceipt.cs       ← base DTO (DB columns)
+│   └── DTOSALOrderReceiptCus.cs    ← custom DTO (joined fields)
+├── ENUM/
+│   └── ENUMSALOrderReceiptStatus.cs ← status enum
+```
+
+### 🔴 BANNED structure
+```
+❌ Feature/Endpoints.cs             → register in MtbModuleConfig.cs instead
+❌ Feature/Constants/               → use src/Domain/ENUM/
+❌ Feature/{Feature}Dto.cs          → use src/Domain/DTO/
+❌ Separate Query.cs + Handler.cs   → combine in 1 file
 ```
 
 ---
@@ -145,62 +166,60 @@ public static class {Feature}Endpoints
 
 ---
 
-## 5. HANDLER PATTERN - GetList (with Redis Cache)
+## 5. HANDLER PATTERN - GetList (Reference: GetListSALMaster.cs)
+
+> Follow the EXISTING handler pattern from `modules/MTB/Features/M.Sale/F.Consult/GetListSALMaster.cs`.
+> Record + Handler in SAME file. Uses `dynamic Param`. Uses `IMemoryCache` or `HybridCache`.
 
 ```csharp
-// GetList{Feature}Handler.cs
-public class GetList{Feature}Handler(HoaiMinhDbContext db, IDistributedCache cache)
-    : IRequestHandler<GetList{Feature}Query, ApiResponse<PagedList<{Feature}Response>>>
+// File: GetListSALReceipt.cs (Record + Handler in 1 file)
+using HM_ERP.DTO;
+using HoaiMinh.ERP.Infrastructure.Persistence;
+using HoaiMinh.ERP.Shared.Abstractions;
+using HoaiMinh.ERP.Shared.Responses;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+
+namespace HoaiMinh.ERP.Modules.Sale.Features.M.Sale.F.Receipt;
+
+public sealed record GetListSALReceiptQuery(dynamic Param) : IRequest<ApiResponse<object>>;
+
+public sealed class GetListSALReceiptHandler : IRequestHandler<GetListSALReceiptQuery, ApiResponse<object>>
 {
-    public async Task<ApiResponse<PagedList<{Feature}Response>>> Handle(
-        GetList{Feature}Query request, CancellationToken ct)
+    private readonly HoaiMinhDbContext _db;
+    private readonly ICurrentUserService _currentUser;
+    private readonly IMemoryCache _cache;
+
+    public GetListSALReceiptHandler(HoaiMinhDbContext db, ICurrentUserService currentUser, IMemoryCache cache)
     {
-        // STEP 1: Try Redis cache
-        var cacheKey = $"{module}:{feature}:list:{HashParams(request.Filter)}";
+        _db = db;
+        _currentUser = currentUser;
+        _cache = cache;
+    }
 
-        // Redis - comment out if not available, use IMemoryCache instead:
-        // var cached = await cache.GetStringAsync(cacheKey, ct);
-        // if (cached != null) return JsonSerializer.Deserialize<...>(cached)!;
+    public async Task<ApiResponse<object>> Handle(
+        GetListSALReceiptQuery request, CancellationToken ct)
+    {
+        long headId = _currentUser.CompanyId; // HEAD filter — MANDATORY
 
-        // STEP 2: Query DB (EF Core 10 - use LeftJoin, not GroupJoin)
-        var query = db.{PrimaryTable}s
-            .Where(x => !x.IsDeleted)
-            .Where(x => x.Head == request.CurrentUser.HeadCode)  // HEAD-01: MANDATORY
-            .AsNoTracking();
-
-        // Apply filters
-        if (request.Filter.DateFrom.HasValue)
-            query = query.Where(x => x.CreatedDate >= request.Filter.DateFrom.Value);
-        if (request.Filter.Status.HasValue)
-            query = query.Where(x => x.Status == request.Filter.Status.Value);
-
-        // LeftJoin example (.NET 10 native syntax):
-        var result = await query
-            .LeftJoin(db.Employees,
-                x => x.CashierCode,
-                e => e.Code,
-                (x, emp) => new {Feature}Response(
-                    x.Code,
-                    x.ReceiptNo,
-                    CollectedAmount: x.CollectedAmount ? 0,
-                    Status: x.Status,
-                    StatusName: {Feature}Status.GetName(x.Status),
-                    CashierName: emp != null ? emp.FullName : ""
-                ))
-            .OrderByDescending(x => x.Code)
-            .Skip((request.Filter.Page - 1) * request.Filter.PageSize)
-            .Take(request.Filter.PageSize)
+        var data = await _db.SALOrderReceipts
+            .Where(w => w.Head == headId)
+            .OrderByDescending(o => o.CreatedTime)
+            .AsNoTracking()
+            .Select(s => new
+            {
+                s.Code,
+                s.ReceiptNo,
+                s.CollectedAmount,
+                s.PaymentMethod,
+                s.Status,
+                StatusName = s.tbl_LSStatus != null ? s.tbl_LSStatus.StatusName ?? "" : "",
+                CashierName = s.tbl_HREmployee != null ? s.tbl_HREmployee.StaffID ?? "" : "",
+            })
             .ToListAsync(ct);
 
-        var total = await query.CountAsync(ct);
-
-        var pagedResult = new PagedList<{Feature}Response>(result, total, request.Filter.Page, request.Filter.PageSize);
-
-        // STEP 3: Set cache (5 min TTL)
-        // await cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(pagedResult),
-        //     new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) }, ct);
-
-        return ApiResponse<PagedList<{Feature}Response>>.Ok(pagedResult);
+        return ApiResponse<object>.Ok(data);
     }
 }
 ```
@@ -271,30 +290,29 @@ public class Update{Feature}Handler(HoaiMinhDbContext db, ICurrentUserService cu
 
 ---
 
-## 7. STATUS CONSTANTS PATTERN
+## 7. STATUS ENUM PATTERN
+
+> Status enums go in `src/Domain/ENUM/`, NOT in Feature folders.
+> ENUM name MUST match table name: `tbl_SALOrderReceipt` → `ENUMSALOrderReceiptStatus`
 
 ```csharp
-// {Feature}Status.cs - in {Feature}Dto.cs or separate file
-public static class {Feature}Status
+// File: src/Domain/ENUM/ENUMSALOrderReceiptStatus.cs
+namespace HM_ERP.DTO
 {
-    // Values MAP TO tbl_LSStatus TypeData=XX - DO NOT CHANGE
-    public const int New       = 1;   // TypeOfStatus=1
-    public const int Completed = 2;   // TypeOfStatus=2
-    public const int Cancelled = 3;   // TypeOfStatus=3
-
-    private static readonly Dictionary<int, string> _names = new()
+    public enum ENUMSALOrderReceiptStatus
     {
-        [New]       = "New",
-        [Completed] = "Completed",
-        [Cancelled] = "Cancelled"
-    };
-
-    public static string GetName(int? status) =>
-        status.HasValue && _names.TryGetValue(status.Value, out var name) ? name : "Unknown";
-
-    public static readonly int[] EditableStatuses = [New];
-    public static readonly int[] FinalStatuses    = [Completed, Cancelled];
+        New = 1,        // tbl_LSStatus TypeOfStatus=1
+        Success = 2,    // tbl_LSStatus TypeOfStatus=2
+        Canceled = 3,   // tbl_LSStatus TypeOfStatus=3
+    }
 }
+```
+
+### 🔴 BANNED
+```
+❌ public static class ReceiptStatus { ... }  → use enum, not static class
+❌ Placing enum in Feature folder             → always src/Domain/ENUM/
+❌ Naming without ENUM prefix                 → ENUMSALOrderReceiptStatus
 ```
 
 ---
@@ -329,7 +347,7 @@ public static class {Feature}Status
 if (request.Code < 0) return ApiResponse<object>.BadRequest("Invalid code");
 
 // Rule 2: HEAD filter - MANDATORY on all list queries
-.Where(x => x.Head == currentUser.HeadCode)
+.Where(x => x.Head == currentUser.CompanyId)
 
 // Rule 3: Status transition guard
 var allowedFrom = new[] { {Feature}Status.New };
@@ -337,9 +355,9 @@ if (!allowedFrom.Contains(entity.Status))
     return ApiResponse<object>.BadRequest($"Cannot perform action from status: {entity.StatusName}");
 
 // Rule 4: Audit fields - NEVER hardcode
-entity.Head = currentUser.HeadCode;
-entity.CreatedBy = currentUser.UserName;
-entity.UpdatedBy = currentUser.UserName;
+entity.Head = currentUser.CompanyId;
+entity.CreatedBy = currentUser.UserCode;
+entity.UpdatedBy = currentUser.UserCode;
 
 // Rule 5: No magic numbers
 //  if (entity.Status == 1)
