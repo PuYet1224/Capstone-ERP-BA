@@ -1,1024 +1,334 @@
 ---
 name: ba-pipeline
-description: >-
-  Reads SRS requirement files and Figma designs, then produces BE + FE implementation guides
-  with full traceability. Use when the user runs /ba-analyst, asks to "analyze requirements",
-  or wants to generate coding guides from an SRS file.
-  Do NOT use for writing the SRS itself (use clean-requirement skill instead).
-skills:
-  - figma-reader
+description: Analyze 7-Pillar SRS + design images and produce zero-ambiguity BE and FE implementation guides. Use when running /ba-analyst, analyzing requirements, or generating implementation guides.
+metadata:
+  role: BA
+  version: "1.0"
+  trigger: "/ba-analyst, 'analyze requirements', 'generate guide'"
 ---
 
-# BA Pipeline Skill â€” Requirements-to-Guide Generator v3.0
+# BA Pipeline -- SRS to Implementation Guides
 
-> **Purpose:** Read 7-Pillar SRS â†’ analyze Figma design â†’ produce zero-ambiguity implementation guides.
-> **Mission:** Read 7-Pillar SRS -> load project-specific standards -> analyze Figma design -> resolve full technical contract -> create zero-ambiguity implementation guides.
-> **Quality bar:** A developer who was NOT in any meeting can implement 100% correctly on the FIRST try.
-> **Standard:** Every guide section cites the source requirement (BR-xx, FR-xx, NFR-xx, AC-xx).
+## Goal
+Read a 7-Pillar SRS + design images → output 2 complete, zero-ambiguity implementation guides (BE + FE Mobile) that any developer can implement on the first try without attending any meeting.
 
 ---
 
-## 1. Paths
-
-### External (Shared Pipeline -- IO only)
-```
-READ:   {PROJECT_PIPELINE}\requirements\     (REQ_*.md -- SRS input)
-READ:   Figma MCP (figma_read)           (live designs -- ONLY source of visual truth)
-WRITE:  {PROJECT_PIPELINE}\guides\           (BE_*.md + FE_*.md -- output for dev teams)
-```
-
-> **Design source priority:** 1) Figma MCP (live) 2) `{PROJECT_PIPELINE}\designs\` PNG fallback 3) SRS text only.
-> **NEVER generate guides WITHOUT reading the SRS first.** SRS is the source of truth.
-
-### Internal (BA Workspace)
-```
-UNIVERSAL SKILLS: .agent\skills\          (generic -- works for any project)
-PROJECT KNOWLEDGE: .agent\projects\       (project-specific -- load per project)
-  +-- Capstone\
-      |-- PROJECT.md                      (meta + trigger rules)
-      |-- domain\*.md                     (business flows, schema, rules)
-      |-- standards\be-standards.md       (BE coding standards)
-      |-- standards\fe-standards.md       (FE coding standards)
-      +-- memory\{Feature}.md            (feature analysis history)
-```
+## GOTCHAS (read first — these are the mistakes the agent makes without this list)
+- `TypeOfStatus` ≠ `TypeData` — always use `TypeOfStatus` to filter tbl_LSStatus groups
+- `tbl_SALOrderReceipt` uses TypeOfStatus=**18**, `tbl_SALOrderMaster` uses TypeOfStatus=**7** — never swap
+- **Status fields store TypeData (1,2,3...) — NOT Code PK (27,28,92...)** — SQL for ENUM: `SELECT TypeData, StatusName`. Existing `EnumSALOrderMasterStatus` (values 1-6) proves TypeData convention.
+- **Status ENUM naming = `EnumXxxStatus`** (camelCase) — NOT `ENUMXxxStatus`. Check existing files in `src/Domain/ENUM/` first, never create duplicates.
+- **Section 3a = N/A** → do NOT write any `Status =` line in new entity creation block.
+- Route prefix = `/api/sale/` not `/sale/` — missing `/api/` prefix causes 404 permanently
+- `tbl_SYSPermissions` uses `RoleID=1`, not `StaffID=1`
+- `tbl_LSList` dropdowns: `[valueField]="'TypeOfList'"` not `'Code'` — entity stores TypeOfList integer
+- **Get{TableName} handler is MANDATORY** — detail page will 404 without it
+- DLLPackage: look up from `refs/module-map.md` — NEVER derive as `{abbr}-{feature}` (e.g., NEVER 'sal-receipt')
+- Notification strings: Vietnamese WITH full diacritics — `'Lưu thành công'` not `'Luu thanh cong'`
+- ModuleID: M.Sale=7, M.Repair=6 — NEVER use Product code (3) as ModuleID
+- **Navigation properties in GetList Select() are FORBIDDEN** — `s.tbl_XXX.Column` causes compile error because nav prop names are unknown. Use FK value directly (e.g., `s.OrderMaster`) instead of `s.tbl_SALOrderMaster.Code`
+- **New tbl_LSList values needed → add Section 8e** — if UI requires a lookup option not in DB (e.g., TypeOfList=3 for "Tiền mặt + Chuyển khoản"), add it in Section 8e, not as a silent assumption
+- **tbl_SALOrderMaster.TypeData** stores payment type (Trả hết / Đặt cọc / Trả góp) — NOT tbl_SALOrderMaster.PaymentMethod
 
 ---
 
-## 2. File Naming Convention
+## Hard Rules
+<!-- Violation = reject output immediately. Do not save guide with violation. -->
 
-```
-SRS Input:       REQ_{SEQ}_{FeatureName}.md
-BE Guide:        BE_{SEQ}_{FeatureName}.md
-FE Guide (Web):  FE_WEB_{SEQ}_{FeatureName}.md    (when Platform = Web or Both)
-FE Guide (Mob):  FE_MOBWEB_{SEQ}_{FeatureName}.md (when Platform = Mobile or Both)
-FE Guide:        FE_WEB_{SEQ}_{FeatureName}.md    (when Platform unspecified -- default Web)
+### R1: VSA Folder Path
+- Path = `modules/{ModuleCode}/Features/{SubModule}/F.{Feature}/`
+- **Determine ModuleCode + SubModule from SRS business domain. Read `refs/module-map.md` first.**
+- Common mappings (see full table in `refs/module-map.md`):
+  | Business Domain | ModuleCode | SubModule | Path Example |
+  |---|---|---|---|
+  | Sale / Order / Invoice / Receipt | MTB | M.Sale | `modules/MTB/Features/M.Sale/F.Receipt/` |
+  | Repair / Work Order / CS | MTB | M.Repair | `modules/MTB/Features/M.Repair/F.Consult/` |
+  | Warehouse / Delivery / Import | MTB | M.Warehouse | `modules/MTB/Features/M.Warehouse/F.DeliveryOrder/` |
+  | CRM / Messaging / ZNS | CRM | M.SentMessage | `modules/CRM/Features/M.SentMessage/F.ZNS/` |
+  | Parts / Inventory | PRT | M.Inventory | `modules/PRT/Features/M.Inventory/F.Inventory/` |
+  | HRM / Employee / Org | HRM | M.Org | `modules/HRM/Features/M.Org/F.Org/` |
+  | Reports / Export | RPT | M.Report | `modules/RPT/Features/M.Report/F.Report/` |
+- NEVER: `modules/SAL/`, `modules/CS/`, any path not matching ModuleCode from map above
+- If domain is ambiguous -> ask user before generating
 
-SEQ: 3-digit zero-padded (001, 002, ...)
-FeatureName: PascalCase (Receipt, Invoice, WorkOrderList)
-```
+### R2: API Naming = Prefix + Full Table Name (without tbl_)
+- `tbl_SALOrderReceipt` -> API = `GetListSALOrderReceipt`
+- `tbl_SALOrderInvoice` -> API = `GetListSALOrderInvoice`
+- NEVER shorten: `GetListReceipt` or `GetListInvoice` are WRONG
+- Allowed prefixes: `GetList`, `Get`, `Update`, `Delete`, `Add`, `Import`, `Export`
+- BANNED prefixes: Create, Insert, Save, Set, Cancel, Approve, Remove
+
+### R3: Anonymous Type Field Names = Entity Column Names
+- Use EXACT column names from entity snapshot in Select projection
+- Entity says `CellPhone` -> projection says `s.CellPhone` (NEVER `Phone`, `CustomerPhone`)
+- Entity says `CollectedAmount` (double) -> projection type = double (NEVER decimal)
+- If unsure -> read `refs/entity-snapshots/tbl_{Table}.md`
+
+### R4: NO DTO Class Files -- Anonymous Types Only
+- Project DOES NOT use DTO classes or `Expression<Func<>>` Select methods
+- Project uses anonymous type `new { }` inline in `.Select()`
+- NEVER generate `DTOSALOrderReceipt.cs` or any `DTO*.cs` file
+- NEVER generate `namespace HM_ERP.DTO;`
+- NEVER add methods, expressions, or static factories to a DTO-like class
+- A data transfer object = plain data properties ONLY
+
+### R5: FE Component = mtb{NNN} from Registry
+- Read `refs/component-registry.md` -> use "Next Available Number"
+- Format: `mtb{NNN}-{feature-kebab}` -> Class: `Mtb{NNN}{FeaturePascal}Component`
+- NEVER use `Mtb001` unless registry says 001 is next
+- NEVER use `Sal001`, `Receipt001`, or any non-mtb naming
+- After saving guide -> update registry: increment next available number
+
+### R6: FE API Names Must Match BE Exactly
+- Copy-paste API names from the BE guide you just generated
+- BE says `GetListSALOrderReceipt` -> FE must say `GetListSALOrderReceipt`
+- Any mismatch = FE will call wrong endpoint
+
+### R7: API Route Prefix (derive from module-map.md)
+- Final URL = ServerURL + RoutePrefix + APIID
+- **Read `refs/module-map.md` → look up Sub-Module → get BE Route Prefix**
+- `MapModuleEndpoints()` wraps ALL modules in a central `/api` group (src/Shared/Extensions/ModuleDiscoveryExtensions.cs).
+  Each module adds its own sub-path → all MTB routes are `/api/sale/`, NOT `/sale/`.
+  | Sub-Module | Route Prefix | Final URL example |
+  |---|---|---|
+  | MTB/M.Sale | `/api/sale/` | `http://server:31/api/sale/GetListSALOrderReceipt` |
+  | MTB/M.Repair | `/api/repair/` | `http://server:31/api/repair/GetListWOMConsultant` |
+  | MTB/M.Warehouse | `/api/warehouse/` | `http://server:31/api/warehouse/GetListDOMaster` |
+  | CRM/M.Config | `/api/config/` | `http://server:31/api/config/GetListSMSTemplate` |
+  | CRM/M.SentMessage | `/api/message/` | `http://server:31/api/message/GetListSendMaster` |
+  | HRM/M.Org | `/api/org/` | `http://server:31/api/org/GetListDepartmentTree` |
+  | PRT | `/api/prt/` | `http://server:31/api/prt/GetListIOMaster` |
+  | RPT | `/api/rpt/` | `http://server:31/api/rpt/GetListReport` |
+- NEVER: `/sal/`, `/sale/` (missing /api/), `/api/sal/`, uppercase paths
+
+### R8: Include ALL Entity Columns in Base DTO
+- Read entity snapshot -> include EVERY column in base DTO (except navigation properties)
+- Custom DTO = base DTO + joined/calculated fields
+- Detail DTO = separate anonymous type (NOT inheriting from parent)
 
 ---
 
-## 3. Execution Protocol
-
-### STEP 1 -- Auto-Scan & Select SRS
-
-1. Scan `{PROJECT_PIPELINE}\requirements\` for `REQ_*.md` files
-2. Check `{PROJECT_PIPELINE}\guides\` -- find files WITHOUT a matching guide pair
-3. Rule:
-   - 1 unprocessed file -> auto-select, announce: "Processing REQ_{SEQ}_{Name}.md"
-   - Multiple -> list them, ask user which to process
-   - 0 -> "No new requirement files. Please run /clean-requirement first."
-4. If user specified a filename (`/ba-analyst REQ_003_Xxx`) -> use that file directly
-
----
-
-### STEP 2 -- Read SRS (Full 7-Pillar Extraction)
-
-Read the entire SRS file. Extract and organize into working memory:
+## Paths
 
 ```
-PILLAR 1 -> Extract:
-  - Feature Key: read from SRS metadata field. If missing, derive from filename REQ_001_{Key}.md
-  - Primary Table: read from SRS metadata (e.g. tbl_SALOrderReceipt). API/DTO names derive from THIS.
-  - Module code (SAL/CS/WH/HR/SYS/MTB/PART)
-  - Platform: Web | Mobile | Both (determines number of FE guides)
-  - Actors: role list -> role-permission matrix for guides
-  - Assumptions, Dependencies, Constraints (-> guide caveats)
-
-  NAMING RULE (derive from Feature Key + Primary Table):
-    Guide files    = BE_{SEQ}_{FeatureKey}.md
-    API names      = GetList + table minus tbl_ (tbl_SALOrderReceipt -> GetListSALReceipt)
-    DTO names      = DTO + table minus tbl_ (DTOSALOrderReceipt)
-    ENUM names     = ENUM + table minus tbl_ + Status (ENUMSALOrderReceiptStatus)
-    Feature folder = F.{FeatureKey} (F.Receipt)
-
-PILLAR 2 -> Extract:
-  - ALL BR-xx rules (verbatim) with rationale
-  - Group: [creation rules] [status rules] [calculation rules] [security rules]
-  - Note BR-xx that blocks certain operations -> status guards in BE
-
-PILLAR 3 -> Extract:
-  - ALL FR-xx requirements with priority (High/Medium/Low)
-  - ALL AC-xx-xx BDD scenarios -> these become:
-      BE: validation rules + error response cases
-      FE: reactive form validators + button state logic
-  - Feature groups -> map to API endpoints (1 FR-group = 1 endpoint group)
-
-PILLAR 4 -> Extract:
-  - NFR-Pxx (Performance) -> API response time targets + DB index hints
-  - NFR-Sxx (Security) -> auth middleware list + audit log fields
-  - NFR-Uxx (Usability) -> error message format + validation UX guide
-  - NFR-Rxx (Reliability) -> logging requirements + fallback behavior
-
-PILLAR 5 -> Extract:
-  - Status list + definitions -> StatusConstants (BE C#) + StatusEnum (FE TS)
-  - Transition table -> state machine guard (BE) + button visibility rules (FE)
-  - Invalid transitions -> 400 error responses (BE) + hidden button rules (FE)
-  - Primary user flow -> API call sequence diagram in guides
-
-PILLAR 6 -> Extract:
-  - Sec. 6.1 Data consumed -> read-only fields in FE, no write endpoints needed
-  - Sec. 6.2 Owned data -> editable fields + validation rules per status + DB column mapping
-  - Sec. 6.3 Data exposed -> output fields other modules consume
-  - Sec. 6.4 Enumerations -> IMMUTABLE contract values -> use in constants/enums ONLY
-  - Sec. 6.5 Integrations -> external service dependencies in BE
-
-PILLAR 7 -> Extract:
-  - Sec. 7.1 Design Reference: Figma file name, page name, frame names -> use in STEP 3
-  - Sec. 7.2 Screen inventory -> component tree
-  - Sec. 7.3 Screen descriptions -> PM-described elements, business rules, visibility notes
-
-APPENDIX A -> Extract:
-  - Risks -> BE edge case handlers + FE error states
-
-APPENDIX B -> Extract:
-  - Traceability matrix -> use to validate guide completeness
-
-APPENDIX C -> Extract:
-  - TBD-xx items -> mark as -> PENDING DECISION in both guides
-  - Assumptions -> mark as -> ASSUMED in guides
+READ:   {PROJECT_PIPELINE}\requirements\          (REQ_*.md -- SRS input)
+READ:   {PROJECT_PIPELINE}\designs\{feature}\     (PNG images from Figma export)
+WRITE:  {PROJECT_PIPELINE}\guides\                (BE_*.md + FE_*.md -- output)
 ```
 
 ---
 
-### STEP 3 -- Read Design (Figma MCP or Archive Images)
+## Steps
 
-1. Call `figma_status` -> verify Figma Desktop + Plugin connected
+### Step 1 -- Auto-Scan and Select SRS
+- Input: `{PROJECT_PIPELINE}\requirements\`
+- Action: Scan for `REQ_*.md`. Find files WITHOUT matching guide in `guides/`.
+- Gate: 1 file -> auto-select. Multiple -> ask user. 0 -> STOP: "Run /clean-requirement first."
 
-2. **If NOT connected -> try design archive fallback:**
+### Step 2 -- Read SRS + Entity Snapshots
+- Input: Selected REQ file + entity snapshot at ABSOLUTE path:
+  `{BA_ROOT}\.agent\skills\ba-pipeline\refs\entity-snapshots\tbl_{PrimaryTable}.md`
+- Action: Extract ALL 7 pillars. Read entity snapshot FIRST -- before any analysis.
+  - Detail table exists -> also read `refs/entity-snapshots/tbl_{DetailTable}.md`
+  - **If snapshot missing**: Ask user ONE question before stopping:
+    "Bảng `tbl_{PrimaryTable}` chưa có entity snapshot.
+     - Bảng đã tồn tại trong DB? → Cần tạo snapshot trước:
+       1. BE agent đọc src/Domain/Entities/tbl_{PrimaryTable}.cs
+       2. Tạo file theo HOW_TO_ADD.md
+       3. Chạy lại /ba-analyst
+     - Bảng CHƯA tồn tại (feature hoàn toàn mới)? → Trả lời 'mới' để BA đề xuất schema"
+  - **If table is brand new** (user confirms): BA proposes minimal schema in Section 1 of guide.
+    BE agent will create entity + migration. No snapshot needed until after table is created.
+  - Snapshot found -> read EVERY column, note C# types and nullability
+    ⚠️ COUNT columns in snapshot. Write that count in your working memory: "Snapshot has N columns."
+    ⚠️ Section 1 of guide MUST list ALL N columns. If guide lists fewer → STOP, re-read snapshot.
+  - **Detail Table rule**: Only set Detail Table in guide header if SRS Pillar 1 EXPLICITLY names a second entity (e.g., "tbl_XxxDetail for line items"). NEVER infer from FK relationships. If SRS has only 1 primary table → write "Detail Table: N/A".
+  - Read component registry: `refs/component-registry.md`
+  - Apply naming rules R2 and R3 from entity table names
+  - Group requirements: BR-xx, FR-xx, AC-xx, NFR-xx
+- Gate: Snapshot read with ALL columns confirmed. SRS must have all 7 pillars.
 
-   a. Scan `{PROJECT_PIPELINE}\designs\` for feature-related folders:
-      - Look for: `{feature}\mobile\*.png`, `{feature}\*.png`, `mobile\*.png`
-      - Also try lowercase/kebab-case variants (e.g., `receipt`, `sales-payment`)
-   
-   b. **If PNG images found:**
-      - Read ALL images using `view_file` (supports binary/image files)
-      - Analyze: layout structure, field labels, button positions, colors, card patterns
-      - Note in guides: "[Analysis from design archive images -- not live Figma]"
-      - Continue to cross-reference with SRS (same as step 3d below)
-   
-   c. **If NO images found either:**
-      - Note in guides:
-        > "No design source available (Figma MCP not connected + no images in designs folder). Screen specs based on SRS Pillar 7 only."
-      - Continue with SRS data only.
+### Step 3 -- Read Design Images + Detect Platform
+- Input: `{PROJECT_PIPELINE}\designs\{feature}\`
+- Action: Check for actual IMAGE FILES (png/jpg), not just folder existence.
+  - `mobile/` has images AND (`web/` or `desktop/`) has images -> Both
+  - `mobile/` has images, others empty -> Mobile
+  - (`web/` or `desktop/`) has images, `mobile/` empty -> Web
+  - `desktop/` = Web equivalent. Empty folder does NOT count.
+  - No designs folder -> Mobile (project default)
+  - Read images using view_file tool in batches of 3. **Read ALL images — do NOT stop after first batch. Continue until every image file in the folder is read.**
+  - Example: 13 images → 5 batches of 3 (last batch = 1). ALL must be read before proceeding.
+  - Do NOT use Figma MCP.
+- Gate: Platform must be resolved (Mobile/Web/Both) before Step 5.
 
-3. **If connected:**
+### Step 4 -- Load Project Standards
+- Input: `projects/hoaiminh/`
+- Action: Load domain files + standards.
+  - Always load: `domain/01-glossary.md`, `domain/06-database-schema.md`, `domain/07-business-rules.md`
+  - SAL/MTB features: also load `domain/03-sales-flow.md`, `domain/08-approval-flows.md`
+  - CS features: also load `domain/04-service-flow.md`
+  - WH features: also load `domain/05-warehouse-flow.md`
+- Gate: Domain loaded -> proceed. Domain files missing -> state error, do not continue.
 
-   a. **Infer frame names** from SRS Pillar 7 Sec. 7.1:
-      - Use "Frame / Screen Names" from Sec. 7.1 Design Reference
-      - If blank -> infer from feature name (e.g., feature "Receipt" -> search Figma for "MTB020", "Receipt", "Receipt")
-      
-   b. **Read each screen** in order (List first, then Detail):
-      ```
-      figma_read scan_design        -> overview: all text, colors, components
-      figma_read get_design_context -> detailed layout of selected frame (tokens, components)
-      figma_read get_css            -> exact CSS for key UI elements if needed
-      ```
+### Step 5 -- Technical Contract Analysis
+- Input: SRS pillars + entity snapshots + domain knowledge
+- Action: Resolve ALL API names (R2), anonymous type schemas (R3, R4, R8), status enums.
+  - Use platform from Step 3 (NOT from SRS if design files exist)
+  - Determine caching strategy: HybridCache key per entity+CompanyId, TTL=15s, invalidate on write (`await cache.RemoveAsync(key)`)
+  - **Status ENUM resolution (HARD GATE -- do this BEFORE writing any handler code):**
+    1. Check if SRS mentions status values for this feature's entity or parent entity
+    2. Look up TypeOfStatus from `refs/entity-snapshots/tbl_LSStatus.md` → "Known TypeOfStatus Groups" table.
+       NEVER guess the TypeOfStatus value. NEVER use TypeData as the filter.
+       Example values (verified from DB): tbl_SALOrderReceipt=18, tbl_SALOrderMaster=7.
+       If entity not in table → write TypeOfStatus=TBD and ask user.
+    3. Always include SQL in Section 3 so BE agent can look up TypeData values:
+       `SELECT TypeData, StatusName FROM tbl_LSStatus WHERE TypeOfStatus = {N} ORDER BY TypeData`
+       (TypeData = sequential value stored in entity Status field — NOT Code/PK)
+    4. In handler code: always write `(int)Enum{TableName}Status.{ValueName}` -- NEVER magic numbers
+       Naming = `EnumXxxStatus` (NOT `ENUMXxxStatus`) — match existing files in `src/Domain/ENUM/`
+    5. Add comment in handler: `// BE agent: check if Enum{TableName}Status exists in src/Domain/ENUM/ — use existing, overwrite only if values wrong`
+- Gate: No unresolved critical TBDs -> proceed. Critical TBDs -> ask user.
 
-   c. **Analyze BODY content only** (skip sidebar/header/chrome):
-      - Layout structure (grid columns, form sections, dialog sizes)
-      - Map all visible field labels -> cross-check against SRS Sec. 6.2 owned data
-      - Map all button labels -> cross-check against SRS Sec. 5.2 transitions
-      - Map colors -> SCSS design tokens (from figma-reader skill if HM project)
-      - Map components -> shared components (ps-button, ps-table, etc. if HM project)
+### Step 6 -- Analysis Summary (Display to User)
+- Output: Summary showing module, APIs, DTO schemas, status machine, discrepancies, TBDs
+- Gate: User sees summary. No critical TBD -> auto-proceed. Critical TBD -> wait for user.
 
-   d. **Cross-reference SRS -- Figma -- generate discrepancy table:**
-      ```
-      For each SRS field in Sec. 6.2:
-        -> Found in Figma? [YES] [NO -> DESIGN MISSING]
-      For each field visible in Figma:
-        -> Found in SRS Sec. 6.2? [YES] [NO -> UNDOCUMENTED -- flag for PM review]
-      For each button in Figma:
-        -> Matches SRS Sec. 5.2 transition trigger? [YES] [MISMATCH -> note both]
-      ```
+### Step 7 -- Generate BE Guide
+- Input: `refs/be-guide-template.md` + all resolved values from Step 5
+- Action: Fill ALL 10 sections with concrete values. No placeholders.
+  - **MANDATORY FIRST**: Fill the MODULE METADATA block in guide header using `refs/module-map.md`:
+    ```
+    Module: {ModuleCode} / {SubModule}
+    VSA Path: modules/{ModuleCode}/Features/{SubModule}/F.{Feature}/
+    Namespace: HoaiMinh.ERP.Modules.{ModuleCode}.Features.{SubModule}.F.{Feature}
+    ModuleConfig: modules/{ModuleCode}/{ModuleCode}ModuleConfig.cs
+    Route prefix: {routePrefix}   <- from module-map.md BE Route Prefix column
+    FE Mobile Abbr: {feAbbr}      <- from module-map.md FE Mobile Abbr column
+    DB ModuleID: {moduleID}       <- from module-map.md DB ModuleID column (e.g., M.Sale=7, M.Repair=6). NEVER use Product code (3) as ModuleID. NEVER use desktop module ID (12 = "Xe máy" desktop).
+    DB Product: Mobile=3 | Desktop=1
+    ```
+  - **VSA Path feature name rule**: `{Feature}` = SHORT business name, NOT the table name.
+    e.g., `tbl_SALOrderReceipt` → `F.Receipt` (NOT `F.SALOrderReceipt`)
+    e.g., `tbl_WOMConsultant` → `F.Consult` (NOT `F.WOMConsultant`)
+    e.g., `tbl_DODeliveryOrder` → `F.DeliveryOrder` (NOT `F.DODeliveryOrder`)
+  - BE agent reads this header block directly — no embedded lookup table needed in BE SKILL.md
+  - **MANDATORY DLLPackage**: Section 8a DLLPackage value MUST be looked up from `refs/module-map.md` DLLPackage table (match by Feature Group). NEVER derive as `{abbr}-{feature}` pattern (e.g., NEVER 'sal-receipt'). Example: SAL Receipt → `receipt`. If not in table → write `[CHECK-FE]`.
+  - **MANDATORY handlers**: ALL 4 handlers (GetList, Get, Update, Delete) MUST be fully written from template. NEVER abbreviate any handler as "see template" or "standard pattern" — that is a critical failure.
+  - **MANDATORY default Status**: If Section 3a = N/A → do NOT write any `Status =` line. If Section 3a has ENUM → use `(int)EnumXxxStatus.{FirstState}` (TypeData=1, initial state). NEVER use Done/Completed. NEVER magic number.
+- Self-check before saving:
+  - [ ] MODULE METADATA block filled in guide header (SSoT for BE/FE agents)
+  - [ ] Folder = `modules/{ModuleCode}/Features/{SubModule}/F.{Feature}/` matches module-map.md (R1)
+  - [ ] Every API name = Prefix + full table name, no tbl_ (R2)
+  - [ ] NO DTO class files anywhere in guide (R4) -- anonymous types only
+  - [ ] Every anonymous type field matches entity snapshot exactly (R3)
+  - [ ] ALL entity columns in base projection (R8)
+  - [ ] tbl_SYSAPI URL column = route prefix from module-map.md (R7) -- NEVER `/sal/` or `/api/sal/`
+  - [ ] Section 7 uses `g.MapPost(...)` ONLY -- MapGet/MapPut/MapDelete are BANNED
+  - [ ] {ModuleConfig} file registration included (Section 7) using be-guide-template pattern
+  - [ ] DB registration SQL included for ALL 4 tables (Section 8) -- all required columns
+  - [ ] Seed data SQL included (Section 9)
+  - [ ] Only allowed prefixes: GetList, Get, Update, Delete, Add, Import, Export (R2)
+  - [ ] Entity Verification section column COUNT matches snapshot column count exactly (e.g., "snapshot has 22 cols → guide lists 22 cols") -- if counts differ → STOP and rewrite Section 1
+  - [ ] Entity Verification: no invented columns, no renamed columns (e.g., `Notes` when entity says `Description`)
+  - [ ] Detail Table in guide header = N/A unless SRS Pillar 1 explicitly names a second entity
+  - [ ] Section 5 has ALL 4 handler patterns: GetList, Get, Update, Delete -- none skipped
+  - [ ] VSA Path feature name = SHORT business name (e.g., F.Receipt), NOT table name (e.g., NOT F.SALOrderReceipt)
+  - [ ] DB ModuleID = from module-map.md ModuleID column -- NEVER same value as Product (3)
+  - [ ] Section 3 TypeOfStatus values come from `refs/entity-snapshots/tbl_LSStatus.md` Known TypeOfStatus Groups table -- NEVER guessed (e.g., 18=SALOrderReceipt, 7=SALOrderMaster, NOT 22)
+  - [ ] Seed data INSERT includes ALL NOT NULL columns from entity Section 1
+  - [ ] Seed data Status value = TypeData value from Section 3 ENUM (e.g., TypeData=1 for initial state), NOT Code PK, NOT magic number
+  - [ ] Section 3a = N/A → NO `Status =` line in new-entity creation block. Section 3a has ENUM → use `(int)EnumXxxStatus.Pending` (TypeData=1)
+  - [ ] Update handler entity Status uses ENUM constant -- NEVER magic number (`Status = 1` raw or `Status = 27` are FORBIDDEN — use `(int)EnumXxxStatus.Pending`)
+  - [ ] New entity default Status = INITIAL workflow state (TypeData=1 / Pending), NOT terminal state (Done/Completed)
+  - [ ] If handler updates PARENT entity status: `parent.Status = (int)EnumXxxStatus.RetailProcessing` -- NEVER `parent.Status = 28` or any integer
+  - [ ] Parent ENUM: check existing file in `src/Domain/ENUM/` first — document existing values in Section 3b. SQL: `SELECT TypeData, StatusName FROM tbl_LSStatus WHERE TypeOfStatus={N}`
+  - [ ] All GetList/Get handlers include HybridCache injection + `cache.GetOrCreateAsync` wrapping query
+  - [ ] All Update/Delete handlers include `await cache.RemoveAsync(key)` AFTER `SaveChangesAsync`
+  - [ ] DLLPackage in Section 8a SQL = looked up from refs/module-map.md DLLPackage table, NOT derived as '{abbr}-{feature}'
+  - [ ] ALL 4 handlers fully generated -- NO "see template" or "standard pattern" shortcuts
+- Gate: ALL self-check items pass -> save. Any CRITICAL fail -> fix before saving.
+- Output: `{PROJECT_PIPELINE}\guides\BE_{SEQ}_{FeatureName}.md`
 
----
+### Step 8 -- Generate FE Web Guide (if Platform = Web or Both)
+- Input: `refs/fe-web-guide-template.md` + BE guide from Step 7
+- Action: Fill all sections. API names MUST match BE guide exactly (R6).
+- Gate: API names verified against BE guide.
+- Output: `{PROJECT_PIPELINE}\guides\FE_WEB_{SEQ}_{FeatureName}.md`
 
-### STEP 4 -- Load Project Standards (Project-Specific)
+### Step 9 -- Generate FE Mobile Guide (if Platform = Mobile or Both)
+- Input: `refs/fe-mobile-guide-template.md` + component registry + BE guide from Step 7
+- NOTE: BA does NOT have access to FE Mobile workspace. Do NOT search or read any file outside BA workspace or ai.pipeline.
+  - DLLPackage value: copy from BE guide Section 8a (which was already looked up from module-map.md DLLPackage table).
+  - CASE A vs CASE B: determine from `refs/module-map.md` DLLPackage table "Notes" column:
+    - "Already in namespaceMap" → CASE A. Also document the FE Mobile Namespace (e.g., `fpayment`) from table.
+    - No note or missing entry → CASE B (FE agent will create new namespace).
+  - FE Mobile agent will verify at implement time, but BA must pre-document the correct case.
+- Action: Fill all sections. CRITICAL naming rule: derive module abbreviation from `refs/module-map.md` → "FE Mobile Abbr" column.
+  - Pattern: folder=`mtb{NNN}-{abbr}-{feature}`, class=`Mtb{NNN}{Abbr}{Feature}Component`, selector=`mtb{NNN}-{abbr}-{feature}`
+  - Examples: Sale → `sal` → `mtb028-sal-receipt`; Repair → `cs` → `mtb030-cs-consult`; Warehouse → `wh` → `mtb032-wh-delivery`
+  - The module abbreviation segment is MANDATORY -- NEVER omit it
+- Self-check before saving:
+  - [ ] Module abbr looked up from `refs/module-map.md` "FE Mobile Abbr" column (e.g. sal/cs/wh/prt/crm) (RULE-MOB-04)
+  - [ ] Component folder = `mtb{NNN}-{abbr}-{feature}/` -- has module abbr? (RULE-MOB-04)
+  - [ ] Class = `Mtb{NNN}{Abbr}{Feature}Component` -- has module abbr (PascalCase)? (RULE-MOB-04)
+  - [ ] Selector = `mtb{NNN}-{abbr}-{feature}` -- has module abbr? (RULE-MOB-04)
+  - [ ] Component = `mtb{NNN}` from registry (R5) -- NOT Mtb001 unless registry says so
+  - [ ] API names match BE guide exactly (R6)
+  - [ ] DLLPackage in MODULE METADATA = from module-map.md DLLPackage table — NEVER '{abbr}-{feature}' pattern
+  - [ ] Section 3a: states CASE A or B determined from module-map.md DLLPackage table Notes column
+  - [ ] Section 3a documents DLLPackage value AND FE namespace (e.g., CASE A: 'receipt' → fpayment)
+  - [ ] Section 3a uses namespace key pattern `{namespace}.{APIID}` (e.g. `fpayment.GetListSALOrderReceipt`) -- NEVER `this.http.get/post`
+  - [ ] Section 3b methods use `this.post({namespace}.{APIID}, payload)` -- no direct HTTP
+  - [ ] Response format uses `res.StatusCode === 0` + `res.ObjectReturn` -- NEVER `res.Success/res.Data`
+  - [ ] MtbikeApiService used -- NEVER custom service class, NotificationService, LoaderService
+  - [ ] Field names match entity columns (R3)
+  - [ ] SCSS wrapper = `::ng-deep { mtb{NNN}-{abbr}-{feature} { } }` with `@import colors`
+  - [ ] Registered in mtbike.module.ts + mtbike.routing.ts
+  - [ ] 5 standard services in constructor (Router, MtbikeApiService, PsCache, PsKendoNotificationService, SystemLoaderService)
+  - [ ] No lucide-icon (use material-icons only)
+  - [ ] No hardcoded arrays (paymentMethods, statusList) -- BANNED mock data
+  - [ ] All dropdown loaders call real API (e.g., GetListLSList for tbl_LSList-based lists) -- NO empty placeholder methods
+  - [ ] tbl_LSList dropdowns use [valueField]="'TypeOfList'" NOT [valueField]="'Code'" (entity stores TypeOfList integer, not Code)
+  - [ ] tbl_LSList dropdowns use [textField]="'ListName'" (display column name in tbl_LSList)
+  - [ ] notification.onSuccess() strings use Vietnamese WITH diacritics (e.g., 'Lưu thành công', NOT 'Luu thanh cong')
+  - [ ] Detail component = SEPARATE mtb{NNN+1}-{abbr}-{feature}-detail (NOT isDetailView toggle)
+  - [ ] KeyLocalStorageEnum entry for detail navigation added
+- Gate: ALL self-check items pass -> save. After saving -> update registry (increment by 2 if both list+detail).
+- Output: `{PROJECT_PIPELINE}\guides\FE_MOBWEB_{SEQ}_{FeatureName}.md`
+  ⚠️ FILENAME MUST START WITH `FE_MOBWEB_` — NEVER `FE_` alone. Wrong name = FE agent cannot find the guide.
 
-**Detect project** from SRS Pillar 1 (module code, terminology, currency):
+### Step 10 -- Save Memory File
+- Input: All analysis decisions from Steps 2-9
+- Action: Save to `.agent/projects/hoaiminh/memory/{FeatureName}.md`
+- Gate: Memory file saved -> proceed.
 
-**If Capstone ERP** (SAL / CS / WH / HR / SYS / MTB module codes, VND, Honda/3PS terms):
-```
-MANDATORY LOAD:
-  .agent\projects\Capstone\standards\be-standards.md   (BE stack, API naming, DTO patterns)
-  .agent\projects\Capstone\standards\fe-standards.md   (FE stack, Angular patterns, components)
-
-LOAD BASED ON MODULE:
-  .agent\projects\Capstone\domain\01-glossary.md
-  .agent\projects\Capstone\domain\06-database-schema.md
-  .agent\projects\Capstone\domain\07-business-rules.md
-  .agent\projects\Capstone\domain\11-coding-standards.md
-  [SAL/MTB] -> domain\03-sales-flow.md + domain\08-approval-flows.md
-  [CS]      -> domain\04-service-flow.md
-  [WH]      -> domain\05-warehouse-flow.md
-  [SYS/HR]  -> domain\02-roles-permissions.md
-  [PART]    -> domain\05-warehouse-flow.md
-
-CHECK MEMORY:
-  .agent\projects\Capstone\memory\{FeatureName}.md  -> additional context
-```
-
-**Conflict resolution (AUTO -- never ask user):**
-- SRS conflicts with domain file -> **SRS wins** (newer and more specific)
-- Note the override in the generated memory file
-- Only ask user if SRS genuinely contradicts itself
-
-**For non-HM projects:** Skip domain + standards files. Rely entirely on SRS.
-
----
-
-### STEP 5 -- Technical Contract Analysis
-
-> This is the most critical step. BA must resolve EVERY technical detail before writing guides.
-> Output: A complete contract that developers can implement with ZERO assumptions.
-
-#### 5.1 Platform & Guide Plan
-```
-FROM SRS Pillar 1 -> Platform:
-  Web    -> 1 FE guide: FE_WEB_{SEQ}_{Name}.md
-  Mobile -> 1 FE guide: FE_MOBWEB_{SEQ}_{Name}.md  
-  Both   -> 2 FE guides: FE_WEB_*.md + FE_MOBWEB_*.md
-  
-Always 1 BE guide: BE_{SEQ}_{Name}.md
-```
-
-#### 5.2 API Contract Resolution
-```
-For each feature group in SRS Sec. 3 (FR-xx groups):
-  API Name    = [GetList|Get|Update|Delete] + [ModuleCode] + [EntityName] + [suffix?]
-  Endpoint    = POST /api/v1/{module}/{feature}/{action}
-  Request DTO = {Feature}[Save|Filter|Cus]Request
-  Response    = ApiResponse<PagedList<{Feature}Response>> | ApiResponse<{Feature}Response>
-
-RULES (from be-standards.md Sec. 1):
-  GetList{Feature}      -> POST .../list     -> {Feature}FilterRequest -> PagedList<{Feature}Response>
-  Get{Feature}          -> POST .../detail   -> {Feature}CusRequest   -> {Feature}Response
-  Update{Feature}       -> POST .../save     -> {Feature}SaveRequest  -> { Code, {FeatureNo} }
-  Update{Feature}Status -> POST .../status   -> UpdateStatusRequest<{Feature}CusRequest>
-  Delete{Feature}       -> POST .../delete   -> {Feature}CusRequest   -> { success: true }
-
-Example for Receipt:
-  GetListSALReceipt     -> POST /api/v1/sal/receipt/list
-  GetSALReceipt         -> POST /api/v1/sal/receipt/detail
-  UpdateSALReceipt      -> POST /api/v1/sal/receipt/save
-  UpdateSALReceiptStatus-> POST /api/v1/sal/receipt/status
-  DeleteSALReceipt      -> POST /api/v1/sal/receipt/delete
-```
-
-#### 5.3 DTO Schema Resolution
-```
-For each API, define exact DTO:
-
-{Feature}SaveRequest (create or update):
-  - Code: long (0 = create, >0 = update) -> -> MANDATORY
-  - [all editable fields from SRS Sec. 6.2 where "Editable When" is not "Never"]
-  - [related IDs if FK relationship]
-
-{Feature}CusRequest (identify record):
-  - Code: long -> always required
-  - [other identifying fields if composite key]
-
-{Feature}FilterRequest (list query):
-  - [all filter fields from SRS Sec. 7.3 filter bar description]
-  - Page: int = 1
-  - PageSize: int = 20
-  - DateFrom?: DateOnly
-  - DateTo?: DateOnly
-  - Status?: int (if status filter exists)
-
-{Feature}Response (list + detail output):
-  - [ALL fields FE needs to display -- from SRS Sec. 7.3 grid columns + detail form]
-  - [StatusName: string -- always include human-readable status]
-  - [related entity names -- e.g., CashierName, CustomerName]
-  - [computed/aggregated fields from SRS Sec. 6.3]
-
-FE TypeScript DTOs:
-  {Module}{Feature}DTO    -> maps to {Feature}Response
-  {Module}{Feature}CusDTO -> maps to {Feature}CusRequest
-  File: {module}-{feature}.dto.ts
-```
-
-#### 5.4 Status & Enum Catalog
-```
-For each status entity in SRS Sec. 6.4 / Sec. 5.2:
-
-BE (C#) -- in {Feature}Dto.cs or Constants/{Feature}Status.cs:
-  public enum ENUM{TableName}Status
-  {
-    public const int {StatusName} = {TypeOfStatus int};  // from tbl_LSStatus
-    public static string GetName(int? s) => ...
-    public static readonly int[] EditableStatuses = [...];
-    public static readonly int[] FinalStatuses = [...];
-  }
-
-FE (TypeScript) -- in e-status/{module}-{feature}-status.enum.ts:
-  export enum {Module}{Feature}StatusEnum {
-    {StatusName} = {TypeOfStatus int},  // must match BE
-  }
-
-For HM project -> include LSStatusTypeDataEnum value for GetListStatus() call.
-```
-
-#### 5.5 Shared Service Catalog
-```
-From SRS Sec. 3 (what data the feature needs from outside) + SRS Sec. 7.3 (dropdowns, pickers):
-
-For each dropdown/picker/autocomplete in the UI:
-  -> Which CORE API provides it?
-  -> Which PSCoreApiService method? With what param?
-  -> When to load it? (OnInit / OnDialogOpen / On{field}Change)
-
-Catalog format:
-  | Data Needed | CORE API | FE Method | TypeData/Param | Load Trigger |
-  |---|---|---|---|---|
-  | Cashier | GetListEmployee | coreApi.GetListEmployee() | -- | OnInit |
-  | Status filter | GetListStatus | coreApi.GetListStatus(LSStatusTypeDataEnum.Receipt) | TypeData=22 | OnInit |
-  | Branch | GetListHead | coreApi.GetListHead(false) | isAll=false | OnInit |
-```
-
-#### 5.6 Caching Strategy
-```
-List queries -> Use Redis (IDistributedCache):
-  Cache key: "{module}:{feature}:list:{md5(filterParams)}"
-  TTL: 5 minutes
-  Invalidate: on any Update or Delete for this feature
-  
-  IF Redis not available -> Comment Redis lines, use IMemoryCache:
-  // var cached = _memCache.Get<PagedList<...>>(cacheKey);
-  // _memCache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
-
-Detail queries -> No cache (always fresh)
-Status changes -> Invalidate list cache
-```
-
-#### 5.7 FE Screen--Component Mapping
-```
-For each SCR-xx in SRS Sec. 7.2:
-  Component name: {Module}{Seq}{Feature}Component
-  File path: views/{module}/views/{module}{seq}-{feature}/
-  Route: /{module}/{seq}-{feature}
-  
-  Grid columns (Web):
-    | field (camelCase) | title (Vietnamese) | width | format | sortable |
-  
-  Filter components:
-    | ps-dropdown binding | TypeData enum | CORE API method | label |
-  
-  Toolbar buttons (by status):
-    | Button label | Status condition (enum) | Action | Role condition |
-  
-  Editability matrix (Detail screen):
-    | Field | Editable when Status = | Read-only when Status = |
-```
+### Step 11 -- Report to User
+- Output: List all guides created with line counts + technical summary (APIs, schemas, enums, screens, discrepancies)
 
 ---
 
-### STEP 6 -- Analysis Summary (Display to User)
+## Output
 
-```
--- ANALYSIS: {FeatureName}
-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
--- SRS: REQ_{SEQ}_{Name}.md
-  [OK] Figma: {Connected -> / Not Connected ?} -- Frames: {list}
-|--  Module: {SAL|CS|...} | Platform: {Web|Mobile|Both}
--- Guides: {BE_xxx.md} + {FE_WEB_xxx.md} [+ FE_MOBWEB_xxx.md if Both]
-
-BUSINESS RULES: {N} (BR-01 to BR-{N})
-  |-- Critical: {BR-xx}: {rule summary}
-  +-- Calculation: {BR-xx}: {formula}
-
-APIs: {N} endpoints
-  |-- GetList{Feature}  -> POST /api/v1/{module}/{feature}/list
-  |-- Get{Feature}      -> POST /api/v1/{module}/{feature}/detail
-  |-- Update{Feature}   -> POST /api/v1/{module}/{feature}/save
-  |-- Update{Feature}Status -> POST /api/v1/{module}/{feature}/status
-  +-- Delete{Feature}   -> POST /api/v1/{module}/{feature}/delete
-
-DTOs: {Feature}SaveRequest ({N} fields), {Feature}Response ({N} fields)
-StatusEnum: {Status1}={N}, {Status2}={N}, {Status3}={N}
-Shared APIs: {GetListEmployee, GetListStatus(TypeData=xx), ...}
-Cache: Redis list cache (5min) + invalidate on Update/Delete
-
-STATE MACHINE: {N} statuses
-  {STATUS_A}(1) -> {STATUS_B}(2) -> {STATUS_C}(3 terminal)
-
-FIGMA vs SRS DISCREPANCIES:
-  |-- UNDOCUMENTED in SRS: {list} or "None"
-  +-- MISSING in Figma: {list} or "None"
-  [OK] PENDING DECISIONS: {N} items
-  +-- TBD-01: {question} -> blocks FR-{xx}
-  [OK] Generating guides now...
-```
-
-**Approval Gate:**
-- No TBD -> Auto-proceed immediately
-- TBD present but non-blocking -> Proceed + flag in guide
-- Critical TBD (blocks core functionality) -> Ask user the specific question first
+BE Guide structure (10 sections):
+1. Entity Verification -- column table from snapshot
+2. API Contract -- endpoint table
+3. Status Constants -- if applicable
+4. VSA File Structure -- folder tree
+5. Handler Code Patterns -- GetList, Get, Update, Delete
+6. Validation Rules -- from AC-xx
+7. Endpoint Registration -- MtbModuleConfig.cs code
+8. Database Registration -- SQL for 4 tables (SYSFunction, SYSAction, SYSPermissions, SYSAPI)
+9. Seed Data -- 3-5 INSERT rows for testing
+10. Shared APIs Required -- dependencies
 
 ---
 
-### STEP 7 -- Generate BE Guide
-
-Save to: `{PROJECT_PIPELINE}\guides\BE_{SEQ}_{FeatureName}.md`
-
-```markdown
-# BE Implementation Guide: {FeatureName}
-> **Generated from:** REQ_{SEQ}_{Name}.md (7-Pillar SRS, IEEE 29148)
-> **Generated at:** {ISO timestamp}
-> **Module:** {module} | **Stack:** .NET 10 + Minimal API + VSA + CQRS (MediatR) + EF Core 10 + Redis
-> **Traceability:** All sections reference SRS IDs (BR-xx, FR-xx, NFR-xx, AC-xx)
-
----
-
-## 1. Overview & Performance Targets
-
-{1-paragraph business description of what this feature does from BE perspective.}
-
-| NFR | Requirement | Source |
-|---|---|---|
-| P95 List APIs | < {N}s response time | NFR-P01 |
-| P95 Detail APIs | < {N}s response time | NFR-P02 |
-| Concurrent users | {N} simultaneous | NFR-P03 |
-| Auth | JWT Bearer required on all endpoints | NFR-S01 |
-| Audit | CreatedBy/UpdatedBy from ICurrentUserService | NFR-S04 |
-| HEAD filter | All list queries MUST filter by _currentUser.CompanyId | BR-{nn} |
-
----
-
-## 2. API Contract
-
-> POST-only endpoints. No GET/PUT/DELETE REST conventions.
-
-| API Name | Endpoint | Request DTO | Response | Cache |
-|---|---|---|---|---|
-| GetList{Feature} | POST /api/v1/{module}/{feature}/list | {Feature}FilterRequest | ApiResponse<PagedList<{Feature}Response>> | Redis 5min |
-| Get{Feature} | POST /api/v1/{module}/{feature}/detail | {Feature}CusRequest | ApiResponse<{Feature}Response> | None |
-| Update{Feature} | POST /api/v1/{module}/{feature}/save | {Feature}SaveRequest | ApiResponse<{Code,{FeatureNo}}> | Invalidates list |
-| Update{Feature}Status | POST /api/v1/{module}/{feature}/status | UpdateStatusRequest<{Feature}CusRequest> | ApiResponse<object> | Invalidates list |
-| Delete{Feature} | POST /api/v1/{module}/{feature}/delete | {Feature}CusRequest | ApiResponse<object> | Invalidates list |
-
----
-
-## 3. DTO Definitions
-
-> File location: `modules/Capstone.ERP.Modules.{Module}/Features/{Feature}/{Feature}Dto.cs`
-
-### {Feature}SaveRequest (Create or Update -- Code=0->INSERT, Code>0->UPDATE)
-```csharp
-public record {Feature}SaveRequest(
-    long Code,                     // 0=create, >0=update  [FR-{nn}]
-    {type} {field},               // {description} [BR-{nn}]
-    {type}? {optionalField}       // optional -- {description}
-);
-```
-
-### {Feature}CusRequest (Identify record -- used in Get/Delete/Status)
-```csharp
-public record {Feature}CusRequest(
-    long Code                      // {Feature} primary key
-);
-```
-
-### {Feature}FilterRequest (List query params)
-```csharp
-public record {Feature}FilterRequest(
-    DateOnly? DateFrom,            // SRS Sec. 7.3 filter bar [FR-{nn}]
-    DateOnly? DateTo,
-    int? Status,                   // null = all statuses
-    int Page = 1,
-    int PageSize = 20
-);
-```
-
-### {Feature}Response (Output -- list rows + detail view)
-```csharp
-public record {Feature}Response(
-    long Code,
-    string {FeatureNo},            // auto-generated number
-    {type} {field},               // {from SRS Sec. 6.2 / Sec. 7.3 grid columns}
-    int Status,
-    string StatusName,             // human-readable -- from {Feature}Status.GetName()
-    {type} {joinedField}Name,     // joined from {OtherTable}
-    DateTimeOffset CreatedAt,
-    string CreatedByName
-);
-```
-
----
-
-## 4. Status & Enum Definitions
-
-> Source: SRS Sec. 6.4 + Sec. 5.2 Transition Table
-> **IMMUTABLE** -- values map to `tbl_LSStatus TypeData={XX}`
-
-### BE C# (StatusConstants)
-```csharp
-// File: modules/.../Features/{Feature}/{Feature}Dto.cs
-public enum ENUM{TableName}Status
-{
-    public const int {StatusName1} = {N};   // TypeOfStatus={N}, display: "{Display}" -- [SRS Sec. 6.4]
-    public const int {StatusName2} = {N};
-    public const int {StatusName3} = {N};   // TERMINAL
-
-    private static readonly Dictionary<int, string> _names = new()
-    {
-        [{StatusName1}] = "{Display1}",
-        [{StatusName2}] = "{Display2}",
-        [{StatusName3}] = "{Display3}"
-    };
-
-    public static string GetName(int? s) =>
-        s.HasValue && _names.TryGetValue(s.Value, out var n) -> n : "Unknown";
-
-    public static readonly int[] EditableStatuses = [{StatusName1}];
-    public static readonly int[] FinalStatuses    = [{StatusName2}, {StatusName3}];
-}
-```
-
----
-
-## 5. VSA File Structure
-
-```
-modules/Capstone.ERP.Modules.{Module}/
-+-- Features/
-    +-- {Feature}/
-        |-- {Feature}Endpoints.cs           -> Route registration + MediatR dispatch
-        |-- GetList{Feature}Query.cs        -> CQRS Query record
-        |-- GetList{Feature}Handler.cs      -> EF Core query + Redis cache
-        |-- Get{Feature}Query.cs
-        |-- Get{Feature}Handler.cs
-        |-- Update{Feature}Command.cs       -> CQRS Command record
-        |-- Update{Feature}Handler.cs       -> Business logic + DB write
-        |-- UpdateStatus{Feature}Command.cs -> Status change command
-        |-- UpdateStatus{Feature}Handler.cs -> Status transition guard
-        |-- Delete{Feature}Command.cs
-        |-- Delete{Feature}Handler.cs
-        +-- {Feature}Dto.cs                 -> All DTOs + StatusConstants
-```
-
----
-
-## 6. Handler Logic (Step-by-Step)
-
-### GetList{Feature}Handler
-```
-Step 1: Build Redis cache key = "{module}:{feature}:list:{md5(filter)}"
-Step 2: Try cache.GetStringAsync(key) -> return if hit
-        [Comment out Redis -> use IMemoryCache if Redis not setup]
-Step 3: Query tbl_{PrimaryTable}
-        -> .Where(x => !x.IsDeleted)                         -> soft delete
-        -> .Where(x => x.Head == _currentUser.CompanyId)       -> HEAD-01 -> MANDATORY
-        -> .Where(x => filter.DateFrom == null || x.CreatedDate >= filter.DateFrom)
-        -> .Where(x => filter.Status == null || x.Status == filter.Status)
-        -> .AsNoTracking()                                    -> read-only -> performance
-Step 4: LeftJoin tbl_{RelatedTable} for joined names (.NET 10 native LeftJoin)
-Step 5: Project to {Feature}Response record
-Step 6: Order + paginate: .OrderByDescending(x => x.Code).Skip().Take()
-Step 7: CountAsync for total
-Step 8: Build PagedList<{Feature}Response> { Data, Total, Page, PageSize }
-Step 9: Set cache (5min TTL) [Comment out if no Redis]
-Step 10: Return ApiResponse<PagedList<{Feature}Response>>.Ok(result)
-```
-
-### Update{Feature}Handler
-```
-Step 1: Validate request fields (from SRS AC-xx)
-        -> {field} required? -> return BadRequest({message from SRS})
-        -> {amount} > 0? -> check from SRS BR-xx
-
-Step 2: if Code == 0 -> CREATE branch:
-        -> Verify no duplicate {uniqueField} (if BR-xx requires uniqueness)
-        -> Generate {FeatureNo} via SysIncreaseService.NextAsync("{PREFIX}")
-        -> new tbl_{PrimaryTable} {
-            Head      = _currentUser.CompanyId,    -> ICurrentUserService -- NEVER hardcode
-            Cashier   = _currentUser.LegacyUserId,
-            CreatedBy = _currentUser.UserCode,
-            CreatedDate = DateTime.UtcNow,
-            Status    = {Feature}Status.{InitialStatus}
-          }
-        -> db.{PrimaryTable}s.Add(entity)
-
-Step 3: if Code > 0 -> UPDATE branch:
-        -> Load entity: db.{PrimaryTable}s.FirstOrDefaultAsync(x => x.Code == Code && !x.IsDeleted)
-        -> If null -> return NotFound("{Feature} not found")
-        -> Status guard: if not in EditableStatuses -> return BadRequest("{message}")
-        -> Map changed fields from request
-        -> entity.UpdatedBy = currentUser.UserName
-        -> entity.UpdatedDate = DateTime.UtcNow
-
-Step 4: db.SaveChangesAsync(ct)
-Step 5: Invalidate Redis cache for this feature's list keys [comment if no Redis]
-Step 6: Return ApiResponse<object>.Ok(new { entity.Code, entity.{FeatureNo} })
-```
-
-### UpdateStatus{Feature}Handler
-```
-Step 1: Load entity by Code -> check exists + not deleted
-Step 2: Look up transition table (from SRS Sec. 5.2):
-        Resolve: (currentStatus, targetStatus) -> allowed?
-        If not allowed -> return BadRequest("Cannot transition from {from} to {to}")
-Step 3: Require reason if targetStatus is Cancelled (from SRS BR-xx)
-Step 4: entity.Status = targetStatus
-        entity.{StatusDate} = DateTime.UtcNow  (if applicable)
-        Log status change to tbl_LOGStatus (if required by SRS NFR-S04)
-Step 5: db.SaveChangesAsync(ct)
-Step 6: Invalidate cache [comment if no Redis]
-Step 7: Return ApiResponse<object>.Ok(new { entity.Code, entity.Status })
-```
-
----
-
-## 7. Shared APIs Required (APICORE)
-
-> BA MUST list which CORE APIs this feature relies on.
-
-| CORE API | Module | When Called | Notes |
-|---|---|---|---|
-| {GetListXxx} | CORE | {When/trigger} | TypeData={N} if applicable |
-
----
-
-## 8. Validation Rules
-
-> Source: SRS Sec. 3 Acceptance Criteria (AC-xx)
-
-| Rule | Condition | Error Message | Source |
-|---|---|---|---|
-| {Field} required | `{field} == null or empty` | "{field} is required" | AC-{nn}-{nn} |
-| Amount > 0 | `amount <= 0` | "Amount must be greater than 0" | BR-{nn} |
-| Status editable | `status not in EditableStatuses` | "Cannot edit in status {statusName}" | BR-{nn} |
-
----
-
-## 9. Figma -- SRS Discrepancy Report
-
-| Type | Field/Element | Details | Recommended Action |
-|---|---|---|---|
-| UNDOCUMENTED | {field in Figma, not in SRS} | Found in {screen}, not in SRS Sec. 6.2 | Confirm with PM -> add to SRS |
-| DESIGN MISSING | {field in SRS, not in Figma} | In SRS Sec. 6.2, frame {SCR-xx} missing | Request design update |
-| LABEL MISMATCH | {button} | SRS: "{A}" / Figma: "{B}" | SRS wins -> implement as "{A}" |
-
----
-
-## 10. Pending Decisions
-
-| ID | Question | Blocks | Assigned To |
-|---|---|---|---|
-| TBD-{nn} | {question from SRS Appendix C} | FR-{nn} | {stakeholder} |
-```
-
----
-
-### STEP 8 -- Generate FE Web Guide (if Platform = Web or Both)
-
-Save to: `{PROJECT_PIPELINE}\guides\FE_WEB_{SEQ}_{FeatureName}.md`
-
-```markdown
-# FE Web Implementation Guide: {FeatureName}
-> **Generated from:** REQ_{SEQ}_{Name}.md + Figma Analysis
-> **Generated at:** {ISO timestamp}
-> **Module:** {module} | **Platform:** Web (Capstone.FEWeb -- Angular 16 + Kendo UI 13)
-> **Stack:** Angular 16, Kendo UI 13, SCSS, PSAPIService, PSCoreApiService
-
----
-
-## 1. Overview
-
-{Brief description of what FE needs to implement. List all screens.}
-
-**Screens:**
-| Screen ID | Component Name | Route | File Path |
-|---|---|---|---|
-| SCR-01 | {Module}{Seq}{Feature}Component | /{module}/{seq}-{feature} | views/{module}/views/{module}{seq}-{feature}/ |
-| SCR-02 | {Module}{Seq}{Feature}DetailComponent | /{module}/{seq}-{feature}-detail | views/{module}/views/{module}{seq}-{feature}-detail/ |
-
----
-
-## 2. Service Files
-
-### {module}-api-static.service.ts -- URL Constants
-```typescript
-// File: views/{module}/services/{module}-api-static.service.ts
-// ADD these URL constants (preserve existing ones):
-export class {Module}ApiStaticService {
-  static readonly {DLL_KEY} = {
-    GetList{Feature}:          'api/v1/{module}/{feature}/list',
-    Get{Feature}:              'api/v1/{module}/{feature}/detail',
-    Update{Feature}:           'api/v1/{module}/{feature}/save',
-    Update{Feature}Status:     'api/v1/{module}/{feature}/status',
-    Delete{Feature}:           'api/v1/{module}/{feature}/delete',
-  };
-}
-```
-
-### {module}-api.service.ts -- Service Methods
-```typescript
-// INJECT: PSAPIService, PSGetConfigService
-// IMPORT: {Feature}CusDTO, UpdatePropertiesInterface, UpdateStatusInterface
-
-// Add these methods:
-GetList{Feature}(param: State): Observable<ResponseDTO> { /* standard Observable pattern */ }
-Get{Feature}(param: {Module}{Feature}CusDTO): Observable<ResponseDTO> { /* standard */ }
-Update{Feature}(param: UpdatePropertiesInterface<{Module}{Feature}CusDTO>): Observable<ResponseDTO> { }
-Update{Feature}Status(param: UpdateStatusInterface<{Module}{Feature}CusDTO>): Observable<ResponseDTO> { }
-Delete{Feature}(param: {Module}{Feature}CusDTO): Observable<ResponseDTO> { }
-```
-[See fe-standards.md Sec. 3 for exact Observable pattern]
-
----
-
-## 3. DTO Files
-
-### {module}-{feature}.dto.ts
-```typescript
-// File: models/dtos/e-dtos/{module}-{feature}.dto.ts
-
-export interface {Module}{Feature}DTO {
-  Code: number;
-  {FeatureNo}: string;
-  {field}: {type};           // SRS Sec. 6.2 -- {description}
-  Status: number;
-  StatusName: string;
-  {JoinedEntity}Name: string; // joined field
-  CreatedAt: string;
-  CreatedByName: string;
-}
-
-export interface {Module}{Feature}CusDTO {
-  Code: number;               // always -- identifies record
-}
-```
-
----
-
-## 4. Enum Files
-
-### e-status/{module}-{feature}-status.enum.ts
-```typescript
-// File: models/enums/e-status/{module}-{feature}-status.enum.ts
-export enum {Module}{Feature}StatusEnum {
-  {StatusName1} = {N},  // "{Display1}" -- maps to BE {Feature}Status.{StatusName1}
-  {StatusName2} = {N},  // "{Display2}"
-  {StatusName3} = {N},  // "{Display3}" -- TERMINAL
-}
-```
-
-### LSStatusTypeDataEnum value for GetListStatus()
-```typescript
-// Use: coreApi.GetListStatus(LSStatusTypeDataEnum.{X})
-// Where TypeData = {N}  (from tbl_LSStatus -- HM DB)
-```
-
----
-
-## 5. Shared Core Services to Inject
-
-| Data | FE Method | TypeData/Param | Load When |
-|---|---|---|---|
-| {Dropdown label} | coreApi.{GetListXxx}({param}) | {param value} | {OnInit / OnOpen / On{Field}Change} |
-
----
-
-## 6. Screen Specifications
-
-### SCR-01: {Feature} List Screen
-
-**Kendo Grid Columns:**
-| field | title | width | format | sortable | notes |
-|---|---|---|---|---|---|
-| {featureNo} | "No. {feature}" | 120 | -- | true | [FR-{nn}] |
-| {amount} | "{Label}" | 150 | "{0:n0}" | true | VND format |
-| {statusName} | "Status" | 120 | -- | true | badge color per status |
-
-**Filter Bar Components:**
-| Component | Binding | API Call | Label |
-|---|---|---|---|
-| kendo-daterangepicker | dateFrom / dateTo | - | "From date - To date" |
-| ps-dropdown | statusFilter | coreApi.GetListStatus(TypeData={N}) | "Status" |
-
-**Toolbar Buttons (by status / role):**
-| Button | Label | Visible when | Action |
-|---|---|---|---|
-| Add | "Add New" | Always | openDialog(null) |
-| Edit | "Edit" | row.Status = {StatusName1} | openDialog(row) |
-| {Approve} | "{Label}" | Status={StatusName1}, Role={Role} | callUpdateStatus({StatusName2}) |
-| Delete | "Delete" | Status={StatusName1} | confirmDelete(row) |
-
-### SCR-02: {Feature} Detail Screen
-
-**Form Fields (Editability Matrix):**
-| Field | Label | Component | Editable when Status = | Source |
-|---|---|---|---|---|
-| {field} | "{Label}" | ps-input | {StatusName1} | SRS Sec. 6.2 |
-| {amount} | "{label}" | kendo-numerictextbox | {StatusName1} | SRS Sec. 6.2 |
-| {statusName} | "Status" | badge | Read-only always | -- |
-
-**Action Buttons (Detail):**
-| Button | Label | Show when | Action |
-|---|---|---|---|
-| Save | "Save" | Status={StatusName1} | callUpdate() |
-| {Submit} | "{Label}" | Status={StatusName1} | callUpdateStatus({N}) |
-| Cancel | "Cancel Transaction" | Status={StatusName1} | confirmCancel() with reason |
-
----
-
-## 7. Status Badge & Rendering
-
-```typescript
-// In component class -- expose enum
-{Feature}Status = {Module}{Feature}StatusEnum;
-
-getStatusClass(status: number): string {
-  return {
-    [{Module}{Feature}StatusEnum.{Name1}]: 'badge badge-warning',
-    [{Module}{Feature}StatusEnum.{Name2}]: 'badge badge-success',
-    [{Module}{Feature}StatusEnum.{Name3}]: 'badge badge-danger',
-  }[status] -> 'badge badge-secondary';
-}
-```
-
----
-
-## 8. Validation (Reactive Forms)
-
-```typescript
-// Form group -- cite FR-xx for each validator
-this.form = this.fb.group({
-  {field}: [null, [Validators.required]],           // AC-{nn}-{nn}: required
-  {amount}: [null, [Validators.min(1)]],            // AC-{nn}-{nn}: must > 0
-});
-```
-
----
-
-## 9. Layout Rules
-
-```
-1. Page structure: ps-layout -> ps-toolbar-top -> ps-table / form
-2. Scroll: table container: overflow-x: auto (zoom support)
-3. Buttons: ONLY inside ps-toolbar -- never floating/absolute
-4. Loading: kendo-loader for all API calls
-5. Empty grid: show "No data available" -- never blank grid
-6. Empty state: {Business-specific empty state message from SRS}
-```
-
----
-
-## 10. Figma -- SRS Discrepancies
-
-| Type | Element | Details | Action |
-|---|---|---|---|
-| UNDOCUMENTED | {element} | In Figma {frame}, not in SRS | Implement if PM confirms |
-| MISSING | {element} | In SRS, missing in Figma | Implement per SRS spec |
-| MISMATCH | {element} | SRS: "{A}" / Figma: "{B}" | Use SRS version: "{A}" |
-
----
-
-## 11. Pending Decisions
-
-| TBD | Question | Blocks | Temp Implementation |
-|---|---|---|---|
-| TBD-{nn} | {question} | {FR-nn} | {temporary workaround if any} |
-```
-
----
-
-### STEP 9 -- Generate FE Mobile Guide (if Platform = Mobile or Both)
-
-Save to: `{PROJECT_PIPELINE}\guides\FE_MOBWEB_{SEQ}_{FeatureName}.md`
-
-```markdown
-# FE Mobile Implementation Guide: {FeatureName}
-> **Platform:** Mobile (Capstone.FEMobileWeb -- Angular 16, Responsive)
-> **Key differences from Web:** No Kendo Grid, card-based lists, bottom action bar, touch targets 44px+
-
----
-## 1. Overview
-## 2. Service Files (same {module}-api.service.ts -- reuse, no changes needed if already created for web)
-## 3. DTO Files (same as Web guide)
-## 4. Enum Files (same as Web guide)
-## 5. Shared Core Services (same as Web guide)
-## 6. Screen Specs (Mobile-specific):
-   - List as card layout (ul/li) NOT kendo-grid
-   - Each card shows: {top 3-4 key fields}
-   - Card tap -> navigate to detail route
-   - Sticky bottom action bar for primary actions
-## 7. Form Layout (Detail):
-   - 1-column layout, full-width inputs
-   - Label above input (not side-by-side)
-   - Button min-height: 44px
-## 8. Navigation Pattern:
-   - router.navigate with back button (History API)
-   - Back button in top bar
-## 9. Pending Decisions
-```
-
----
-
-### STEP 10 -- Save Memory File
-
-```
-Path: .agent\projects\Capstone\memory\{FeatureName}.md (if HM project)
-
-Content:
-- SRS filename + key design decisions
-- API names resolved (final)
-- Status values resolved
-- Discrepancies found + how resolved
-- TBD items still open
-- Key business rules to remember for future iterations
-```
-
----
-
-### STEP 11 -- Report to User
-
-```
-  [OK] BA Analysis Complete: {FeatureName}
-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-?*?*
--- SRS: REQ_{SEQ}_{Name}.md
-  [OK] Figma: {status}
-
--- Guides created:
-   -> {PROJECT_PIPELINE}\guides\BE_{SEQ}_{Name}.md        ({N} lines)
-   -> {PROJECT_PIPELINE}\guides\FE_WEB_{SEQ}_{Name}.md    ({N} lines)  [if Web/Both]
-   -> {PROJECT_PIPELINE}\guides\FE_MOBWEB_{SEQ}_{Name}.md    ({N} lines)  [if Mobile/Both]
-
--- Technical Summary:
-   APIs:     {N} endpoints (GetList, Get, Update, UpdateStatus, Delete)
-   DTOs:     {N} DTO types defined
-   Enums:    {N} status constants + {N} TypeScript enums
-   Shared:   {N} PSCoreApiService methods required
-   Cache:    Redis list cache (5min) + {N} invalidation triggers
-   Screens:  {N} screens ({Web grid + detail} / {Mobile card + form})
-  [OK]  Discrepancies: {N} Figma vs SRS conflicts -> see Sec. 10 in FE guides
-  [OK]  Pending:       {N} TBD items -> {list which FRs blocked}
-
---- Next steps:
-   BE team  -> read BE_{SEQ}_{Name}.md
-   FE team  -> read FE_WEB_{SEQ}_{Name}.md [+ FE_MOB if applicable]
-   PM/BA    -> resolve TBD items before sprint start
-```
-
----
-
-## 4. Quality Gates -- -> MANDATORY Before Saving Any Guide
-
-### BE Guide Checklist
-```
-[ ] All 5 API endpoints defined (GetList/Get/Update/UpdateStatus/Delete)
-[ ] ALL DTO types defined with full field lists (not "... other fields")
-[ ] Status constants defined with EXACT int values from tbl_LSStatus
-[ ] StatusGetName() method included
-[ ] HEAD filter explicitly mentioned in every list handler
-[ ] ICurrentUserService injection mandatory for all write handlers
-[ ] Redis cache strategy documented (key pattern + TTL + invalidation)
-[ ] Validation rules cite SRS AC-xx (not generic rules)
-[ ] Shared APIs listed (which CORE APIs, with TypeData enums)
-[ ] VSA file structure shows exact file names
-[ ] Figma discrepancy table included (even if empty -- write "None")
-[ ] All TBD-xx items flagged with [!] 
-```
-
-### FE Web Guide Checklist
-```
-[ ] Service file pattern correct (PSAPIService + Observable<ResponseDTO>)
-[ ] Static service URLs correct (POST only -- no GET/PUT/DELETE)
-[ ] DTO interfaces complete + Cus interface included
-[ ] Enum file defined + maps to BE StatusConstants values
-[ ] PSCoreApiService catalog complete (all dropdowns accounted for)
-[ ] Grid columns table: field, title, width, format, sortable
-[ ] Toolbar buttons table: label, status condition (enum -- NO magic numbers), action
-[ ] Editability matrix: field |- status (from SRS Sec. 6.2 "Editable When")
-[ ] Layout rules mentioned (scroll, buttons in toolbar, loading state)
-[ ] Status badge getStatusClass() method defined
-[ ] Figma discrepancy table included
-[ ] All TBD-xx items flagged
-```
-
-### FE Mobile Guide Checklist
-```
-[ ] Service files: reference web service if already created (no duplication)
-[ ] Card layout spec: which fields in each card
-[ ] Bottom action bar: buttons + status conditions
-[ ] 44px minimum touch target mentioned
-[ ] Navigation with back button pattern included
-```
-
----
-
-## 5. Universal Adaptation Rules
-
-| Project Type | Adaptation |
-|---|---|
-| **Capstone ERP** | Load `projects/Capstone/` -- use HM standards, module codes, VND |
-| **Any other project** | Do NOT load projects/Capstone/ -- use only SRS content |
-| **Stack unknown** | Infer from SRS technology constraints or ask once |
-| **Platform unknown** | Default to Web only |
-
-> **GOLDEN RULE:** Never output a guide with placeholder text like "{api_name}" or "{field}".
-> Every single field, method name, endpoint path, enum value MUST be concrete and project-specific.
-> If information is genuinely unknown -> write "? TBD: {specific question}" -- NOT a generic placeholder.
+## References
+
+- Entity snapshots: `refs/entity-snapshots/` (read before Step 2)
+- Component registry: `refs/component-registry.md` (read in Step 2, update after Step 9)
+- BE guide template: `refs/be-guide-template.md`
+- FE Mobile guide template: `refs/fe-mobile-guide-template.md`
+- FE Web guide template: `refs/fe-web-guide-template.md`
+- Quality gate checklists: `refs/quality-gates.md` (run before saving any guide)

@@ -1,121 +1,67 @@
 ---
-name: figma-reader
-description: |
-  Figma MCP live reader for BA design analysis.
-  Reads live Figma Desktop data via MCP bridge, analyzes BODY content only.
-  CRITICAL: ALWAYS skips sidebar and header nodes - only analyzes the main content area.
-  Maps colors to SCSS variables, components to Capstone wrappers.
-  NEVER reads from local images or archives.
-triggers:
-  - "analyze"
-  - "design"
-  - "figma"
-  - "screen"
-  - "UI"
+skill: figma-reader
+role: BA
+version: 1.0
+trigger: "'analyze design', 'read figma', 'what does screen look like', 'UI', 'screen'"
 ---
 
-# Figma Reader Skill - BA Analysis (BODY CONTENT ONLY)
+# Figma Reader Skill -- BA Design Analysis (Body Content Only)
 
->  **Figma MCP is the ONLY design source.** No local images, no archives, no fallbacks.
->  **BODY ONLY:** NEVER analyze or include sidebar, header, or footer in specs.
+## Purpose
 
----
+Read live Figma Desktop data via MCP bridge, extract body-content specs for FE guides.
+Skips sidebar, header, and footer -- analyzes ONLY the main content area.
 
-## PHASE 0 - CONNECTION CHECK
+## Hard Rules
 
-```
-1. Call figma_status IMMEDIATELY
-   -- CONNECTED  Run PHASE 1 (Figma Read)
-   -- NOT CONNECTED  STOP. Tell user:
-       " Figma Desktop not connected. Please open Figma + MCP plugin and try again."
-       DO NOT fall back to archive images. DO NOT proceed without Figma.
-```
+- RULE-FG-01: Figma MCP is the ONLY design source. NEVER fall back to local images.
+- RULE-FG-02: NEVER analyze or include sidebar, header, or footer in output specs.
+- RULE-FG-03: NEVER output raw hex colors -- always map to SCSS variable.
+- RULE-FG-04: NEVER reference raw Kendo component names -- always map to HM wrappers.
+- RULE-FG-05: ALWAYS declare source at start: "Reading from Figma Desktop (live)"
 
----
+## Steps
 
-## PHASE 1 - FIGMA LIVE READ
+### Phase 0 -- Connection Check
+- Action: Call `figma_status` immediately.
+  - CONNECTED -> proceed to Phase 1
+  - NOT CONNECTED -> STOP. Tell user: "Figma Desktop not connected. Please open Figma + MCP plugin."
+  - DO NOT fall back to archive images. DO NOT proceed without live Figma.
+- Gate: figma_status = CONNECTED before any read.
 
-### Step 1.1: Read the currently selected frame
-```
-figma_read  operation: "get_selection"  depth: 6, detail: "compact"
-```
- Gets the full frame tree including sidebar, header, body sections
+### Phase 1 -- Figma Live Read
 
-###  Step 1.2: FILTER - Find BODY content node ONLY
+1. **Read selected frame**
+   - Call: `figma_read operation: "get_selection" depth: 6, detail: "compact"`
+   - Output: Full frame tree (includes sidebar, header, body)
 
-> **THIS IS THE MOST CRITICAL STEP.** The frame contains sidebar, header, and body.
-> You MUST identify and isolate the BODY content node before analyzing.
+2. **Filter -- isolate BODY node only**
+   - SKIP nodes matching: "Sidebar", "Nav", "Navigation", "Menu", "Side", "Header", "Top bar", "Navbar", "Footer", "Bottom bar"
+   - SKIP nodes positioned at x=0 with narrow width (sidebar)
+   - SKIP nodes positioned at y=0 with small height (header)
+   - SELECT the LARGEST node by area, positioned right of sidebar and below header
+   - Body node name often contains: "Content", "Body", "Main", "Page", or the feature name
+   - Gate: Body node identified before any CSS/design read.
 
-**How to identify the BODY content node:**
-1. Look at the top-level children of the selected frame
-2. **SKIP** any node that matches these patterns:
-   - Name contains: "Sidebar", "Nav", "Navigation", "Menu", "Side"
-   - Name contains: "Header", "Top bar", "Navbar", "App bar"
-   - Name contains: "Footer", "Bottom bar"
-   - Node is positioned at x=0 with narrow width (sidebar)
-   - Node is positioned at y=0 with small height (header)
-3. **SELECT** the node that represents the main content area:
-   - Usually the LARGEST node by area
-   - Usually positioned to the RIGHT of the sidebar
-   - Usually positioned BELOW the header
-   - Name often contains: "Content", "Body", "Main", "Page", or the feature name
+3. **Get CSS for body section only**
+   - Call: `figma_read operation: "get_css" nodeId: <BODY_NODE_ID>`
 
-**After identifying the body node:** Use its `nodeId` for ALL subsequent calls.
+4. **Get detailed design for body sections**
+   - Call: `figma_read operation: "get_design" nodeId: <BODY_NODE_ID> depth: 6`
 
-### Step 1.3: Get CSS for BODY section only
-```
-figma_read  operation: "get_css"  nodeId: <BODY_NODE_ID>
-```
- Gets padding, gap, width, border-radius, font-size for body ONLY
+5. **Check color variable names** (for each colored element)
+   - Call: `figma_read operation: "get_node_detail" nodeId: <node_id>`
 
-### Step 1.4: Get detailed design for body sections
-```
-figma_read  operation: "get_design"  nodeId: <BODY_NODE_ID>  depth: 6
-```
- Gets all text, colors, components WITHIN the body section only
+### Phase 2 -- Produce Spec Output
 
-### Step 1.5: Check color variable names
-```
-figma_read  operation: "get_node_detail"  nodeId: <node_id>
-```
- Gets fillStyle.name, boundVariables for design token identification
+- Self-check before writing any spec:
+  - "Am I describing sidebar or header?" -> YES -> DELETE that section
+  - "Am I describing body content only?" -> YES -> Continue
+- Gate: Output contains ONLY body content.
 
----
+## Color Mapping (Mandatory)
 
-##  CRITICAL: WHAT TO SKIP vs WHAT TO ANALYZE
-
-```
- ABSOLUTELY NEVER INCLUDE IN SPECS:
-   -- Sidebar navigation (left panel with menu items)
-   -- Top header / navbar (logo, user avatar, notifications)
-   -- Page footer / copyright
-   -- ANY navigation component
-
-   If you see these in the Figma data  IGNORE THEM COMPLETELY.
-   Do NOT include them in FE Guide specs.
-   Do NOT list them in component inventory.
-   They ALREADY EXIST in the layout system.
-
- ONLY ANALYZE THE BODY CONTENT:
-   -- ps-toolbar-top (action buttons at top of content area)
-   -- ps-filter-bar (search/filter controls)
-   -- ps-kendo-grid (data tables/lists)
-   -- Form sections (input fields, dropdowns)
-   -- Status badges
-   -- Financial summaries
-   -- Signature / QR code areas
-   -- Dialogs / modals
-```
-
->  **SELF-CHECK:** Before writing any spec output, ask yourself:
-> "Am I describing sidebar or header--  If YES  DELETE that section.
-> "Am I describing only the body content--  If YES  Continue.
-
----
-
-## COLOR MAPPING (MANDATORY)
-
->  NEVER output raw hex. Always map to SCSS variable.
+NEVER output raw hex. Always map:
 
 | Figma HEX | SCSS Variable |
 |---|---|
@@ -129,15 +75,13 @@ figma_read  operation: "get_node_detail"  nodeId: <node_id>
 | `#f5f5f5` | `$gray-100` |
 | `#ffffff` | `$white` |
 
-If a color is NOT in this table  flag it: " Unknown color #XXXXXX - needs SCSS variable assignment"
+Unknown color -> flag: "[!] Unknown color #XXXXXX - needs SCSS variable assignment"
 
----
+## Component Mapping (Mandatory)
 
-## COMPONENT MAPPING (MANDATORY)
+NEVER reference raw Kendo names. Always map to HM wrapper:
 
->  NEVER reference raw Kendo component names in guides. Always map to Capstone wrappers.
-
-| Figma Element | Correct Angular Component |
+| Figma Element | HM Angular Component |
 |---|---|
 | Single-line text input | `<ps-kendo-textbox>` |
 | Number input | `<ps-kendo-numeric-textbox>` |
@@ -156,16 +100,15 @@ If a color is NOT in this table  flag it: " Unknown color #XXXXXX - needs SCSS v
 | Status filter | `<ps-filter-status1>` |
 | Filter buttons | `<ps-filter-button>` |
 
----
+## Output Format
 
-## STRUCTURED OUTPUT FORMAT
-
-For EVERY screen analyzed, produce this (BODY content only):
+For EVERY screen analyzed:
 
 ```markdown
-##  BA Design Analysis: {frame_name}
-> Source: **Figma Desktop (live)** - {timestamp}
->  Analysis covers BODY content ONLY - sidebar/header excluded
+## BA Design Analysis: {frame_name}
+
+> Source: Figma Desktop (live) - {timestamp}
+> Analysis covers BODY content ONLY - sidebar/header excluded
 
 ### A. SCREEN OVERVIEW
 - Frame: {name} ({width}x{height})
